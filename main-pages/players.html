@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strike Master - Players</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="/scripts/accent-loader.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      text-align: center;
+    }
+
+    /* Main */
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #f5f5f5;
+      padding: 25px;
+      border-radius: 12px;
+      border: 2px solid #000000;
+    }
+
+    button {
+      background-color: var(--accent-color); /* brown */
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin: 8px;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: color-mix(in srgb, var(--accent-color) 50%, black); /* orange */
+    }
+
+    .player-list {
+      margin-top: 20px;
+      text-align: left;
+      position: relative;
+    }
+
+    .player-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .options-btn {
+      cursor: pointer;
+      font-size: 20px;
+      padding: 4px 10px;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+    .options-btn:hover {
+      background: #ddd;
+    }
+
+    .options-menu {
+      position: absolute;
+      right: 15px;
+      top: 40px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .options-menu button {
+      background: none;
+      color: #000;
+      border: none;
+      padding: 10px 15px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .options-menu button:hover {
+      background: #f0f0f0;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>Strike Master</h1>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="records.html">Records</a>
+      <a href="players.html">Players</a>
+      <a href="/settings/appearanceSettings.html">Settings</a>
+      <a href="#">About</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Players</h1>
+    <p>Add and remove players. These players will appear in the Records tab tables.</p>
+
+    <input id="playerInput" type="text" placeholder="Enter player name" style="padding: 8px; width: 60%;" />
+    <button id="addPlayerBtn">Add Player</button>
+
+    <div class="player-list" id="playerList"></div>
+  </div>
+
+<script>
+  let players = [];
+
+  // -----------------------
+  // Load players from Flask
+  // -----------------------
+  async function loadPlayers() {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/players");
+      players = await res.json();
+      renderPlayers();
+    } catch (err) {
+      console.error("Failed to load players:", err);
+    }
+  }
+
+  // -----------------------
+  // Render Players List
+  // -----------------------
+  function renderPlayers() {
+    playerList.innerHTML = "";
+
+    players.forEach((player, index) => {
+      const item = document.createElement("div");
+      item.className = "player-item";
+
+      const name = document.createElement("span");
+      name.textContent = player.name;
+
+      // Three-dot menu button
+      const menuBtn = document.createElement("button");
+      menuBtn.textContent = "⋮";
+      menuBtn.style.background = "transparent";
+      menuBtn.style.color = "black";
+      menuBtn.style.fontSize = "20px";
+      menuBtn.style.border = "none";
+      menuBtn.style.cursor = "pointer";
+
+      // Dropdown menu container
+      const menu = document.createElement("div");
+      menu.style.position = "absolute";
+      menu.style.background = "white";
+      menu.style.border = "1px solid #ddd";
+      menu.style.borderRadius = "6px";
+      menu.style.padding = "8px 0";
+      menu.style.minWidth = "120px";
+      menu.style.boxShadow = "0 4px 10px rgba(0,0,0,0.15)";
+      menu.style.display = "none";
+      menu.style.zIndex = "10";
+      menu.style.right = "15px";
+      menu.style.top = "40px";
+
+      // Remove player option
+      const removeOpt = document.createElement("div");
+      removeOpt.textContent = "Remove Player";
+      removeOpt.style.padding = "8px 12px";
+      removeOpt.style.cursor = "pointer";
+      removeOpt.onmouseover = () => (removeOpt.style.background = "#eee");
+      removeOpt.onmouseout = () => (removeOpt.style.background = "white");
+      removeOpt.onclick = () => removePlayer(player.name);
+
+      // View profile option
+      const profileOpt = document.createElement("div");
+      profileOpt.textContent = "View Profile";
+      profileOpt.style.padding = "8px 12px";
+      profileOpt.style.cursor = "pointer";
+      profileOpt.onmouseover = () => (profileOpt.style.background = "#eee");
+      profileOpt.onmouseout = () => (profileOpt.style.background = "white");
+      profileOpt.onclick = () => {
+        window.location.href = `playerProfile.html?name=${encodeURIComponent(player.name)}`;
+      };
+
+      menu.appendChild(profileOpt);
+      menu.appendChild(removeOpt);
+
+      // Toggle menu show/hide
+      menuBtn.onclick = (e) => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === "none" ? "block" : "none";
+      };
+
+      // Hide if user clicks anywhere else
+      document.addEventListener("click", () => {
+        menu.style.display = "none";
+      });
+
+      item.style.position = "relative";
+      item.appendChild(name);
+      item.appendChild(menuBtn);
+      item.appendChild(menu);
+
+      playerList.appendChild(item);
+    });
+  }
+
+  // -----------------------
+  // Add Player
+  // -----------------------
+async function addPlayer() {
+  const name = playerInput.value.trim();
+  if (!name) return alert("Enter a valid player name");
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/players", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Failed to add player");
+      return;
+    }
+
+    playerInput.value = "";
+    loadPlayers(); // reload updated list
+  } catch (err) {
+    console.error("Add player failed:", err);
+  }
+}
+
+  // -----------------------
+  // Remove Player
+  // -----------------------
+  async function removePlayer(name) {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/players/${encodeURIComponent(name)}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error);
+        return;
+      }
+
+      loadPlayers();
+    } catch (err) {
+      console.error("Remove player failed:", err);
+    }
+  }
+
+  // -----------------------
+  // Event listener
+  // -----------------------
+  addPlayerBtn.addEventListener("click", addPlayer);
+
+  // -----------------------
+  // Load on startup
+  // -----------------------
+  loadPlayers();
+</script>
+</body>
+</html>

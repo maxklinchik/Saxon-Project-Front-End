@@ -1,0 +1,119 @@
+body {
+    margin:0; 
+    font-family: Arial, sans-serif; 
+    background:#f9f9f9; 
+}
+
+/* Fade + slide in animation */
+@keyframes fadeSlideIn {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.animated {
+    opacity: 0;
+    animation-name: fadeSlideIn;
+    animation-duration: 0.6s;
+    animation-fill-mode: forwards;
+}
+
+.top-bar {
+    display:flex; 
+    justify-content:center; 
+    gap:12px; 
+    background:#fff; 
+    padding:16px; 
+    border-bottom:2px solid #ddd; 
+    flex-wrap:wrap; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+}
+
+.sectionLabel {
+    font-weight:600; 
+    align-self:center; 
+}
+
+select, input, button {
+    padding:8px 12px;
+    font-size:15px;
+    border-radius:6px;
+    border:1px solid #ccc; 
+}
+
+button {
+    background: var(--accent-color);
+    border:none; color:#fff;
+    cursor:pointer;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background: color-mix(in srgb, var(--accent-color) 50%, black); 
+    transform: scale(1.05);
+}
+
+.records-container {
+    padding:30px 6%; 
+}
+
+table {
+    width:100%; 
+    border-collapse: separate; 
+    border-spacing:0; 
+    border-radius:12px; 
+    overflow:hidden; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    background:#fff; 
+}
+
+th, td { 
+    padding:12px 15px; 
+    text-align:center; 
+}
+
+th { 
+    background: var(--main-color); 
+    color:#fff; 
+    font-weight:600; 
+    text-transform: uppercase; 
+}
+
+tr:nth-child(even) { 
+    background:#f7f7f7; 
+}
+
+tr:hover { 
+    background:#ffe6b3; 
+}
+
+input[type=number] { 
+    width:70px; 
+    padding:6px; 
+    border:1px solid #ccc; 
+    border-radius:6px; 
+}
+
+h2 { 
+    text-align:center; 
+    margin-bottom:20px; 
+}
+
+.mode-toggle { 
+    margin-left: 20px; 
+    padding:8px 12px; 
+    border-radius:6px; 
+    border:none; 
+    background: var(--accent-color); 
+    color:white; 
+    cursor:pointer; 
+}
+
+.mode-toggle:hover { 
+    background: color-mix(in srgb, var(--accent-color) 50%, black); 
+}
+
+.edit-controls { 
+    display: flex; 
+    gap: 8px; 
+    flex-wrap:wrap; 
+}

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Info - Strike Master</title>
+    <link rel="stylesheet" type="text/css" href="/main-pages/style.css">
+    <script src="/scripts/accent-loader.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #f9f9f9;
+    }
+
+   /* Sidebar */
+   .sidebar {
+     width: 200px;
+     background: var(--main-color);
+     color: white;
+     display: flex;
+     flex-direction: column;
+     padding: 20px 0;
+   }
+
+   .sidebar a {
+     color: white;
+     padding: 15px 20px;
+     text-decoration: none;
+     display: block;
+     transition: background 0.2s;
+   }
+
+   .sidebar a:hover { background: color-mix(in srgb, var(--accent-color) 50%, black) }
+   .sidebar a.active { background: var(--accent-color); }
+
+   /* Content */
+   .content {
+     flex: 1;
+     padding: 30px;
+     background: #ecf0f1;
+     overflow-y: auto;
+     position: relative; /* allow absolute positioning inside */
+   }
+
+   h2 { margin-top: 0; }
+
+   .profile-section {
+     background: white;
+     padding: 20px;
+     border-radius: 6px;
+     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+     max-width: 500px;
+   }
+
+   .profile-picture {
+     display: flex;
+     align-items: center;
+     gap: 20px;
+     margin-bottom: 20px;
+   }
+
+   .profile-picture img {
+     width: 100px;
+     height: 100px;
+     border-radius: 50%;
+     object-fit: cover;
+     border: 2px solid #ccc;
+   }
+
+   .form-group {
+     margin-bottom: 15px;
+     position: relative;
+   }
+
+   .form-group label {
+     display: block;
+     margin-bottom: 6px;
+     font-weight: bold;
+   }
+
+   .form-group input {
+     width: 95%;
+     padding: 8px 12px;
+     border-radius: 6px;
+     border: 1px solid #ccc;
+   }
+
+   /* Style when readonly */
+   .form-group input:read-only {
+     background-color: #f0f0f0; /* light gray background */
+     color: #666;              /* muted text */
+     cursor: default;
+   }
+
+   .edit-icon {
+     position: absolute;
+     right: 5px;
+     top: 32px;
+     cursor: pointer;
+     font-size: 16px;
+     color: #2196F3;
+   }
+
+   .save-btn {
+     background: var(--accent-color);
+     border: none;
+     color: white;
+     padding: 10px 20px;
+     border-radius: 6px;
+     cursor: pointer;
+     font-size: 16px;
+   }
+
+   .save-btn:hover {
+     background: color-mix(in srgb, var(--accent-color) 50%, black);
+   }
+
+   #logoutBtn {
+     margin-top: auto;
+     color: rgb(235, 76, 76);
+     background: none;
+     border: none;
+     padding: 15px 20px;
+     text-align: left;
+     font-size: 16px;
+     cursor: pointer;
+   }
+
+   #logoutBtn:hover {
+     background: #391f00;
+   }
+
+   .showPasswordContainer {
+     display: flex;
+   }
+
+   #showPassword {
+     width: 20px;
+   }
+
+   /* X icon */
+   .close-icon {
+     position: absolute;
+     top: 10px;
+     right: 10px;
+     font-size: 20px;
+     color: #333;
+     text-decoration: none;
+     font-weight: bold;
+     padding: 20px;
+   }
+
+   .close-icon:hover {
+     color: red;
+   }
+ </style>
+</head>
+<body>
+ <div class="sidebar">
+   <a href="appearanceSettings.html">Appearance</a>
+   <a href="teamsSettings.html">Teams</a>
+   <a href="accountInfo.html" class="active">Account Info</a>
+   <button id="logoutBtn">Logout</button>
+ </div>
+
+ <div class="content">
+   <!-- X icon in top right -->
+   <a href="/main-pages/index.html" class="close-icon">X</a>
+
+   <h2>Account Information</h2>
+   <div class="profile-section">
+     <!-- Profile Picture -->
+     <div class="profile-picture">
+       <img id="profileImg" src="default-avatar.png" alt="Profile Picture">
+       <input type="file" id="profileUpload" accept="image/*">
+     </div>
+
+     <!-- Display Name -->
+     <div class="form-group">
+       <label for="displayName">Display Name</label>
+       <input type="text" id="displayName" value="demo_user" readonly>
+       <span class="edit-icon" onclick="enableEdit('displayName')">&#9998;</span>
+     </div>
+
+     <!-- Email -->
+     <div class="form-group">
+       <label for="email">Email</label>
+       <input type="email" id="email" value="demo@example.com" readonly>
+       <span class="edit-icon" onclick="enableEdit('email')">&#9998;</span>
+     </div>
+
+     <!-- Password -->
+     <div class="form-group">
+       <label for="password">Password</label>
+       <input type="password" id="password" value="password123" readonly>
+       <span class="edit-icon" onclick="enableEdit('password')">&#9998;</span>
+       <div style="margin-top:6px;" class="showPasswordContainer">
+         Show Password <input type="checkbox" id="showPassword">
+       </div>
+     </div>
+
+      <!-- Code (unchangeable) -->
+      <div class="form-group">
+        <label for="userCode">Your Code</label>
+        <input type="text" id="userCode" value="A1B2C3" readonly>
+      </div>
+
+      <button class="save-btn" id="saveBtn">Save Changes</button>
+    </div>
+  </div>
+
+  <script>
+    // Enable editing when clicking the pencil icon
+    function enableEdit(fieldId) {
+      const field = document.getElementById(fieldId);
+      field.removeAttribute('readonly');
+      field.focus();
+    }
+
+    // Toggle password visibility
+    const showPasswordCheckbox = document.getElementById('showPassword');
+    const passwordField = document.getElementById('password');
+
+    showPasswordCheckbox.addEventListener('change', () => {
+      if (showPasswordCheckbox.checked) {
+        passwordField.type = 'text';
+      } else {
+        passwordField.type = 'password';
+      }
+    });
+
+    // Profile picture preview
+    const profileUpload = document.getElementById('profileUpload');
+    const profileImg = document.getElementById('profileImg');
+
+    profileUpload.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => profileImg.src = e.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Save button functionality (placeholder)
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const name = document.getElementById('displayName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const code = document.getElementById('userCode').value;
+
+      alert(`Saved:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\nCode: ${code}`);
+
+      // Lock fields again after saving
+      document.getElementById('displayName').setAttribute('readonly', true);
+      document.getElementById('email').setAttribute('readonly', true);
+      document.getElementById('password').setAttribute('readonly', true);
+      // Code remains readonly always
+    });
+  </script>
+</body>
+</html>

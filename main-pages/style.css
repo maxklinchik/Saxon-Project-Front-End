@@ -1,0 +1,39 @@
+/* Navigation Bar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--main-color);
+    padding: 15px 25px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar h1 {
+    color: #ffffff;
+    margin: 0;
+    font-size: 24px;
+}
+
+.nav-links a {
+    color: #ffffff;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--accent-color); /* orange accent */
+}
+
+:root {
+  --accent-color: #ffa500; /* default — overwritten by JS if user chooses */
+  --accent-color-light: color-mix(in srgb, var(--accent-color) 70%, white);
+  --accent-color-dark: color-mix(in srgb, var(--accent-color) 70%, black);
+}
+
+:root {
+  --main-color: #ffa500; /* default — overwritten by JS if user chooses */
+}

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings - Strike Master</title>
+
+  <style>
+    :root {
+      --accent-color: #ffa500; /* default, overwritten by JS */
+      --main-color: #5f371c; /* default, overwritten by JS */
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #f9f9f9;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px;
+      background: var(--main-color);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+    }
+
+    .sidebar a {
+      background: none;
+      border: none;
+      color: white;
+      padding: 15px 20px;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .sidebar a:hover {
+      background: color-mix(in srgb, var(--accent-color) 50%, black);
+    }
+
+    .sidebar a.active {
+      background: var(--accent-color);
+    }
+
+    /* Main content */
+    .content {
+      flex: 1;
+      padding: 30px;
+      background: #ecf0f1;
+      overflow-y: auto;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .team-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .team-list li {
+      padding: 8px 12px;
+      background: white;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .team-list button {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .add-team {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .add-team input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .add-team button {
+      background: var(--accent-color);
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .add-team button:hover {
+      filter: brightness(0.9);
+    }
+
+    #logoutBtn {
+      margin-top: auto;
+      color: rgb(235, 76, 76);
+      background: none;
+      border: none;
+      padding: 15px 20px;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #logoutBtn:hover {
+      background: var(--accent-color);
+    }
+
+    .close-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 20px;
+    }
+
+    .close-icon:hover {
+      color: var(--accent-color);
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar">
+    <a href="appearanceSettings.html" class="active">Appearance</a>
+    <a href="teamsSettings.html">Teams</a>
+    <a href="accountInfo.html">Account Info</a>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <div class="content">
+    <a href="/main-pages/index.html" class="close-icon">X</a>
+
+  <div id="appearance" class="section">
+    <h2>Appearance</h2>
+
+    <label>Accent Color:</label>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <input type="color" id="accentColorPicker" value="#ffa500">
+      <button id="resetAccent" style="padding:6px 10px;">Reset</button>
+    </div>
+
+    <br><br>
+
+    <label>Main Color:</label>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <input type="color" id="mainColorPicker" value="#5f371c">
+      <button id="resetMain" style="padding:6px 10px;">Reset</button>
+    </div>
+  </div>
+
+    <div id="teams" class="section" style="display:none;">
+      <h2>Teams</h2>
+      <ul id="teamList" class="team-list"></ul>
+
+      <div class="add-team">
+        <input type="text" id="newTeamInput" placeholder="Enter new team name" />
+        <button id="addTeamBtn">Add Team</button>
+      </div>
+    </div>
+
+    <div id="account" class="section" style="display:none;">
+      <h2>Account Info</h2>
+      <p>Coming soon...</p>
+    </div>
+  </div>
+
+  <script>
+/* ---------------------------------------------------
+   ACCENT COLOR SYSTEM — WORKS ON ALL PAGES
+--------------------------------------------------- */
+
+// Load saved accent color on page load
+(function applySavedAccent() {
+  const saved = localStorage.getItem("accentColor");
+  if (saved) {
+    document.documentElement.style.setProperty("--accent-color", saved);
+  }
+})();
+
+// If this page has a color picker, connect it
+const picker = document.getElementById("accentColorPicker");
+if (picker) {
+  const saved = localStorage.getItem("accentColor");
+  if (saved) picker.value = saved;
+
+  picker.addEventListener("input", (e) => {
+    const color = e.target.value;
+
+    localStorage.setItem("accentColor", color);
+    document.documentElement.style.setProperty("--accent-color", color);
+  });
+}
+
+
+/* ---------------------------------------------------
+   MAIN COLOR SYSTEM — WORKS ON ALL PAGES
+--------------------------------------------------- */
+
+// Load saved main color
+(function applySavedMain() {
+  const saved = localStorage.getItem("mainColor");
+  if (saved) {
+    document.documentElement.style.setProperty("--main-color", saved);
+  }
+})();
+
+const mainPicker = document.getElementById("mainColorPicker");
+if (mainPicker) {
+  const saved = localStorage.getItem("mainColor");
+  if (saved) mainPicker.value = saved;
+
+  mainPicker.addEventListener("input", (e) => {
+    const color = e.target.value;
+
+    localStorage.setItem("mainColor", color);
+    document.documentElement.style.setProperty("--main-color", color);
+  });
+}
+
+
+/* ------------------------------
+   RESET ACCENT COLOR
+------------------------------ */
+const resetAccentBtn = document.getElementById("resetAccent");
+if (resetAccentBtn) {
+  resetAccentBtn.addEventListener("click", () => {
+    const defaultColor = "#ffa500";
+
+    // Update UI
+    picker.value = defaultColor;
+
+    // Update CSS variable
+    document.documentElement.style.setProperty("--accent-color", defaultColor);
+
+    // Update localStorage
+    localStorage.setItem("accentColor", defaultColor);
+  });
+}
+
+/* ------------------------------
+   RESET MAIN COLOR
+------------------------------ */
+const resetMainBtn = document.getElementById("resetMain");
+if (resetMainBtn) {
+  resetMainBtn.addEventListener("click", () => {
+    const defaultColor = "#5f371c";
+
+    // Update UI
+    mainPicker.value = defaultColor;
+
+    // Update CSS variable
+    document.documentElement.style.setProperty("--main-color", defaultColor);
+
+    // Update localStorage
+    localStorage.setItem("mainColor", defaultColor);
+  });
+}
+
+
+/* ---------------------------------------------------
+   TEAMS
+--------------------------------------------------- */
+const teamList = document.getElementById('teamList');
+const addTeamBtn = document.getElementById('addTeamBtn');
+const newTeamInput = document.getElementById('newTeamInput');
+
+let teams = [];
+
+async function loadTeams() {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/teams");
+    teams = await res.json();
+    renderTeams();
+  } catch (err) {
+    console.error("Failed to load teams:", err);
+  }
+}
+
+function renderTeams() {
+  teamList.innerHTML = "";
+  teams.forEach(team => {
+    const li = document.createElement('li');
+    li.textContent = team.name;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.onclick = async () => {
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/api/teams/${encodeURIComponent(team.name)}`, {
+          method: 'DELETE'
+        });
+
+        if (res.ok) {
+          loadTeams();
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to delete team');
+        }
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    };
+
+    li.appendChild(removeBtn);
+    teamList.appendChild(li);
+  });
+}
+
+if (addTeamBtn) {
+  addTeamBtn.addEventListener('click', async () => {
+    const name = newTeamInput.value.trim();
+    if (!name) return alert('Enter a team name');
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/teams", {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+
+      const data = await res.json();
+      if (!res.ok) return alert(data.error || 'Failed to add');
+
+      newTeamInput.value = '';
+      loadTeams();
+    } catch (err) {
+      console.error("Add failed:", err);
+    }
+  });
+
+  loadTeams();
+}
+
+/* Logout */
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  alert('Logging out...');
+});
+  </script>
+
+</body>
+</html>
