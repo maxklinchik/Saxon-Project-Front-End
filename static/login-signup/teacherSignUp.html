@@ -28,41 +28,31 @@
       <input type="email" id="tEmail" required>
       <label>Password:</label>
       <input type="password" id="tPassword" required>
-      <label>Admin Password:</label>
-      <input type="password" id="adminCode" required>
-      <button type="submit">Sign Up</button>
+        <button type="submit">Sign Up</button>
     </form>
     <div class="message" id="message"></div>
     <a class="back" href="/main-pages/index.html">Go back</a>
   </div>
 
   <script>
-    const ADMIN_SECRET = "ADMIN123"; // admin password
-    const teachers = [];
-
-    function generateCode() {
-      return Math.random().toString(36).substring(2,8).toUpperCase();
-    }
-
-    document.getElementById("teacherForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const firstName = tFirstName.value.trim();
-      const lastName = tLastName.value.trim();
-      const email = tEmail.value.trim();
-      const password = tPassword.value;
-      const adminCode = adminCode.value;
-
-      if(adminCode !== ADMIN_SECRET){
-        message.textContent = "Invalid Admin Password.";
-        message.style.color = "red";
-        return;
-      }
-
-      const code = generateCode();
-      teachers.push({firstName,lastName,email,password,code});
-      message.textContent = `Teacher account created! Share this code with students: ${code}`;
-      message.style.color = "green";
-    });
+      document.getElementById("teacherForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const firstName = tFirstName.value.trim();
+        const lastName = tLastName.value.trim();
+        const email = tEmail.value.trim();
+        const password = tPassword.value;
+        const name = `${firstName} ${lastName}`.trim();
+        message.textContent = '';
+        try {
+          const res = await fetch('/api/auth/signup-coach', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name, email, password }) });
+          const data = await res.json();
+          if (!res.ok) { message.textContent = data.message || 'Signup failed'; message.style.color = 'red'; return; }
+          // store token for immediate use
+          if (data.token) localStorage.setItem('bowling_token', data.token);
+          message.textContent = 'Account created. Your coach code: ' + (data.user && data.user.coach_code ? data.user.coach_code : '—');
+          message.style.color = 'green';
+        } catch (err) { message.textContent = 'Error creating account'; message.style.color = 'red'; console.error(err); }
+      });
   </script>
 </body>
 </html>

@@ -133,49 +133,18 @@
     <a href="index.html" class="logo">
       <img src="/images/phLogo.png" alt="Strike Master Logo">
     </a>
-
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="records.html">Records</a>
-      <a href="players.html">Players</a>
-      <a href="/settings/appearanceSettings.html">Settings</a>
-      <a href="#">About</a>
-    </div>
+    <div class="nav-links" aria-hidden="true"></div>
   </div>
-
-
-  <section class="hero" style="background-color: #f4f1ed;">
-    <h2>Welcome to Strike Master</h2>
-    <div class="hero-content">
-      <p>
-        Strike Master is your all-in-one platform for tracking bowling records,
-        monitoring player performance, and organizing game statistics. Whether
-        you're a casual bowler or a competitive player, Strike Master helps you
-        analyze trends, store game results, and improve your skills.
-      </p>
-    </div>
-  </section>
-
-  <section class="hero" style="background-color: #ffffff;">
-    <h2>Track Players and Stats</h2>
-    <div class="hero-content">
-      <p>
-        Easily add new players, update their information, and track their bowling
-        stats over time. Strike Master lets you record scores, averages, high
-        games, and more—all in one organized place. Build your roster and watch
-        your progress grow with every frame.
-      </p>
-    </div>
-  </section>
-
-  <!-- New Bottom Section -->
-  <section class="auth-section">
-    <h2>Get Started</h2>
-    <div class="auth-buttons">
-      <a href="/login-signup/teacherSignUp.html" class="signup-btn">Sign Up</a>
-      <a href="/login-signup/teacherLogin.html" class="login-btn">Log In</a>
-      <a href="/login-signup/studentLogin.html" class="teacher-btn">Enter Teacher Code</a>
-    </div>
-  </section>
+  <main style="display:flex; align-items:center; justify-content:center; height:70vh;">
+    <section style="text-align:center; max-width:720px; padding:28px;">
+      <h1 style="margin-bottom:8px;">Strike Master</h1>
+      <p style="font-size:18px; color: #444; margin-bottom:20px;">A simple, secure scoreboard for coaches and students — track players, enter three-game scores, and view team stats.</p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="/login-signup/studentLogin.html" class="auth-btn" style="padding:12px 18px; background:var(--accent-color); color:#fff; border-radius:8px; text-decoration:none;">Student Portal</a>
+        <a href="/login-signup/teacherSignUp.html" class="auth-btn" style="padding:12px 18px; background:#fff; color:var(--accent-color); border-radius:8px; text-decoration:none; border:1px solid var(--accent-color);">Director Sign Up</a>
+        <a href="/login-signup/teacherLogin.html" class="auth-btn" style="padding:12px 18px; background:#fff; color:var(--accent-color); border-radius:8px; text-decoration:none; border:1px solid var(--accent-color);">Director Log In</a>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

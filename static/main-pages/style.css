@@ -36,3 +36,16 @@
 :root {
   --main-color: #ffa500; /* default — overwritten by JS if user chooses */
 }
+
+/* Ensure form controls are readable on all themes */
+input, select, textarea {
+  background: var(--input-bg, #fff);
+  color: var(--input-color, #111);
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+input::placeholder, textarea::placeholder { color: rgba(0,0,0,0.5); }
+
+.small-input { width:72px; padding:6px; margin-left:6px; }

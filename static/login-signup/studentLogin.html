@@ -64,33 +64,19 @@
   </div>
 
   <script>
-    // Helper: load teacher list from localStorage (set by teacher_signup.html)
-    function loadTeachers() {
-      try {
-        const raw = localStorage.getItem("teachers");
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    document.getElementById("studentForm").addEventListener("submit", (e) => {
+    document.getElementById('studentForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const code = document.getElementById("studentCodeInput").value.trim().toUpperCase();
-      const teachers = loadTeachers();
-
-      const teacher = teachers.find(t => String(t.code).toUpperCase() === code);
-      const msgEl = document.getElementById("message");
-
-      if (teacher) {
-        msgEl.textContent = `Login successful! Connected to ${teacher.firstName} ${teacher.lastName}.`;
-        msgEl.style.color = "green";
-        // Example: you could redirect to a student dashboard
-        // window.location.href = "student_dashboard.html";
-      } else {
-        msgEl.textContent = "Invalid teacher code. Please double-check and try again.";
-        msgEl.style.color = "red";
-      }
+      const code = document.getElementById('studentCodeInput').value.trim();
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = '';
+      try {
+        const res = await fetch('/api/auth/signin-code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ coachCode: code }) });
+        const data = await res.json();
+        if (!res.ok) { msgEl.textContent = data.message || 'Sign-in failed'; msgEl.style.color = 'red'; return; }
+        if (data.token) localStorage.setItem('bowling_token', data.token);
+        msgEl.textContent = 'Signed in — redirecting...'; msgEl.style.color = 'green';
+        setTimeout(() => window.location.href = '/main-pages/index.html', 700);
+      } catch (err) { console.error(err); msgEl.textContent = 'Network error'; msgEl.style.color = 'red'; }
     });
   </script>
 </body>

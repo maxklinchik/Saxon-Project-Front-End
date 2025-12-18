@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Director Dashboard</title>
+  <link rel="stylesheet" href="/main-pages/style.css">
+  <style>
+    .topbar { display:flex; gap:12px; align-items:center; padding:12px; border-bottom:1px solid rgba(0,0,0,0.08); }
+    .teams { margin-left:8px; }
+    .grid { display:grid; grid-template-columns: 360px 1fr; gap:16px; padding:16px; }
+    .panel { background:var(--card-bg); padding:12px; border-radius:8px; box-shadow: var(--card-shadow); }
+    .player-row { display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px dashed rgba(0,0,0,0.06); }
+    input.score { width:70px; }
+    .actions { margin-top:8px; }
+    .small { font-size:0.9rem; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h2>Director Dashboard</h2>
+    <div class="teams">
+      Team:
+      <button id="team-boys" class="btn">Boys</button>
+      <button id="team-girls" class="btn">Girls</button>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+      <input id="tokenInput" placeholder="paste token (optional)" style="width:260px; padding:6px; border-radius:6px; border:1px solid #ccc">
+      <button id="saveToken" class="btn">Save token</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel" id="leftPanel">
+      <h3>Players</h3>
+      <div id="playersList"></div>
+      <hr>
+      <h4>Add Player</h4>
+      <form id="addPlayerForm">
+        <input id="newPlayerName" placeholder="Player name" required style="width:100%; padding:8px; margin-bottom:8px;">
+        <select id="newPlayerTeam" style="width:100%; padding:8px; margin-bottom:8px;"><option value="boys">Boys</option><option value="girls">Girls</option></select>
+        <button type="submit" class="btn">Add Player</button>
+      </form>
+      <p class="small">Tip: keep this page open while entering scores.</p>
+    </div>
+
+    <div class="panel" id="rightPanel">
+      <h3>Quick Score Entry</h3>
+      <div id="quickList"></div>
+      <hr>
+      <h4>Recent Scores</h4>
+      <div id="recentScores"></div>
+    </div>
+  </div>
+
+  <script src="/main-pages/director.js"></script>
+</body>
+</html>
