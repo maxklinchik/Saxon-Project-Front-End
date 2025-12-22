@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Team - Strike Master</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="/scripts/accent-loader.js"></script>
+  <style>
+    :root {
+      --orange: #ff7f11;
+      --brown: #5c4033;
+      --white: #ffffff;
+      --black: #000000;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--white);
+      color: var(--black);
+    }
+
+    /* Page Header */
+    .page-header {
+      text-align: center;
+      padding: 60px 10%;
+      background: linear-gradient(180deg, var(--white), #f4f1ed);
+    }
+    .page-header h1 {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin-bottom: 15px;
+    }
+    .page-header p {
+      font-size: 18px;
+      color: #444;
+    }
+
+    /* Menu Cards */
+    .menu-options {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      padding: 60px 10%;
+    }
+    .menu-card {
+      background: var(--white);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      width: 280px;
+      text-align: center;
+      padding: 40px 20px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    .menu-card h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--main-color);
+      margin-bottom: 20px;
+    }
+    .menu-card p {
+      font-size: 16px;
+      color: #444;
+      margin-bottom: 25px;
+    }
+    .menu-card a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: var(--accent-color);
+      color: var(--white);
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    .menu-card a:hover {
+      background: color-mix(in srgb, var(--accent-color) 50%, black);
+      color: var(--accent-color);
+    }
+    .menu-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: var(--main-color);
+      color: var(--white);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <!-- Logo image that links to index.html -->
+    <a href="index.html" class="logo">
+      <img src="/images/phLogo.png" alt="Strike Master Logo">
+    </a>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="records.html">Records</a>
+      <a href="boysPlayers.html">Players</a>
+      <a href="/settings/appearanceSettings.html">Settings</a>
+      <a href="myTeam.html">My Team</a>
+    </div>
+  </div>
+
+  <section class="page-header">
+    <h1>My Team</h1>
+    <p>View your team's stats and rankings.</p>
+  </section>
+
+<section class="menu-options">
+  <div class="menu-card">
+    <h2>County Rankings</h2>
+    <p>View player and team rankings across the county, split by boys and girls.</p>
+    <a href="/my-team/countyRanking.html">Go to County Rankings</a>
+  </div>
+
+  <div class="menu-card">
+    <h2>Division Rankings</h2>
+    <p>View player and team rankings by division, split by boys and girls.</p>
+    <a href="/my-team/divisionRankings.html">Go to Division Rankings</a>
+  </div>
+
+  <div class="menu-card">
+    <h2>Team Season Stats</h2>
+    <p>View complete team statistics for the entire season, including averages and totals.</p>
+    <a href="/my-team/teamSeasonStats.html">Go to Team Stats</a>
+  </div>
+</section>
+
+
+  <div class="footer">
+    <p>&copy; 2025 Strike Master | Rankings Menu</p>
+  </div>
+</body>
+</html>

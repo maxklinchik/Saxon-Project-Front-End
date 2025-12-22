@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Season Stats - Strike Master</title>
+  <link rel="stylesheet" type="text/css" href="/main-pages/style.css">
+      <script src="/scripts/accent-loader.js"></script>
+
+  <style>
+    :root {
+      --orange: var(--accent-color);
+      --brown: var(--main-color);
+      --white: #ffffff;
+      --black: #000000;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--white);
+      color: var(--black);
+    }
+
+    /* Header */
+    .page-header {
+      text-align: center;
+      padding: 60px 10%;
+      background: linear-gradient(180deg, var(--white), #f4f1ed);
+    }
+    .page-header h1 {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 15px;
+    }
+    .page-header p {
+      font-size: 18px;
+      color: #444;
+    }
+
+    /* Summary Cards */
+    .stats-summary {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      padding: 40px 10%;
+    }
+    .card {
+      background: var(--white);
+      border: 2px solid var(--orange);
+      border-radius: 12px;
+      padding: 25px;
+      width: 220px;
+      text-align: center;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .card:hover { transform: translateY(-5px); }
+    .card h2 {
+      font-size: 28px;
+      color: var(--brown);
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--orange);
+    }
+
+    /* Stats Table */
+    .stats-table {
+      width: 90%;
+      margin: 40px auto;
+      border-collapse: collapse;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .stats-table th, .stats-table td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+    .stats-table th {
+      background-color: var(--brown);
+      color: var(--white);
+      font-weight: 600;
+    }
+    .stats-table tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: var(--brown);
+      color: var(--white);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <!-- Logo image that links to index.html -->
+    <a href="index.html" class="logo">
+      <img src="/images/phLogo.png" alt="Strike Master Logo">
+    </a>
+
+    <div class="nav-links">
+      <a href="/main-pages/index.html">Home</a>
+      <a href="/main-pages/records.html">Records</a>
+      <a href="/main-pages/players.html">Players</a>
+      <a href="/settings/appearanceSettings.html">Settings</a>
+      <a href="/main-pages/myTeam.html">My Team</a>
+    </div>
+  </div>
+
+  <section class="page-header">
+    <h1>Season Stats</h1>
+    <p>Overview of the school’s bowling performance this season.</p>
+  </section>
+
+  <!-- Summary Cards -->
+  <section class="stats-summary">
+    <div class="card">
+      <h2>Total Games</h2>
+      <p>120</p>
+    </div>
+    <div class="card">
+      <h2>Average Score</h2>
+      <p>178</p>
+    </div>
+    <div class="card">
+      <h2>High Game</h2>
+      <p>279</p>
+    </div>
+    <div class="card">
+      <h2>Wins</h2>
+      <p>85</p>
+    </div>
+  </section>
+
+  <!-- Detailed Table -->
+  <table class="stats-table">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>Games Played</th>
+        <th>Average</th>
+        <th>High Game</th>
+        <th>Wins</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Alex Johnson</td>
+        <td>20</td>
+        <td>182</td>
+        <td>245</td>
+        <td>15</td>
+      </tr>
+      <tr>
+        <td>Samantha Lee</td>
+        <td>18</td>
+        <td>190</td>
+        <td>279</td>
+        <td>14</td>
+      </tr>
+      <tr>
+        <td>Marcus Brown</td>
+        <td>22</td>
+        <td>175</td>
+        <td>230</td>
+        <td>16</td>
+      </tr>
+      <!-- Add more players here -->
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p>&copy; 2025 Strike Master | School Season Stats</p>
+  </div>
+</body>
+</html>
