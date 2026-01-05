@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strike Master - Records</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="records.css">
+  <script src="/scripts/accent-loader.js"></script>
+</head>
+<body>
+  <div class="navbar">
+    <!-- Logo image that links to index.html -->
+    <a href="index.html" class="logo">
+      <img src="/images/phLogo.png" alt="Strike Master Logo">
+    </a>
+
+    <div class="split-button">
+      <a href="boysRecords.html" class="boys">Boys</a>
+      <a href="girlsRecords.html" class="girls">Girls</a>
+    </div>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="boysRecords.html">Records</a>
+      <a href="boysPlayers.html">Players</a>
+      <a href="/settings/appearanceSettings.html">Settings</a>
+      <a href="myTeam.html">My Team</a>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <label id="opponentLabel" class="sectionLabel">Opponent:</label>
+    <select id="opponentSelect">
+      <option value="" selected disabled>Select opponent</option>
+    </select>
+
+    <label id="dateLabel" class="sectionLabel">Date:</label>
+    <select id="dateSelect">
+      <option value="" selected disabled>Select date</option>
+    </select>
+
+    <div id="editDateControls" class="edit-controls">
+      <input id="newDateInput" type="date" placeholder="Date" />
+
+      <!-- New Opponent dropdown -->
+      <select id="newOpponentSelect">
+        <option value="" selected disabled>Select Opponent</option>
+      </select>
+
+      <select id="newPlaceSelect">
+        <option value="" selected disabled>Select Place</option>
+        <option value="Montvale Lanes">Montvale Lanes</option>
+        <option value="Holiday Bowl Oakland">Holiday Bowl Oakland</option>
+        <option value="Bowling City Hackensack">Bowling City Hackensack</option>
+      </select>
+      <button id="addDateBtn">Add Date</button>
+
+      <!-- Remove Date Controls -->
+      <select id="removeDateSelect">
+        <option value="" selected disabled>Select date</option>
+      </select>
+      <button id="removeDateBtn">Remove Date</button>
+    </div>
+
+    <button id="modeToggle" class="mode-toggle">Switch to Edit Mode</button>
+  </div>
+
+  <div class="records-container">
+    <h2 id="recordsTitle">Records</h2>
+    <table id="recordsTable">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Game 1</th>
+          <th>Game 2</th>
+          <th>Game 3</th>
+          <th>Average</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+let teacherAccess = true;   // <--- CHANGE TO false to disable editing
+let opponents = {}; // All events
+let editMode = false;
+let players = [];
+
+const opponentSelect = document.getElementById('opponentSelect');
+const dateSelect = document.getElementById('dateSelect');
+const recordsTableBody = document.querySelector('#recordsTable tbody');
+const recordsTitle = document.getElementById('recordsTitle');
+const newDateInput = document.getElementById('newDateInput');
+const newOpponentSelect = document.getElementById('newOpponentSelect');
+const newPlaceSelect = document.getElementById('newPlaceSelect');
+const addDateBtn = document.getElementById('addDateBtn');
+const removeDateBtn = document.getElementById('removeDateBtn');
+const removeDateSelect = document.getElementById('removeDateSelect');
+const modeToggle = document.getElementById('modeToggle');
+const editDateControls = document.getElementById('editDateControls');
+
+  const currentPage = window.location.pathname; 
+  if (currentPage.includes("boysRecords.html")) { 
+    document.querySelector(".boys").classList.add("active"); 
+  }
+  else if (currentPage.includes("girlsRecords.html")) { 
+    document.querySelector(".girls").classList.add("active"); 
+  }
+
+// ---------------- Load players ----------------
+async function loadPlayers() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/players");
+        players = await res.json();
+        renderTable();
+    } catch (err) {
+        console.error("Error loading players:", err);
+    }
+}
+loadPlayers();
+
+// ---------------- Load teams for new date ----------------
+async function loadTeams() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/teams");
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+
+        const teamsArray = Array.isArray(data) ? data : data.teams;
+        allTeams = teamsArray.map(t => t.name);   // ← store all team names
+
+        newOpponentSelect.innerHTML = '<option value="" selected disabled>Select Opponent</option>';
+        teamsArray.forEach(team => {
+            const opt = document.createElement('option');
+            opt.value = team.name;
+            opt.textContent = team.name;
+            newOpponentSelect.appendChild(opt);
+        });
+
+        populateOpponents();  // ← refresh viewing dropdowns
+    } catch (err) {
+        console.error("Failed to load teams:", err);
+        alert("Could not load teams from backend.");
+    }
+}
+loadTeams();
+
+// ---------------- Edit Mode ----------------
+function toggleMode() {
+  if (!teacherAccess) return; // editing blocked
+
+  editMode = !editMode;
+  modeToggle.textContent = editMode ? 'Switch to Viewing Mode' : 'Switch to Edit Mode';
+  editDateControls.style.display = editMode ? 'flex' : 'none';
+
+  const opponentLabel = document.getElementById('opponentLabel');
+  const dateLabel = document.getElementById('dateLabel');
+
+  opponentSelect.style.display = editMode ? 'none' : 'inline-block';
+  opponentLabel.style.display = editMode ? 'none' : 'inline-block';
+
+  dateSelect.style.display = editMode ? 'none' : 'inline-block';
+  dateLabel.style.display = editMode ? 'none' : 'inline-block';
+
+  renderTable();
+}
+modeToggle.onclick = toggleMode;
+
+
+if (!teacherAccess) {
+    modeToggle.style.display = "none";        // hide toggle button
+    editMode = false;                         // force viewing mode
+}
+
+// ---------------- Populate viewing dropdowns ----------------
+function populateOpponents() {
+    opponentSelect.innerHTML = '<option value="" selected disabled>Select opponent</option>';
+
+    const uniqueOpponents = new Set(allTeams);  // ← start with all backend teams
+
+    // Add any teams that already have dates stored
+    Object.values(opponents).forEach(placeObj => {
+        Object.values(placeObj).forEach(event => uniqueOpponents.add(event.name));
+    });
+
+    Array.from(uniqueOpponents).forEach(team => {
+        const opt = document.createElement('option');
+        opt.value = team;
+        opt.textContent = team;
+        opponentSelect.appendChild(opt);
+    });
+}
+
+function populateDates(opponentName) {
+  dateSelect.innerHTML = '<option value="" selected disabled>Select date</option>';
+  Object.entries(opponents).forEach(([place, placeObj]) => {
+    Object.entries(placeObj).forEach(([date, event]) => {
+      if (event.name === opponentName) {
+        const opt = document.createElement('option');
+        opt.value = `${place}|${date}`;
+        opt.textContent = `${date} — ${place}`;
+        dateSelect.appendChild(opt);
+      }
+    });
+  });
+}
+
+function populateRemoveDates() {
+  removeDateSelect.innerHTML = '<option value="" selected disabled>Select date</option>';
+  Object.entries(opponents).forEach(([place, placeObj]) => {
+    Object.entries(placeObj).forEach(([date, event]) => {
+      const opt = document.createElement('option');
+      opt.value = `${place}|${date}`;
+      opt.textContent = `${event.name} — ${date} — ${place}`;
+      removeDateSelect.appendChild(opt);
+    });
+  });
+}
+
+function refreshDateControls() {
+  populateOpponents();
+  populateRemoveDates();
+}
+
+// ---------------- Render table ----------------
+function renderTable() {
+  const selectedOption = dateSelect.value?.split('|');
+  if (!selectedOption) {
+    recordsTitle.textContent = "Records";
+    recordsTableBody.innerHTML = '';
+    return;
+  }
+  const place = selectedOption[0];
+  const date = selectedOption[1];
+  const opponentName = opponents[place][date].name;
+
+  recordsTitle.textContent = `${opponentName} — ${date} — ${place}`;
+  recordsTableBody.innerHTML = '';
+
+  if (!players.length) {
+    const row = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 5;
+    td.textContent = 'No players added yet.';
+    row.appendChild(td);
+    recordsTableBody.appendChild(row);
+    return;
+  }
+
+  let playersWithAverages = players.map(player => {
+    let record = opponents?.[place]?.[date]?.players.find(r => r.name === player.name) || { g1: 0, g2: 0, g3: 0 };
+    const g1 = Number(record.g1) || 0;
+    const g2 = Number(record.g2) || 0;
+    const g3 = Number(record.g3) || 0;
+    const avg = (g1 + g2 + g3)/3;
+    return { name: player.name, g1, g2, g3, avg };
+  });
+
+  playersWithAverages.sort((a,b) => b.avg - a.avg);
+
+  playersWithAverages.forEach(player => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${player.name}</td>
+      <td><input type='number' min='0' value='${player.g1}' ${editMode ? '' : 'disabled'}></td>
+      <td><input type='number' min='0' value='${player.g2}' ${editMode ? '' : 'disabled'}></td>
+      <td><input type='number' min='0' value='${player.g3}' ${editMode ? '' : 'disabled'}></td>
+      <td>${isNaN(player.avg) ? '-' : player.avg.toFixed(1)}</td>
+    `;
+    recordsTableBody.appendChild(row);
+
+    const inputs = row.querySelectorAll('input[type=number]');
+    inputs.forEach((input, index) => {
+      input.addEventListener('input', (event) => {
+          if (!editMode) return;
+
+          let val = Number(event.target.value) || 0;
+
+          // ---- LIMIT TO 300 ----
+          if (val > 300) {
+              val = 300;
+              event.target.value = 300;
+          }
+          if (val < 0) {
+              val = 0;
+              event.target.value = 0;
+          }
+          // ----------------------
+
+          let record = opponents[place][date].players.find(r => r.name === player.name);
+          if (!record) {
+              record = { name: player.name, g1: 0, g2: 0, g3: 0 };
+              opponents[place][date].players.push(record);
+          }
+
+          if (index === 0) record.g1 = val;
+          if (index === 1) record.g2 = val;
+          if (index === 2) record.g3 = val;
+
+          const newAvg = ((record.g1 + record.g2 + record.g3) / 3).toFixed(1);
+          row.children[4].textContent = newAvg;
+      });
+    });
+  });
+}
+
+// ---------------- Show table when selecting a date in the Remove dropdown ----------------
+removeDateSelect.onchange = () => {
+    const selected = removeDateSelect.value?.split("|");
+    if (!selected) return;
+
+    const place = selected[0];
+    const date = selected[1];
+    const opponentName = opponents[place][date].name;
+
+    // Update the normal viewing opponent dropdown
+    opponentSelect.value = opponentName;
+
+    // Rebuild the date dropdown for that opponent
+    populateDates(opponentName);
+
+    // Select the correct date
+    dateSelect.value = `${place}|${date}`;
+
+    // Render the correct table
+    renderTable();
+};
+
+// ---------------- Add Date ----------------
+addDateBtn.onclick = () => {
+  if (!editMode || !teacherAccess) return;
+  const date = newDateInput.value;
+  const opponentName = newOpponentSelect.value;
+  const place = newPlaceSelect.value;
+
+  if (!date || !opponentName || !place) return alert("Fill out all fields.");
+
+  if (!opponents[place]) opponents[place] = {};
+  if (!opponents[place][date]) opponents[place][date] = { name: opponentName, players: [] };
+
+  newDateInput.value = '';
+  newOpponentSelect.value = '';
+  newPlaceSelect.value = '';
+  refreshDateControls();
+};
+
+// ---------------- Remove Date ----------------
+removeDateBtn.onclick = () => {
+  if (!editMode || !teacherAccess) return;
+  const selected = removeDateSelect.value?.split('|');
+  if (!selected) return;
+  const place = selected[0];
+  const date = selected[1];
+
+  delete opponents[place][date];
+  refreshDateControls();
+  renderTable();
+};
+
+editMode = false;
+editDateControls.style.display = 'none';
+opponentSelect.style.display = 'inline-block';
+document.getElementById('opponentLabel').style.display = 'inline-block';
+dateSelect.style.display = 'inline-block';
+document.getElementById('dateLabel').style.display = 'inline-block';
+modeToggle.textContent = "Switch to Edit Mode";
+
+// ---------------- Event listeners ----------------
+opponentSelect.onchange = () => { populateDates(opponentSelect.value); renderTable(); };
+dateSelect.onchange = () => renderTable();
+
+refreshDateControls();
+editDateControls.style.display = 'none';
+renderTable();
+</script>
+</body>
+</html>

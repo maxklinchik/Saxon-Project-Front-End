@@ -117,3 +117,46 @@ h2 {
     gap: 8px; 
     flex-wrap:wrap; 
 }
+
+    .split-button {
+      display: flex;
+      width: 300px;
+      height: 40px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 2px solid #fff;
+      margin-left: 40px;
+    }
+
+    .split-button a {
+      flex: 1;
+      text-decoration: none;
+      color: var(--main-color);
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Left side */
+    .girls {
+      background-color: #b2b2b2;
+    }
+
+    .girls:hover {
+      background-color: #929292;
+    }
+
+    /* Right side */
+    .boys {
+      background-color: #b2b2b2;
+    }
+
+    .boys:hover {
+      background-color: #929292;
+    }
+
+    .split-button a.active { 
+      filter: brightness(75%); 
+    }
