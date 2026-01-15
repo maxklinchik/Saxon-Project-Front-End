@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Strike Master - Players</title>
   <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="/scripts/stored-colors.css">
   <script src="/scripts/accent-loader.js"></script>
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #ffffff;
-      color: #000000;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       text-align: center;
     }
 
@@ -20,10 +21,10 @@
     .container {
       max-width: 700px;
       margin: 40px auto;
-      background: #f5f5f5;
+      background: var(--card-bg);
       padding: 25px;
       border-radius: 12px;
-      border: 2px solid #000000;
+      border: 2px solid var(--accent-color);
     }
 
         /* Split button container */
@@ -78,7 +79,7 @@
     }
 
     button:hover {
-      background-color: color-mix(in srgb, var(--accent-color) 50%, black); /* orange */
+      background-color: var(--acccent-color-hover); /* orange */
     }
 
     .player-list {
@@ -138,9 +139,8 @@
     }
 
     .split-button a.active { 
-        filter: brightness(75%); 
+      filter: brightness(75%); 
     }
-
 </style>
 </head>
 <body>

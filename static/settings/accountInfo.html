@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Account Info - Strike Master</title>
     <link rel="stylesheet" type="text/css" href="/main-pages/style.css">
+    <link rel="stylesheet" type="text/css" href="/scripts/stored-colors.css">
     <script src="/scripts/accent-loader.js"></script>
 
   <style>
@@ -13,7 +14,8 @@
       font-family: Arial, sans-serif;
       display: flex;
       height: 100vh;
-      background: #f9f9f9;
+      background: var(--bg-color);
+      color: var(--text-color);
     }
 
    /* Sidebar */
@@ -41,7 +43,7 @@
    .content {
      flex: 1;
      padding: 30px;
-     background: #ecf0f1;
+     background: var(--bg-color);
      overflow-y: auto;
      position: relative; /* allow absolute positioning inside */
    }
@@ -49,11 +51,12 @@
    h2 { margin-top: 0; }
 
    .profile-section {
-     background: white;
+     background: var(--card-bg);
      padding: 20px;
      border-radius: 6px;
      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
      max-width: 500px;
+     color: var(--text-color);
    }
 
    .profile-picture {
@@ -169,7 +172,7 @@
 
  <div class="content">
    <!-- X icon in top right -->
-   <a href="/main-pages/boysRecords.html" class="close-icon">X</a>
+   <a href="/main-pages/teamSelector.html" class="close-icon">X</a>
 
    <h2>Account Information</h2>
    <div class="profile-section">

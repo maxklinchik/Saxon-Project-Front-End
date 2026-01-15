@@ -12,3 +12,9 @@
     document.documentElement.style.setProperty("--main-color", saved);
   }
 })();
+
+(function () {
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+})();
+

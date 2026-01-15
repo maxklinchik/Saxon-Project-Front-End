@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Team - Strike Master</title>
   <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="/scripts/stored-colors.css">
     <script src="/scripts/accent-loader.js"></script>
   <style>
     :root {
@@ -18,14 +19,14 @@
       margin: 0;
       font-family: 'Poppins', sans-serif;
       background: var(--white);
-      color: var(--black);
+      color: var(--text-color);
     }
 
     /* Page Header */
     .page-header {
       text-align: center;
       padding: 60px 10%;
-      background: linear-gradient(180deg, var(--white), #f4f1ed);
+      background: var(--card-bg);
     }
     .page-header h1 {
       font-size: 42px;
@@ -35,7 +36,7 @@
     }
     .page-header p {
       font-size: 18px;
-      color: #444;
+      color: var(--text-color);
     }
 
     /* Menu Cards */
@@ -45,9 +46,10 @@
       gap: 40px;
       flex-wrap: wrap;
       padding: 60px 10%;
+      background: var(--bg-color);
     }
     .menu-card {
-      background: var(--white);
+      background: var(--content-bg);
       border: 2px solid var(--accent-color);
       border-radius: 12px;
       width: 280px;
@@ -59,26 +61,26 @@
     .menu-card h2 {
       font-size: 26px;
       font-weight: 700;
-      color: var(--main-color);
+      color: var(--accent-color);
       margin-bottom: 20px;
     }
     .menu-card p {
       font-size: 16px;
-      color: #444;
+      color: var(--text-color);
       margin-bottom: 25px;
     }
     .menu-card a {
       display: inline-block;
       padding: 12px 25px;
       background: var(--accent-color);
-      color: var(--white);
+      color: var(--bg-color);
       font-weight: 600;
       border-radius: 8px;
       text-decoration: none;
       transition: background-color 0.3s ease;
     }
     .menu-card a:hover {
-      background: color-mix(in srgb, var(--accent-color) 50%, black);
+      background: var(--acccent-color-hover);
       color: var(--accent-color);
     }
     .menu-card:hover {
@@ -90,8 +92,8 @@
       text-align: center;
       padding: 20px;
       background: var(--main-color);
-      color: var(--white);
-      margin-top: 40px;
+      color: var(--text-color);
+      margin-top: 0px;
     }
   </style>
 </head>

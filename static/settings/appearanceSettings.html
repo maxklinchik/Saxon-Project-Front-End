@@ -7,8 +7,23 @@
 
   <style>
     :root {
-      --accent-color: #ffa500; /* default, overwritten by JS */
-      --main-color: #5f371c; /* default, overwritten by JS */
+      /* Brand colors (user controlled) */
+      --accent-color: #ffa500;
+      --main-color: #5f371c;
+
+      /* Theme colors */
+      --bg-color: #f9f9f9;
+      --content-bg: #ececec;
+      --card-bg: #ededed;
+      --text-color: #000000;
+    }
+
+    /* Dark mode overrides */
+    [data-theme="dark"] {
+      --bg-color: #343434;
+      --content-bg: #3e3e3e;
+      --card-bg: #434343;
+      --text-color: #ffffff;
     }
 
     body {
@@ -16,7 +31,7 @@
       font-family: Arial, sans-serif;
       display: flex;
       height: 100vh;
-      background: #f9f9f9;
+      background: var(--bg-color);
     }
 
     /* Sidebar */
@@ -54,8 +69,9 @@
     .content {
       flex: 1;
       padding: 30px;
-      background: #ecf0f1;
+      background: var(--bg-color);
       overflow-y: auto;
+      color: var(--text-color);
     }
 
     h2 {
@@ -134,7 +150,7 @@
       top: 10px;
       right: 10px;
       font-size: 20px;
-      color: #333;
+      color: var(--text-color);
       text-decoration: none;
       font-weight: bold;
       padding: 20px;
@@ -157,7 +173,7 @@
   </div>
 
   <div class="content">
-    <a href="/main-pages/boysRecords.html" class="close-icon">X</a>
+    <a href="/main-pages/teamSelector.html" class="close-icon">X</a>
 
   <div id="appearance" class="section">
     <h2>Appearance</h2>
@@ -174,6 +190,15 @@
     <div style="display:flex;align-items:center;gap:10px;">
       <input type="color" id="mainColorPicker" value="#5f371c">
       <button id="resetMain" style="padding:6px 10px;">Reset</button>
+    </div>
+
+    <br><br>
+
+    <label>Theme:</label>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="themeToggle" style="padding:8px 12px;">
+        Toggle Light / Dark
+      </button>
     </div>
   </div>
 
@@ -220,6 +245,26 @@ if (picker) {
   });
 }
 
+/* LIGHT / DARK MODE */
+
+(function () {
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+})();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("themeToggle");
+  if (!toggle) return;
+
+  toggle.addEventListener("click", () => {
+    const html = document.documentElement;
+    const current = html.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+
+    html.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+  });
+});
 
 /* ---------------------------------------------------
    MAIN COLOR SYSTEM — WORKS ON ALL PAGES

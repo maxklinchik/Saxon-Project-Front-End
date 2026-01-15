@@ -5,22 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Season & Team Level - Strike Master</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="/scripts/stored-colors.css">
     <script src="/scripts/accent-loader.js"></script>
 
   <style>
-    :root {
-      --orange:#ff7f11;
-      --brown:#5c4033;
-      --white:#ffffff;
-      --black:#000000;
-      --light:#f4f1ed;
-    }
 
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: var(--light);
-      color: var(--black);
+      background: var(--bg-color);
+      color: var(--text-color);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -36,7 +30,7 @@
     }
 
     .selection-box {
-      background: var(--white);
+      background: var(--card-bg);
       padding: 40px;
       border-radius: 16px;
       border: 2px solid var(--accent-color);
@@ -53,7 +47,7 @@
     }
 
     .selection-box p {
-      color: #444;
+      color: var(--text-color);
       margin-bottom: 30px;
       font-size: 16px;
     }
@@ -65,7 +59,7 @@
 
     label {
       font-weight: 600;
-      color: var(--main-color);
+      color: var(--text-color);
       display: block;
       margin-bottom: 8px;
     }
@@ -76,7 +70,8 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
-      background: var(--light);
+      background: var(--content-bg);
+      color: var(--text-color);
     }
 
     button {
@@ -85,7 +80,7 @@
       background: var(--accent-color);
       border: none;
       border-radius: 10px;
-      color: var(--white);
+      color: var(--text-color);
       font-size: 18px;
       font-weight: 600;
       cursor: pointer;
@@ -100,7 +95,7 @@
       text-align: center;
       padding: 20px;
       background: var(--main-color);
-      color: var(--white);
+      color: var(--text-color);
     }
   </style>
 </head>
