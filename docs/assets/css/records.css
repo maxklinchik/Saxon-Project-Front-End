@@ -56,6 +56,7 @@ button:hover {
 
 .records-container {
     padding:30px 6%; 
+    background: var(--content-bg);
 }
 
 table {
