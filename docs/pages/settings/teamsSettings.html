@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
 
   <style>
     body {
@@ -257,9 +258,15 @@ addTeamBtn.addEventListener('click', async () => {
 // Logout button
 // -----------------------------
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  alert('Logging out...');
-  // Implement actual logout logic here
+  if (confirm('Are you sure you want to logout?')) {
+    auth.logout('../../index.html');
+  }
 });
+
+// Require authentication
+if (!auth.requireCoach('../auth/teacherLogin.html')) {
+  throw new Error('Not authenticated');
+}
 
 // Load teams initially
 loadTeams();

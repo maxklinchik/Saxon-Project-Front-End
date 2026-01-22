@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
     <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
     <script src="../../assets/js/accent-loader.js"></script>
+    <script src="../../assets/js/auth-helper.js"></script>
 
   <style>
     body {
@@ -165,21 +166,21 @@
      <!-- Display Name -->
      <div class="form-group">
        <label for="displayName">Display Name</label>
-       <input type="text" id="displayName" value="demo_user" readonly>
+       <input type="text" id="displayName" value="" readonly>
        <span class="edit-icon" onclick="enableEdit('displayName')">&#9998;</span>
      </div>
 
      <!-- Email -->
      <div class="form-group">
        <label for="email">Email</label>
-       <input type="email" id="email" value="demo@example.com" readonly>
+       <input type="email" id="email" value="" readonly>
        <span class="edit-icon" onclick="enableEdit('email')">&#9998;</span>
      </div>
 
      <!-- Password -->
      <div class="form-group">
        <label for="password">Password</label>
-       <input type="password" id="password" value="password123" readonly>
+       <input type="password" id="password" value="" readonly placeholder="********">
        <span class="edit-icon" onclick="enableEdit('password')">&#9998;</span>
        <div style="margin-top:6px;" class="showPasswordContainer">
          Show Password <input type="checkbox" id="showPassword">
@@ -188,8 +189,8 @@
 
       <!-- Code (unchangeable) -->
       <div class="form-group">
-        <label for="userCode">Your Code</label>
-        <input type="text" id="userCode" value="A1B2C3" readonly>
+        <label for="userCode">Your Coach Code</label>
+        <input type="text" id="userCode" value="" readonly>
       </div>
 
       <button class="save-btn" id="saveBtn">Save Changes</button>
@@ -197,6 +198,26 @@
   </div>
 
   <script>
+    // Require authentication
+    if (!auth.requireCoach('../auth/teacherLogin.html')) {
+      throw new Error('Not authenticated');
+    }
+
+    // Setup logout button
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
+      }
+    });
+
+    // Load user data from session
+    const currentUser = auth.getUser();
+    if (currentUser) {
+      document.getElementById('displayName').value = auth.getDisplayName();
+      document.getElementById('email').value = currentUser.email || '';
+      document.getElementById('userCode').value = currentUser.coach_code || 'N/A';
+    }
+
     // Enable editing when clicking the pencil icon
     function enableEdit(fieldId) {
       const field = document.getElementById(fieldId);

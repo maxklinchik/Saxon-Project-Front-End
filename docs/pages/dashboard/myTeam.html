@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
   <style>
     :root {
       --orange: #ff7f11;
@@ -282,12 +283,13 @@
       <a href="boysPlayers.html">Players</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
     </div>
   </div>
 
   <section class="page-header">
     <h1>My Team</h1>
-    <p>Manage your players and view team statistics.</p>
+    <p id="welcomeMsg">Manage your players and view team statistics.</p>
   </section>
 
   <div class="team-section">
@@ -364,37 +366,46 @@
   </div>
 
   <script>
+    // Require authentication - redirect to login if not logged in
+    if (!auth.requireCoach('../auth/teacherLogin.html')) {
+      // Stop script execution if not authenticated
+      throw new Error('Not authenticated');
+    }
+
     let currentGender = 'boys';
     let boysTeamId = null;
     let girlsTeamId = null;
     let players = [];
-    let isCoach = false;
+    const currentUser = auth.getUser();
 
-    // Check auth
-    function checkAuth() {
-      const user = localStorage.getItem('bowling_user');
-      const token = localStorage.getItem('bowling_token');
-      if (user && token) {
-        const userData = JSON.parse(user);
-        isCoach = userData.role === 'coach';
-        return userData;
+    // Update welcome message with user's name
+    document.getElementById('welcomeMsg').textContent = 
+      'Welcome, ' + auth.getDisplayName() + '! Manage your players and view team statistics.';
+
+    // Setup logout button
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
       }
-      return null;
-    }
+    });
 
     // Get coach's teams
     async function getTeams() {
-      const user = checkAuth();
-      if (!user) {
-        document.getElementById('addPlayerBtn').style.display = 'none';
-        showMessage('Please log in as a coach to manage players.', 'error');
+      if (!currentUser || !currentUser.id) {
+        showMessage('User session invalid. Please log in again.', 'error');
         return;
       }
 
       try {
-        const res = await api.get(`/api/coach/${user.id}/teams`);
+        const res = await api.get('/api/coach/' + currentUser.id + '/teams');
         const teams = await res.json();
         
+        if (!teams || teams.length === 0) {
+          showMessage('No teams found. Contact support if this is an error.', 'error');
+          return;
+        }
+
         teams.forEach(team => {
           if (team.gender === 'boys') boysTeamId = team.id;
           if (team.gender === 'girls') girlsTeamId = team.id;
@@ -403,7 +414,7 @@
         loadPlayers();
       } catch (err) {
         console.error('Failed to get teams:', err);
-        showMessage('Failed to load teams.', 'error');
+        showMessage('Failed to load teams. Please check your connection.', 'error');
       }
     }
 
@@ -431,21 +442,21 @@
       const list = document.getElementById('playersList');
       
       if (players.length === 0) {
-        list.innerHTML = '<div class="no-players">No players yet. Click "Add Player" to get started!</div>';
+        list.innerHTML = '<div class="no-players">No players yet. Click "+ Add Player" to get started!</div>';
         return;
       }
 
-      list.innerHTML = players.map(player => `
-        <div class="player-item">
-          <div class="player-info">
-            <h4>${player.first_name} ${player.last_name}</h4>
-            <span>Class of ${player.grad_year || 'N/A'}${player.email ? ' • ' + player.email : ''}</span>
-          </div>
-          <div class="player-actions">
-            ${isCoach ? `<button onclick="removePlayer('${player.id}')" title="Remove">🗑️</button>` : ''}
-          </div>
-        </div>
-      `).join('');
+      list.innerHTML = players.map(player => 
+        '<div class="player-item">' +
+          '<div class="player-info">' +
+            '<h4>' + player.first_name + ' ' + player.last_name + '</h4>' +
+            '<span>Class of ' + (player.grad_year || 'N/A') + (player.email ? ' • ' + player.email : '') + '</span>' +
+          '</div>' +
+          '<div class="player-actions">' +
+            '<button onclick="removePlayer(\'' + player.id + '\')" title="Remove">🗑️</button>' +
+          '</div>' +
+        '</div>'
+      ).join('');
     }
 
     // Add player
@@ -544,11 +555,6 @@
     });
 
     document.getElementById('savePlayerBtn').addEventListener('click', addPlayer);
-
-    // Hide add button if not coach
-    if (!checkAuth() || !isCoach) {
-      document.getElementById('addPlayerBtn').style.display = 'none';
-    }
 
     // Load on startup
     getTeams();

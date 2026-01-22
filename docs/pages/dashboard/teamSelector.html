@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
     <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
     <script src="../../assets/js/accent-loader.js"></script>
+    <script src="../../assets/js/auth-helper.js"></script>
 
   <style>
 
@@ -113,8 +114,22 @@
       <a href="boysPlayers.html">Players</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
     </div>
   </div>
+
+  <script>
+    // Require authentication
+    if (!auth.requireCoach('../auth/teacherLogin.html')) {
+      throw new Error('Not authenticated');
+    }
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
+      }
+    });
+  </script>
 
   <div class="container">
     <div class="selection-box">

@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
     <script src="../../assets/js/accent-loader.js"></script>
     <script src="../../assets/js/config/api.js"></script>
+    <script src="../../assets/js/auth-helper.js"></script>
 </head>
 <body>
   <div class="navbar">
@@ -28,6 +29,7 @@
       <a href="boysPlayers.html">Players</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
     </div>
   </div>
 
@@ -85,10 +87,24 @@
   </div>
 
 <script>
-let teacherAccess = true;   // <--- CHANGE TO false to disable editing
+// Require authentication
+if (!auth.requireCoach('../auth/teacherLogin.html')) {
+  throw new Error('Not authenticated');
+}
+
+const currentUser = auth.getUser();
+let teacherAccess = auth.isCoach();   // Dynamically set based on login
 let opponents = {}; // All events
 let editMode = false;
 let players = [];
+
+// Setup logout button
+document.getElementById('logoutBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (confirm('Are you sure you want to logout?')) {
+    auth.logout('../../index.html');
+  }
+});
 
 const opponentSelect = document.getElementById('opponentSelect');
 const dateSelect = document.getElementById('dateSelect');

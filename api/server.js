@@ -85,10 +85,28 @@ app.post('/api/auth/login', async (req, res) => {
 
     if (error) throw error;
 
+    // Fetch full user profile from users table
+    const { data: userProfile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError) {
+      console.warn('Could not fetch user profile:', profileError.message);
+    }
+
+    // Merge auth user with profile data
+    const fullUser = {
+      id: data.user.id,
+      email: data.user.email,
+      ...(userProfile || {}),
+    };
+
     res.json({ 
       success: true, 
       session: data.session,
-      user: data.user 
+      user: fullUser 
     });
   } catch (error) {
     console.error('Login error:', error);

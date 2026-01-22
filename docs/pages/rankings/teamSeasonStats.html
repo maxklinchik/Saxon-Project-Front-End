@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
   <style>
     :root {
       --orange: var(--accent-color);
@@ -167,6 +168,7 @@
       <a href="../dashboard/boysPlayers.html">Players</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="../dashboard/myTeam.html">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
     </div>
   </div>
 
@@ -223,24 +225,40 @@
   </div>
 
   <script>
+    // Require authentication - redirect to login if not logged in
+    if (!auth.requireCoach('../auth/teacherLogin.html')) {
+      throw new Error('Not authenticated');
+    }
+
+    const currentUser = auth.getUser();
     let currentGender = 'boys';
     let boysTeamId = null;
     let girlsTeamId = null;
 
+    // Setup logout button
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
+      }
+    });
+
     async function init() {
-      const user = localStorage.getItem('bowling_user');
-      if (user) {
-        const userData = JSON.parse(user);
-        try {
-          const res = await api.get('/api/coach/' + userData.id + '/teams');
-          const teams = await res.json();
-          teams.forEach(team => {
-            if (team.gender === 'boys') boysTeamId = team.id;
-            if (team.gender === 'girls') girlsTeamId = team.id;
-          });
-        } catch (err) {
-          console.error('Failed to get teams:', err);
-        }
+      if (!currentUser || !currentUser.id) {
+        document.getElementById('playersTable').innerHTML = 
+          '<tr><td colspan="5" class="no-data-row">Please log in to view your team stats</td></tr>';
+        return;
+      }
+
+      try {
+        const res = await api.get('/api/coach/' + currentUser.id + '/teams');
+        const teams = await res.json();
+        teams.forEach(team => {
+          if (team.gender === 'boys') boysTeamId = team.id;
+          if (team.gender === 'girls') girlsTeamId = team.id;
+        });
+      } catch (err) {
+        console.error('Failed to get teams:', err);
       }
       loadStats();
     }

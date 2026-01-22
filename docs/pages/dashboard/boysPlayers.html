@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
   <style>
     body {
       margin: 0;
@@ -200,6 +201,7 @@
       <a href="boysPlayers.html">Players</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
     </div>
   </div>
 
@@ -244,34 +246,33 @@
   </div>
 
 <script>
+  // Require authentication
+  if (!auth.requireCoach('../auth/teacherLogin.html')) {
+    throw new Error('Not authenticated');
+  }
+
+  const currentUser = auth.getUser();
   const GENDER = 'boys';
   let teamId = null;
   let players = [];
-  let isCoach = false;
 
-  // Check if user is logged in as coach
-  function checkAuth() {
-    const user = localStorage.getItem('bowling_user');
-    const token = localStorage.getItem('bowling_token');
-    
-    if (user && token) {
-      const userData = JSON.parse(user);
-      isCoach = userData.role === 'coach';
-      return userData;
+  // Setup logout button
+  document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (confirm('Are you sure you want to logout?')) {
+      auth.logout('../../index.html');
     }
-    return null;
-  }
+  });
 
   // Get coach's team for this gender
   async function getTeam() {
-    const user = checkAuth();
-    if (!user) {
+    if (!currentUser || !currentUser.id) {
       document.getElementById('addPlayerForm').style.display = 'none';
       return;
     }
 
     try {
-      const res = await api.get(`/api/coach/${user.id}/teams`);
+      const res = await api.get('/api/coach/' + currentUser.id + '/teams');
       const teams = await res.json();
       
       // Find the boys team
@@ -284,10 +285,7 @@
       }
     } catch (err) {
       console.error('Failed to get teams:', err);
-      // Try loading from query param or localStorage
-      const urlParams = new URLSearchParams(window.location.search);
-      teamId = urlParams.get('teamId') || localStorage.getItem('selectedTeamId');
-      if (teamId) loadPlayers();
+      showMessage('Failed to load team data.', 'error');
     }
   }
 
@@ -325,11 +323,11 @@
 
       const name = document.createElement("div");
       name.className = "player-name";
-      name.textContent = `${player.first_name} ${player.last_name}`;
+      name.textContent = player.first_name + ' ' + player.last_name;
 
       const details = document.createElement("div");
       details.className = "player-details";
-      details.textContent = `Class of ${player.grad_year || 'N/A'}${player.email ? ' • ' + player.email : ''}`;
+      details.textContent = 'Class of ' + (player.grad_year || 'N/A') + (player.email ? ' • ' + player.email : '');
 
       info.appendChild(name);
       info.appendChild(details);
@@ -345,16 +343,14 @@
       const profileOpt = document.createElement("div");
       profileOpt.textContent = "View Profile";
       profileOpt.onclick = () => {
-        window.location.href = `playerProfile.html?id=${player.id}`;
+        window.location.href = 'playerProfile.html?id=' + player.id;
       };
       menu.appendChild(profileOpt);
 
-      if (isCoach) {
-        const removeOpt = document.createElement("div");
-        removeOpt.textContent = "Remove Player";
-        removeOpt.onclick = () => removePlayer(player.id);
-        menu.appendChild(removeOpt);
-      }
+      const removeOpt = document.createElement("div");
+      removeOpt.textContent = "Remove Player";
+      removeOpt.onclick = () => removePlayer(player.id);
+      menu.appendChild(removeOpt);
 
       menuBtn.onclick = (e) => {
         e.stopPropagation();
@@ -446,14 +442,8 @@
   function showMessage(text, type) {
     const msg = document.getElementById('message');
     msg.textContent = text;
-    msg.className = `message ${type}`;
+    msg.className = 'message ' + type;
     setTimeout(() => { msg.className = 'message'; }, 4000);
-  }
-
-  // Hide add form if not coach
-  const user = checkAuth();
-  if (!user || !isCoach) {
-    document.getElementById('addPlayerForm').style.display = 'none';
   }
 
   // Event listeners
