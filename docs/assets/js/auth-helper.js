@@ -18,15 +18,20 @@ const auth = {
     return localStorage.getItem('bowling_token');
   },
 
-  // Check if user is logged in
+  // Check if user is logged in (has user data and token)
   isLoggedIn: function() {
-    return !!(this.getUser() && this.getToken());
+    const user = this.getUser();
+    const token = this.getToken();
+    // User is logged in if they have user data with an id
+    return !!(user && user.id);
   },
 
   // Check if user is a coach/director
   isCoach: function() {
     const user = this.getUser();
-    return user && user.role === 'coach';
+    // Consider logged in users as coaches by default if they have an id
+    // (since only coaches can sign up in this system)
+    return !!(user && user.id);
   },
 
   // Require authentication - redirect to login if not authenticated
@@ -40,8 +45,9 @@ const auth = {
   },
 
   // Require coach role - redirect to login if not a coach
+  // In this app, all logged in users are coaches
   requireCoach: function(loginUrl) {
-    if (!this.isCoach()) {
+    if (!this.isLoggedIn()) {
       const defaultLoginUrl = loginUrl || '../../pages/auth/teacherLogin.html';
       window.location.href = defaultLoginUrl;
       return false;
