@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Strike Master - Players</title>
-    <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
-    <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
-    <script src="../../assets/js/accent-loader.js"></script>
-    <script src="../../assets/js/config/api.js"></script>
+  <title>Strike Master - Boys Players</title>
+  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
   <style>
     body {
       margin: 0;
@@ -18,7 +18,6 @@
       text-align: center;
     }
 
-    /* Main */
     .container {
       max-width: 700px;
       margin: 40px auto;
@@ -28,7 +27,6 @@
       border: 2px solid var(--accent-color);
     }
 
-        /* Split button container */
     .split-button {
       display: flex;
       width: 300px;
@@ -50,26 +48,14 @@
       transition: background-color 0.2s ease;
     }
 
-    /* Left side */
-    .girls {
-      background-color: #b2b2b2;
-    }
-
-    .girls:hover {
-      background-color: #929292;
-    }
-
-    /* Right side */
-    .boys {
-      background-color: #b2b2b2;
-    }
-
-    .boys:hover {
-      background-color: #929292;
-    }
+    .girls { background-color: #b2b2b2; }
+    .girls:hover { background-color: #929292; }
+    .boys { background-color: #b2b2b2; }
+    .boys:hover { background-color: #929292; }
+    .split-button a.active { filter: brightness(75%); }
 
     button {
-      background-color: var(--accent-color); /* brown */
+      background-color: var(--accent-color);
       color: white;
       border: none;
       padding: 10px 18px;
@@ -80,13 +66,38 @@
     }
 
     button:hover {
-      background-color: var(--acccent-color-hover); /* orange */
+      background-color: var(--acccent-color-hover);
+    }
+
+    .player-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .player-form label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .player-form input, .player-form select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .player-form .full-width {
+      grid-column: 1 / -1;
     }
 
     .player-list {
       margin-top: 20px;
       text-align: left;
-      position: relative;
     }
 
     .player-item {
@@ -94,7 +105,7 @@
       justify-content: space-between;
       align-items: center;
       background: white;
-      padding: 10px 15px;
+      padding: 12px 15px;
       border: 1px solid #ccc;
       border-radius: 6px;
       margin-bottom: 10px;
@@ -102,12 +113,29 @@
       color: black;
     }
 
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .player-details {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+
     .options-btn {
       cursor: pointer;
       font-size: 20px;
       padding: 4px 10px;
       border-radius: 50%;
-      transition: background 0.2s;
+      background: transparent;
+      border: none;
+      color: black;
     }
 
     .options-btn:hover {
@@ -117,44 +145,52 @@
     .options-menu {
       position: absolute;
       right: 15px;
-      top: 40px;
+      top: 45px;
       background: white;
       border: 1px solid #ccc;
       border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       display: none;
-      flex-direction: column;
       z-index: 10;
     }
 
-    .options-menu button {
-      background: none;
-      color: #000;
-      border: none;
+    .options-menu div {
       padding: 10px 15px;
-      text-align: left;
       cursor: pointer;
     }
 
-    .options-menu button:hover {
+    .options-menu div:hover {
       background: #f0f0f0;
     }
 
-    .split-button a.active { 
-      filter: brightness(75%); 
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      display: none;
     }
 
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
   </style>
 </head>
 <body>
   <div class="navbar">
-    <!-- Logo image that links to index.html -->
     <a href="../../index.html" class="logo">
       <img src="../../assets/images/images/phLogo.png" alt="Strike Master Logo">
     </a>
 
     <div class="split-button">
-      <a href="boysRecords.html" class="boys">Boys</a>
+      <a href="boysRecords.html" class="boys active">Boys</a>
       <a href="girlsRecords.html" class="girls">Girls</a>
     </div>
 
@@ -168,188 +204,263 @@
   </div>
 
   <div class="container">
-    <h1>Players</h1>
-    <p>Add and remove players. These players will appear in the Records tab tables.</p>
+    <h1>Boys Players</h1>
+    <p>Add players to your boys bowling team. They will appear in the Records tab.</p>
 
-    <input id="playerInput" type="text" placeholder="Enter player name" style="padding: 8px; width: 60%;" />
-    <button id="addPlayerBtn">Add Player</button>
+    <div id="message" class="message"></div>
 
-    <div class="player-list" id="playerList"></div>
+    <div class="player-form" id="addPlayerForm">
+      <div>
+        <label>First Name *</label>
+        <input type="text" id="firstName" required>
+      </div>
+      <div>
+        <label>Last Name *</label>
+        <input type="text" id="lastName" required>
+      </div>
+      <div>
+        <label>Graduation Year *</label>
+        <select id="gradYear" required>
+          <option value="">Select Year</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+        </select>
+      </div>
+      <div>
+        <label>Email (optional)</label>
+        <input type="email" id="playerEmail" placeholder="student@email.com">
+      </div>
+      <div class="full-width" style="text-align: center;">
+        <button id="addPlayerBtn">Add Player</button>
+      </div>
+    </div>
+
+    <div class="player-list" id="playerList">
+      <p style="text-align:center; color:#666;">Loading players...</p>
+    </div>
   </div>
 
 <script>
-  let teacherAccess = true; // Set to false to disable adding/removing players
+  const GENDER = 'boys';
+  let teamId = null;
   let players = [];
+  let isCoach = false;
 
-  const currentPage = window.location.pathname; 
-  if (currentPage.includes("boysPlayers.html")) { 
-    document.querySelector(".boys").classList.add("active"); 
+  // Check if user is logged in as coach
+  function checkAuth() {
+    const user = localStorage.getItem('bowling_user');
+    const token = localStorage.getItem('bowling_token');
+    
+    if (user && token) {
+      const userData = JSON.parse(user);
+      isCoach = userData.role === 'coach';
+      return userData;
+    }
+    return null;
   }
-  else if (currentPage.includes("girlsPlayers.html")) { 
-    document.querySelector(".girls").classList.add("active"); 
-  }
 
+  // Get coach's team for this gender
+  async function getTeam() {
+    const user = checkAuth();
+    if (!user) {
+      document.getElementById('addPlayerForm').style.display = 'none';
+      return;
+    }
 
-  // -----------------------
-  // Load players from Flask
-  // -----------------------
-  async function loadPlayers() {
     try {
-      const res = await api.get('/api/players');
+      const res = await api.get(`/api/coach/${user.id}/teams`);
+      const teams = await res.json();
+      
+      // Find the boys team
+      const boysTeam = teams.find(t => t.gender === GENDER);
+      if (boysTeam) {
+        teamId = boysTeam.id;
+        loadPlayers();
+      } else {
+        showMessage('No boys team found. Please contact support.', 'error');
+      }
+    } catch (err) {
+      console.error('Failed to get teams:', err);
+      // Try loading from query param or localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      teamId = urlParams.get('teamId') || localStorage.getItem('selectedTeamId');
+      if (teamId) loadPlayers();
+    }
+  }
+
+  // Load players from API
+  async function loadPlayers() {
+    if (!teamId) {
+      playerList.innerHTML = '<p style="text-align:center;">Please select a team first.</p>';
+      return;
+    }
+
+    try {
+      const res = await api.get(`/api/teams/${teamId}/players`);
       players = await res.json();
       renderPlayers();
     } catch (err) {
       console.error("Failed to load players:", err);
+      playerList.innerHTML = '<p style="text-align:center; color:red;">Failed to load players.</p>';
     }
   }
 
-  // -----------------------
-  // Render Players List
-  // -----------------------
-function renderPlayers() {
-  playerList.innerHTML = "";
-
-  players.forEach((player, index) => {
-    const item = document.createElement("div");
-    item.className = "player-item";
-
-    const name = document.createElement("span");
-    name.textContent = player.name;
-
-    // Three-dot menu button
-    const menuBtn = document.createElement("button");
-    menuBtn.textContent = "⋮";
-    menuBtn.style.background = "transparent";
-    menuBtn.style.color = "black";
-    menuBtn.style.fontSize = "20px";
-    menuBtn.style.border = "none";
-    menuBtn.style.cursor = "pointer";
-
-    // Dropdown menu container
-    const menu = document.createElement("div");
-    menu.style.position = "absolute";
-    menu.style.background = "white";
-    menu.style.border = "1px solid #ddd";
-    menu.style.borderRadius = "6px";
-    menu.style.padding = "8px 0";
-    menu.style.minWidth = "120px";
-    menu.style.boxShadow = "0 4px 10px rgba(0,0,0,0.15)";
-    menu.style.display = "none";
-    menu.style.zIndex = "10";
-    menu.style.right = "15px";
-    menu.style.top = "40px";
-
-    // View profile option (always available)
-    const profileOpt = document.createElement("div");
-    profileOpt.textContent = "View Profile";
-    profileOpt.style.padding = "8px 12px";
-    profileOpt.style.cursor = "pointer";
-    profileOpt.onmouseover = () => (profileOpt.style.background = "#eee");
-    profileOpt.onmouseout = () => (profileOpt.style.background = "white");
-    profileOpt.onclick = () => {
-      window.location.href = `playerProfile.html?name=${encodeURIComponent(player.name)}`;
-    };
-    menu.appendChild(profileOpt);
-
-    // Only add "Remove Player" if teacherAccess is true
-    if (teacherAccess) {
-      const removeOpt = document.createElement("div");
-      removeOpt.textContent = "Remove Player";
-      removeOpt.style.padding = "8px 12px";
-      removeOpt.style.cursor = "pointer";
-      removeOpt.onmouseover = () => (removeOpt.style.background = "#eee");
-      removeOpt.onmouseout = () => (removeOpt.style.background = "white");
-      removeOpt.onclick = () => removePlayer(player.name);
-      menu.appendChild(removeOpt);
-    }
-
-    // Toggle menu show/hide
-    menuBtn.onclick = (e) => {
-      e.stopPropagation();
-      menu.style.display = menu.style.display === "none" ? "block" : "none";
-    };
-
-    // Hide if user clicks anywhere else
-    document.addEventListener("click", () => {
-      menu.style.display = "none";
-    });
-
-    item.style.position = "relative";
-    item.appendChild(name);
-    item.appendChild(menuBtn);
-    item.appendChild(menu);
-
-    playerList.appendChild(item);
-  });
-}
-
-  // -----------------------
-  // Add Player
-  // -----------------------
-async function addPlayer() {
-  const name = playerInput.value.trim();
-  if (!name) return alert("Enter a valid player name");
-
-  try {
-    const res = await api.post('/api/players', { name });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "Failed to add player");
+  // Render players list
+  function renderPlayers() {
+    if (players.length === 0) {
+      playerList.innerHTML = '<p style="text-align:center; color:#666;">No players yet. Add your first player above!</p>';
       return;
     }
 
-    playerInput.value = "";
-    loadPlayers(); // reload updated list
-  } catch (err) {
-    console.error("Add player failed:", err);
-  }
-}
+    playerList.innerHTML = "";
+    players.forEach((player) => {
+      const item = document.createElement("div");
+      item.className = "player-item";
 
-  // -----------------------
-  // Remove Player
-  // -----------------------
-  async function removePlayer(name) {
+      const info = document.createElement("div");
+      info.className = "player-info";
+
+      const name = document.createElement("div");
+      name.className = "player-name";
+      name.textContent = `${player.first_name} ${player.last_name}`;
+
+      const details = document.createElement("div");
+      details.className = "player-details";
+      details.textContent = `Class of ${player.grad_year || 'N/A'}${player.email ? ' • ' + player.email : ''}`;
+
+      info.appendChild(name);
+      info.appendChild(details);
+
+      // Three-dot menu
+      const menuBtn = document.createElement("button");
+      menuBtn.className = "options-btn";
+      menuBtn.textContent = "⋮";
+
+      const menu = document.createElement("div");
+      menu.className = "options-menu";
+
+      const profileOpt = document.createElement("div");
+      profileOpt.textContent = "View Profile";
+      profileOpt.onclick = () => {
+        window.location.href = `playerProfile.html?id=${player.id}`;
+      };
+      menu.appendChild(profileOpt);
+
+      if (isCoach) {
+        const removeOpt = document.createElement("div");
+        removeOpt.textContent = "Remove Player";
+        removeOpt.onclick = () => removePlayer(player.id);
+        menu.appendChild(removeOpt);
+      }
+
+      menuBtn.onclick = (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.options-menu').forEach(m => m.style.display = 'none');
+        menu.style.display = menu.style.display === "none" ? "block" : "none";
+      };
+
+      document.addEventListener("click", () => {
+        menu.style.display = "none";
+      });
+
+      item.appendChild(info);
+      item.appendChild(menuBtn);
+      item.appendChild(menu);
+      playerList.appendChild(item);
+    });
+  }
+
+  // Add player
+  async function addPlayer() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const gradYear = document.getElementById('gradYear').value;
+    const email = document.getElementById('playerEmail').value.trim();
+
+    if (!firstName || !lastName || !gradYear) {
+      showMessage('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    if (!teamId) {
+      showMessage('No team selected. Please log in again.', 'error');
+      return;
+    }
+
     try {
-      const res = await api.delete(`/api/players/${encodeURIComponent(name)}`);
+      const res = await api.post('/api/players', {
+        teamId,
+        firstName,
+        lastName,
+        gradYear,
+        gender: GENDER,
+        email: email || null
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error);
+        showMessage(data.error || "Failed to add player", 'error');
         return;
       }
 
+      // Clear form
+      document.getElementById('firstName').value = '';
+      document.getElementById('lastName').value = '';
+      document.getElementById('gradYear').value = '';
+      document.getElementById('playerEmail').value = '';
+
+      showMessage(`${firstName} ${lastName} added successfully!`, 'success');
       loadPlayers();
     } catch (err) {
-      console.error("Remove player failed:", err);
+      console.error("Add player failed:", err);
+      showMessage('Failed to add player. Please try again.', 'error');
     }
   }
 
-  const container = document.querySelector(".container");
-  const playerInput = document.getElementById("playerInput");
-  const addPlayerBtn = document.getElementById("addPlayerBtn");
+  // Remove player
+  async function removePlayer(playerId) {
+    if (!confirm('Are you sure you want to remove this player?')) return;
 
-  if (!teacherAccess) {
-      // Hide input and button
-      playerInput.remove();
-      addPlayerBtn.remove();
+    try {
+      const res = await api.delete(`/api/players/${playerId}`);
 
-      // Remove instruction paragraph
-      const paragraph = container.querySelector("p");
-      if (paragraph) paragraph.remove();
+      if (!res.ok) {
+        const data = await res.json();
+        showMessage(data.error || 'Failed to remove player', 'error');
+        return;
+      }
+
+      showMessage('Player removed.', 'success');
+      loadPlayers();
+    } catch (err) {
+      console.error("Remove player failed:", err);
+      showMessage('Failed to remove player.', 'error');
+    }
   }
 
-  // -----------------------
-  // Event listener
-  // -----------------------
-  addPlayerBtn.addEventListener("click", addPlayer);
+  // Show message
+  function showMessage(text, type) {
+    const msg = document.getElementById('message');
+    msg.textContent = text;
+    msg.className = `message ${type}`;
+    setTimeout(() => { msg.className = 'message'; }, 4000);
+  }
 
-  // -----------------------
+  // Hide add form if not coach
+  const user = checkAuth();
+  if (!user || !isCoach) {
+    document.getElementById('addPlayerForm').style.display = 'none';
+  }
+
+  // Event listeners
+  document.getElementById('addPlayerBtn').addEventListener('click', addPlayer);
+
   // Load on startup
-  // -----------------------
-  loadPlayers();
+  getTeam();
 </script>
 </body>
 </html>

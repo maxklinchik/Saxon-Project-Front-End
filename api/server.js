@@ -99,7 +99,11 @@ app.post('/api/auth/login', async (req, res) => {
 // Coach/Director Sign Up (generates unique coach code)
 app.post('/api/auth/signup-coach', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, email, password, school } = req.body;
+    
+    if (!firstName || !lastName || !email || !password || !school) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
     
     // Generate unique coach code (6 alphanumeric characters)
     const coachCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -113,21 +117,49 @@ app.post('/api/auth/signup-coach', async (req, res) => {
 
     if (authError) throw authError;
 
+    // Look up school_id (or use default for now)
+    let schoolId = null;
+    const { data: schoolData } = await supabase
+      .from('schools')
+      .select('id')
+      .eq('name', school)
+      .single();
+    
+    if (schoolData) {
+      schoolId = schoolData.id;
+    }
+
     // Create user profile with coach code
     const { data: userData, error: profileError } = await supabase
       .from('users')
       .insert([{
         id: authData.user.id,
         email,
-        first_name: name.split(' ')[0] || name,
-        last_name: name.split(' ').slice(1).join(' ') || '',
+        first_name: firstName,
+        last_name: lastName,
         role: 'coach',
-        coach_code: coachCode
+        coach_code: coachCode,
+        school_id: schoolId
       }])
       .select()
       .single();
 
     if (profileError) throw profileError;
+
+    // Auto-create teams for this coach (boys and girls)
+    const teamInserts = [
+      { name: `${school} Boys Bowling`, gender: 'boys', school_name: school, director_id: authData.user.id },
+      { name: `${school} Girls Bowling`, gender: 'girls', school_name: school, director_id: authData.user.id }
+    ];
+    
+    const { data: teamsData, error: teamsError } = await supabase
+      .from('teams')
+      .insert(teamInserts)
+      .select();
+    
+    if (teamsError) {
+      console.warn('Could not auto-create teams:', teamsError.message);
+    }
 
     // Generate session token
     const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
@@ -141,7 +173,8 @@ app.post('/api/auth/signup-coach', async (req, res) => {
       user: {
         ...userData,
         coach_code: coachCode
-      }
+      },
+      teams: teamsData || []
     });
   } catch (error) {
     console.error('Coach signup error:', error);
@@ -335,7 +368,11 @@ app.get('/api/players/:id', async (req, res) => {
 // Create player
 app.post('/api/players', async (req, res) => {
   try {
-    const { teamId, firstName, lastName, grade, jerseyNumber } = req.body;
+    const { teamId, firstName, lastName, gradYear, gender, email } = req.body;
+    
+    if (!teamId || !firstName || !lastName || !gradYear || !gender) {
+      return res.status(400).json({ error: 'Required fields: teamId, firstName, lastName, gradYear, gender' });
+    }
     
     const { data, error } = await supabase
       .from('players')
@@ -343,8 +380,10 @@ app.post('/api/players', async (req, res) => {
         team_id: teamId,
         first_name: firstName,
         last_name: lastName,
-        grade,
-        jersey_number: jerseyNumber
+        grad_year: parseInt(gradYear),
+        gender: gender,
+        email: email || null,
+        is_active: true
       }])
       .select()
       .single();
@@ -354,6 +393,22 @@ app.post('/api/players', async (req, res) => {
   } catch (error) {
     console.error('Create player error:', error);
     res.status(400).json({ error: error.message });
+  }
+});
+
+// Get coach's teams
+app.get('/api/coach/:coachId/teams', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('teams')
+      .select('*')
+      .eq('director_id', req.params.coachId);
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Get coach teams error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -380,6 +435,24 @@ app.put('/api/players/:id', async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Update player error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Delete player (soft delete - sets is_active to false)
+app.delete('/api/players/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('players')
+      .update({ is_active: false })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ success: true, message: 'Player removed' });
+  } catch (error) {
+    console.error('Delete player error:', error);
     res.status(400).json({ error: error.message });
   }
 });
