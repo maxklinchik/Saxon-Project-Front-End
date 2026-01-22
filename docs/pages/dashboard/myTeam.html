@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Team - Strike Master</title>
-    <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
-    <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
-    <script src="../../assets/js/accent-loader.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
   <style>
     :root {
       --orange: #ff7f11;
@@ -22,10 +23,9 @@
       color: var(--text-color);
     }
 
-    /* Page Header */
     .page-header {
       text-align: center;
-      padding: 60px 10%;
+      padding: 40px 10%;
       background: var(--card-bg);
     }
     .page-header h1 {
@@ -39,71 +39,243 @@
       color: var(--text-color);
     }
 
-    /* Menu Cards */
+    .team-section {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .team-header h2 {
+      color: var(--accent-color);
+      margin: 0;
+    }
+
+    .add-player-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .add-player-btn:hover {
+      opacity: 0.9;
+    }
+
+    .player-form {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .player-form.active {
+      display: block;
+    }
+
+    .player-form h3 {
+      margin-top: 0;
+      color: var(--accent-color);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .form-grid label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .form-grid input, .form-grid select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .form-actions {
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    .form-actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .btn-save {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .btn-cancel {
+      background: #ccc;
+      color: #333;
+    }
+
+    .players-list {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .player-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .player-item:last-child {
+      border-bottom: none;
+    }
+
+    .player-info h4 {
+      margin: 0 0 5px 0;
+      color: var(--text-color);
+    }
+
+    .player-info span {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .player-actions button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 5px 10px;
+    }
+
+    .no-players {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .message {
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+
     .menu-options {
       display: flex;
       justify-content: center;
-      gap: 40px;
+      gap: 30px;
       flex-wrap: wrap;
-      padding: 60px 10%;
+      padding: 40px 10%;
       background: var(--bg-color);
     }
+
     .menu-card {
       background: var(--content-bg);
       border: 2px solid var(--accent-color);
       border-radius: 12px;
-      width: 280px;
+      width: 250px;
       text-align: center;
-      padding: 40px 20px;
+      padding: 30px 20px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease, background-color 0.3s ease;
+      transition: transform 0.3s ease;
     }
+
     .menu-card h2 {
-      font-size: 26px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--accent-color);
+      margin-bottom: 15px;
+    }
+
+    .menu-card p {
+      font-size: 14px;
+      color: var(--text-color);
       margin-bottom: 20px;
     }
-    .menu-card p {
-      font-size: 16px;
-      color: var(--text-color);
-      margin-bottom: 25px;
-    }
+
     .menu-card a {
       display: inline-block;
-      padding: 12px 25px;
+      padding: 10px 20px;
       background: var(--accent-color);
       color: var(--bg-color);
       font-weight: 600;
       border-radius: 8px;
       text-decoration: none;
-      transition: background-color 0.3s ease;
     }
-    .menu-card a:hover {
-      background: var(--acccent-color-hover);
-      color: var(--accent-color);
-    }
+
     .menu-card:hover {
       transform: translateY(-5px);
     }
 
-    /* Footer */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      padding: 10px 25px;
+      border: 2px solid var(--accent-color);
+      background: transparent;
+      color: var(--accent-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-color);
+      color: white;
+    }
+
     .footer {
       text-align: center;
       padding: 20px;
       background: var(--main-color);
       color: var(--text-color);
-      margin-top: 0px;
     }
   </style>
 </head>
 <body>
   <div class="navbar">
-    <!-- Logo image that links to index.html -->
     <a href="../../index.html" class="logo">
       <img src="../../assets/images/images/phLogo.png" alt="Strike Master Logo">
     </a>
-
     <div class="nav-links">
       <a href="teamSelector.html">Team Selector</a>
       <a href="boysRecords.html">Records</a>
@@ -115,32 +287,271 @@
 
   <section class="page-header">
     <h1>My Team</h1>
-    <p>View your team's stats and rankings.</p>
+    <p>Manage your players and view team statistics.</p>
   </section>
 
-<section class="menu-options">
-  <div class="menu-card">
-    <h2>County Rankings</h2>
-    <p>View player and team rankings across the county, split by boys and girls.</p>
-    <a href="../rankings/countyRanking.html">Go to County Rankings</a>
+  <div class="team-section">
+    <div id="message" class="message"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-gender="boys">Boys Team</button>
+      <button class="tab-btn" data-gender="girls">Girls Team</button>
+    </div>
+
+    <div class="team-header">
+      <h2 id="teamTitle">Boys Team</h2>
+      <button class="add-player-btn" id="addPlayerBtn">+ Add Player</button>
+    </div>
+
+    <div class="player-form" id="playerForm">
+      <h3>Add New Player</h3>
+      <div class="form-grid">
+        <div>
+          <label>First Name *</label>
+          <input type="text" id="firstName" required>
+        </div>
+        <div>
+          <label>Last Name *</label>
+          <input type="text" id="lastName" required>
+        </div>
+        <div>
+          <label>Graduation Year *</label>
+          <select id="gradYear" required>
+            <option value="">Select Year</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+          </select>
+        </div>
+        <div>
+          <label>Email (optional)</label>
+          <input type="email" id="playerEmail" placeholder="student@email.com">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn-save" id="savePlayerBtn">Add Player</button>
+      </div>
+    </div>
+
+    <div class="players-list" id="playersList">
+      <div class="no-players">Loading players...</div>
+    </div>
   </div>
 
-  <div class="menu-card">
-    <h2>Division Rankings</h2>
-    <p>View player and team rankings by division, split by boys and girls.</p>
-    <a href="../rankings/divisionRankings.html">Go to Division Rankings</a>
-  </div>
-
-  <div class="menu-card">
-    <h2>Team Season Stats</h2>
-    <p>View complete team statistics for the entire season, including averages and totals.</p>
-    <a href="../rankings/teamSeasonStats.html">Go to Team Stats</a>
-  </div>
-</section>
-
+  <section class="menu-options">
+    <div class="menu-card">
+      <h2>County Rankings</h2>
+      <p>View rankings across the county.</p>
+      <a href="../rankings/countyRanking.html">View Rankings</a>
+    </div>
+    <div class="menu-card">
+      <h2>Division Rankings</h2>
+      <p>View rankings by division.</p>
+      <a href="../rankings/divisionRankings.html">View Rankings</a>
+    </div>
+    <div class="menu-card">
+      <h2>Team Season Stats</h2>
+      <p>Complete team statistics.</p>
+      <a href="../rankings/teamSeasonStats.html">View Stats</a>
+    </div>
+  </section>
 
   <div class="footer">
-    <p>&copy; 2025 Strike Master | Rankings Menu</p>
+    <p>&copy; 2025 Strike Master | My Team</p>
   </div>
+
+  <script>
+    let currentGender = 'boys';
+    let boysTeamId = null;
+    let girlsTeamId = null;
+    let players = [];
+    let isCoach = false;
+
+    // Check auth
+    function checkAuth() {
+      const user = localStorage.getItem('bowling_user');
+      const token = localStorage.getItem('bowling_token');
+      if (user && token) {
+        const userData = JSON.parse(user);
+        isCoach = userData.role === 'coach';
+        return userData;
+      }
+      return null;
+    }
+
+    // Get coach's teams
+    async function getTeams() {
+      const user = checkAuth();
+      if (!user) {
+        document.getElementById('addPlayerBtn').style.display = 'none';
+        showMessage('Please log in as a coach to manage players.', 'error');
+        return;
+      }
+
+      try {
+        const res = await api.get(`/api/coach/${user.id}/teams`);
+        const teams = await res.json();
+        
+        teams.forEach(team => {
+          if (team.gender === 'boys') boysTeamId = team.id;
+          if (team.gender === 'girls') girlsTeamId = team.id;
+        });
+
+        loadPlayers();
+      } catch (err) {
+        console.error('Failed to get teams:', err);
+        showMessage('Failed to load teams.', 'error');
+      }
+    }
+
+    // Load players
+    async function loadPlayers() {
+      const teamId = currentGender === 'boys' ? boysTeamId : girlsTeamId;
+      
+      if (!teamId) {
+        document.getElementById('playersList').innerHTML = '<div class="no-players">No team found. Please create an account first.</div>';
+        return;
+      }
+
+      try {
+        const res = await api.get(`/api/teams/${teamId}/players`);
+        players = await res.json();
+        renderPlayers();
+      } catch (err) {
+        console.error('Failed to load players:', err);
+        document.getElementById('playersList').innerHTML = '<div class="no-players">Failed to load players.</div>';
+      }
+    }
+
+    // Render players
+    function renderPlayers() {
+      const list = document.getElementById('playersList');
+      
+      if (players.length === 0) {
+        list.innerHTML = '<div class="no-players">No players yet. Click "Add Player" to get started!</div>';
+        return;
+      }
+
+      list.innerHTML = players.map(player => `
+        <div class="player-item">
+          <div class="player-info">
+            <h4>${player.first_name} ${player.last_name}</h4>
+            <span>Class of ${player.grad_year || 'N/A'}${player.email ? ' • ' + player.email : ''}</span>
+          </div>
+          <div class="player-actions">
+            ${isCoach ? `<button onclick="removePlayer('${player.id}')" title="Remove">🗑️</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Add player
+    async function addPlayer() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const gradYear = document.getElementById('gradYear').value;
+      const email = document.getElementById('playerEmail').value.trim();
+
+      if (!firstName || !lastName || !gradYear) {
+        showMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      const teamId = currentGender === 'boys' ? boysTeamId : girlsTeamId;
+      if (!teamId) {
+        showMessage('No team found.', 'error');
+        return;
+      }
+
+      try {
+        const res = await api.post('/api/players', {
+          teamId,
+          firstName,
+          lastName,
+          gradYear,
+          gender: currentGender,
+          email: email || null
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          showMessage(data.error || 'Failed to add player', 'error');
+          return;
+        }
+
+        // Clear form and hide
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('gradYear').value = '';
+        document.getElementById('playerEmail').value = '';
+        document.getElementById('playerForm').classList.remove('active');
+
+        showMessage(`${firstName} ${lastName} added successfully!`, 'success');
+        loadPlayers();
+      } catch (err) {
+        console.error('Add player failed:', err);
+        showMessage('Failed to add player.', 'error');
+      }
+    }
+
+    // Remove player
+    async function removePlayer(playerId) {
+      if (!confirm('Are you sure you want to remove this player?')) return;
+
+      try {
+        const res = await api.delete(`/api/players/${playerId}`);
+        if (res.ok) {
+          showMessage('Player removed.', 'success');
+          loadPlayers();
+        } else {
+          showMessage('Failed to remove player.', 'error');
+        }
+      } catch (err) {
+        console.error('Remove player failed:', err);
+        showMessage('Failed to remove player.', 'error');
+      }
+    }
+
+    // Show message
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+      setTimeout(() => { msg.className = 'message'; }, 4000);
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGender = btn.dataset.gender;
+        document.getElementById('teamTitle').textContent = currentGender === 'boys' ? 'Boys Team' : 'Girls Team';
+        loadPlayers();
+      });
+    });
+
+    // Toggle form
+    document.getElementById('addPlayerBtn').addEventListener('click', () => {
+      document.getElementById('playerForm').classList.toggle('active');
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      document.getElementById('playerForm').classList.remove('active');
+    });
+
+    document.getElementById('savePlayerBtn').addEventListener('click', addPlayer);
+
+    // Hide add button if not coach
+    if (!checkAuth() || !isCoach) {
+      document.getElementById('addPlayerBtn').style.display = 'none';
+    }
+
+    // Load on startup
+    getTeams();
+  </script>
 </body>
 </html>

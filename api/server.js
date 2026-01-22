@@ -412,6 +412,23 @@ app.get('/api/coach/:coachId/teams', async (req, res) => {
   }
 });
 
+// Get player scores
+app.get('/api/players/:playerId/scores', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('player_scores')
+      .select('*')
+      .eq('player_id', req.params.playerId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data || []);
+  } catch (error) {
+    console.error('Get player scores error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update player
 app.put('/api/players/:id', async (req, res) => {
   try {
