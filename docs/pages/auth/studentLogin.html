@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Student Log In</title>
-  <link rel="stylesheet" type="text/css" href="/docs/assets/css/style.css">
-  <link rel="stylesheet" type="text/css" href="/docs/assets/css/stored-colors.css">
-  <script src="/docs/assets/js/accent-loader.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <script src="../../assets/js/accent-loader.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -61,7 +61,7 @@
     </form>
     <div class="message" id="message"></div>
     <div class="note">Use the code generated for your teacher during sign up.</div>
-    <a class="back" href="/docs/index.html">Go back</a>
+    <a class="back" href="../../index.html">Go back</a>
   </div>
 
   <script>
@@ -76,7 +76,7 @@
         if (!res.ok) { msgEl.textContent = data.message || 'Sign-in failed'; msgEl.style.color = 'red'; return; }
         if (data.token) localStorage.setItem('bowling_token', data.token);
         msgEl.textContent = 'Signed in — redirecting...'; msgEl.style.color = 'green';
-        setTimeout(() => window.location.href = '/main-pages/index.html', 700);
+        setTimeout(() => window.location.href = '../dashboard/teamSelector.html', 700);
       } catch (err) { console.error(err); msgEl.textContent = 'Network error'; msgEl.style.color = 'red'; }
     });
   </script>
