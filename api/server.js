@@ -5,18 +5,18 @@ import { createClient } from '@supabase/supabase-js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Check required environment variables
+// Check required environment variables (warn but don't crash)
+let supabase = null;
 if (!process.env.SUPABASE_SERVICE_KEY) {
-  console.error('ERROR: SUPABASE_SERVICE_KEY environment variable is not set!');
-  console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('SUPABASE')));
-  process.exit(1);
+  console.warn('WARNING: SUPABASE_SERVICE_KEY environment variable is not set!');
+  console.warn('API endpoints requiring database will not work.');
+} else {
+  // Supabase client (server-side with service key)
+  supabase = createClient(
+    process.env.SUPABASE_URL || 'https://fxqddamrgadttkfxvjth.supabase.co',
+    process.env.SUPABASE_SERVICE_KEY
+  );
 }
-
-// Supabase client (server-side with service key)
-const supabase = createClient(
-  process.env.SUPABASE_URL || 'https://fxqddamrgadttkfxvjth.supabase.co',
-  process.env.SUPABASE_SERVICE_KEY
-);
 
 // CORS - allow GitHub Pages to call this API
 app.use(cors({
