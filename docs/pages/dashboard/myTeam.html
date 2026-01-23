@@ -394,42 +394,63 @@
     async function getTeams() {
       if (!currentUser || !currentUser.id) {
         showMessage('User session invalid. Please log in again.', 'error');
+        document.getElementById('playersList').innerHTML = '<div class="no-players">Please log in to manage your team.</div>';
         return;
       }
 
+      console.log('Current user:', currentUser);
+      console.log('Fetching teams for user ID:', currentUser.id);
+
       try {
         const res = await api.get('/api/coach/' + currentUser.id + '/teams');
+        
+        if (!res.ok) {
+          console.error('API error:', res.status, res.statusText);
+          showMessage('Failed to load teams from server. Status: ' + res.status, 'error');
+          document.getElementById('playersList').innerHTML = '<div class="no-players">Failed to connect to server.</div>';
+          return;
+        }
+        
         const teams = await res.json();
+        console.log('Teams response:', teams);
         
         if (!teams || teams.length === 0) {
-          showMessage('No teams found. Contact support if this is an error.', 'error');
+          showMessage('No teams found. Teams will be created automatically...', 'error');
+          document.getElementById('playersList').innerHTML = '<div class="no-players">No teams found. Try refreshing the page.</div>';
           return;
         }
 
         teams.forEach(team => {
+          console.log('Found team:', team.name, team.gender, team.id);
           if (team.gender === 'boys') boysTeamId = team.id;
           if (team.gender === 'girls') girlsTeamId = team.id;
         });
 
+        console.log('Boys team ID:', boysTeamId);
+        console.log('Girls team ID:', girlsTeamId);
+        
         loadPlayers();
       } catch (err) {
         console.error('Failed to get teams:', err);
-        showMessage('Failed to load teams. Please check your connection.', 'error');
+        showMessage('Failed to load teams: ' + err.message, 'error');
+        document.getElementById('playersList').innerHTML = '<div class="no-players">Error loading teams. Check console.</div>';
       }
     }
 
     // Load players
     async function loadPlayers() {
       const teamId = currentGender === 'boys' ? boysTeamId : girlsTeamId;
+      console.log('Loading players for team:', teamId, 'gender:', currentGender);
       
       if (!teamId) {
-        document.getElementById('playersList').innerHTML = '<div class="no-players">No team found. Please create an account first.</div>';
+        document.getElementById('playersList').innerHTML = '<div class="no-players">No ' + currentGender + ' team found. Try switching tabs or refreshing.</div>';
         return;
       }
 
       try {
-        const res = await api.get(`/api/teams/${teamId}/players`);
+        const res = await api.get('/api/teams/' + teamId + '/players');
         players = await res.json();
+        console.log('Players loaded:', players);
         renderPlayers();
       } catch (err) {
         console.error('Failed to load players:', err);

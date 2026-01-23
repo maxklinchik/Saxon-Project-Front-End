@@ -46,6 +46,8 @@
         const res = await api.post('/api/auth/login', { email, password });
         const data = await res.json();
         
+        console.log('Login response:', data);
+        
         if (!res.ok) {
           message.textContent = data.error || 'Invalid credentials';
           message.style.color = 'red';
@@ -55,10 +57,16 @@
         // Store session info
         if (data.session?.access_token) {
           localStorage.setItem('bowling_token', data.session.access_token);
+          console.log('Token stored');
         }
         if (data.user) {
+          console.log('Storing user data:', data.user);
+          console.log('User ID:', data.user.id);
           localStorage.setItem('bowling_user', JSON.stringify(data.user));
         }
+        
+        // Verify storage
+        console.log('Stored user:', localStorage.getItem('bowling_user'));
         
         message.textContent = 'Login successful! Redirecting...';
         message.style.color = 'green';
@@ -69,7 +77,7 @@
       } catch (err) {
         message.textContent = 'Login failed. Please try again.';
         message.style.color = 'red';
-        console.error(err);
+        console.error('Login error:', err);
       }
     });
   </script>
