@@ -268,24 +268,40 @@
   async function getTeam() {
     if (!currentUser || !currentUser.id) {
       document.getElementById('addPlayerForm').style.display = 'none';
+      showMessage('No user data found. Please log out and log in again.', 'error');
       return;
     }
 
     try {
+      console.log('Fetching teams for coach:', currentUser.id);
       const res = await api.get('/api/coach/' + currentUser.id + '/teams');
+      
+      if (!res.ok) {
+        console.error('API error:', res.status);
+        showMessage('Failed to load teams from server.', 'error');
+        return;
+      }
+      
       const teams = await res.json();
+      console.log('Teams found:', teams);
+      
+      if (!teams || teams.length === 0) {
+        showMessage('No teams found for your account. Please sign up again or contact support.', 'error');
+        return;
+      }
       
       // Find the girls team
       const girlsTeam = teams.find(t => t.gender === GENDER);
       if (girlsTeam) {
         teamId = girlsTeam.id;
+        console.log('Girls team ID:', teamId);
         loadPlayers();
       } else {
         showMessage('No girls team found. Please contact support.', 'error');
       }
     } catch (err) {
       console.error('Failed to get teams:', err);
-      showMessage('Failed to load team data.', 'error');
+      showMessage('Failed to load team data. Check console for details.', 'error');
     }
   }
 

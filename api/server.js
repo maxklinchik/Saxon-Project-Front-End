@@ -414,16 +414,53 @@ app.post('/api/players', async (req, res) => {
   }
 });
 
-// Get coach's teams
+// Get coach's teams (auto-creates teams if none exist)
 app.get('/api/coach/:coachId/teams', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const coachId = req.params.coachId;
+    
+    // First try to get existing teams
+    let { data: teams, error } = await supabase
       .from('teams')
       .select('*')
-      .eq('director_id', req.params.coachId);
+      .eq('director_id', coachId);
 
     if (error) throw error;
-    res.json(data);
+    
+    // If no teams exist, create them automatically
+    if (!teams || teams.length === 0) {
+      console.log('No teams found for coach, creating default teams...');
+      
+      // Get the coach's info to determine school
+      const { data: coach, error: coachError } = await supabase
+        .from('users')
+        .select('*, schools(name)')
+        .eq('id', coachId)
+        .single();
+      
+      const schoolName = coach?.schools?.name || 'Pascack Hills';
+      
+      // Create boys and girls teams
+      const teamInserts = [
+        { name: schoolName + ' Boys Bowling', gender: 'boys', school_name: schoolName, director_id: coachId },
+        { name: schoolName + ' Girls Bowling', gender: 'girls', school_name: schoolName, director_id: coachId }
+      ];
+      
+      const { data: newTeams, error: insertError } = await supabase
+        .from('teams')
+        .insert(teamInserts)
+        .select();
+      
+      if (insertError) {
+        console.error('Failed to create teams:', insertError);
+        throw insertError;
+      }
+      
+      console.log('Created teams:', newTeams);
+      teams = newTeams;
+    }
+
+    res.json(teams || []);
   } catch (error) {
     console.error('Get coach teams error:', error);
     res.status(500).json({ error: error.message });
