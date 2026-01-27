@@ -1977,14 +1977,17 @@
         return `
           <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-record-id="${record ? record.id : ''}">
             <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
-            <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''}></td>
-            <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''}></td>
-            <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''}></td>
-            <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''}></td>
+            <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
           </tr>
         `;
       }).join('');
+      
+      // Recalculate team totals after loading existing scores
+      setTimeout(() => calculateTeamTotals(), 100);
     }
 
     // Delete match
