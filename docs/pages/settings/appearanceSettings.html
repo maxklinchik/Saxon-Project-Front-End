@@ -40,7 +40,7 @@
     .sidebar {
       width: 200px;
       background: var(--main-color);
-      color: white;
+      color: var(--sidebar-text-color, white);
       display: flex;
       flex-direction: column;
       padding: 20px 0;
@@ -49,7 +49,7 @@
     .sidebar a {
       background: none;
       border: none;
-      color: white;
+      color: var(--sidebar-text-color, white);
       padding: 15px 20px;
       text-align: left;
       font-size: 16px;
@@ -420,6 +420,7 @@
         localStorage.setItem("mainColor", mainColor);
         document.documentElement.style.setProperty("--main-color", mainColor);
         updatePresetSelection('mainPresets', mainColor);
+        updateSidebarTextColor(mainColor);
       }
 
       updateCurrentLogoPreview();
@@ -473,8 +474,26 @@
       const saved = localStorage.getItem("mainColor");
       if (saved) {
         document.documentElement.style.setProperty("--main-color", saved);
+        updateSidebarTextColor(saved);
       }
     })();
+
+    // Function to check if color is light and update sidebar text color
+    function updateSidebarTextColor(hex) {
+      const c = hex.replace('#', '');
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      
+      if (luminance > 0.5) {
+        document.documentElement.style.setProperty("--sidebar-text-color", "#000000");
+        document.documentElement.classList.add('light-sidebar');
+      } else {
+        document.documentElement.style.setProperty("--sidebar-text-color", "#ffffff");
+        document.documentElement.classList.remove('light-sidebar');
+      }
+    }
 
     const mainPicker = document.getElementById("mainColorPicker");
     if (mainPicker) {
@@ -485,6 +504,7 @@
         const color = e.target.value;
         localStorage.setItem("mainColor", color);
         document.documentElement.style.setProperty("--main-color", color);
+        updateSidebarTextColor(color);
         updatePresetSelection('mainPresets', color);
       });
     }
@@ -496,6 +516,7 @@
         mainPicker.value = color;
         localStorage.setItem("mainColor", color);
         document.documentElement.style.setProperty("--main-color", color);
+        updateSidebarTextColor(color);
         updatePresetSelection('mainPresets', color);
       });
     });

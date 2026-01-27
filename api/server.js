@@ -174,7 +174,7 @@ app.post('/api/auth/student-signup', async (req, res) => {
     // First, find coach by team code to get coach_id
     const { data: coach, error: coachError } = await supabase
       .from('users')
-      .select('id, team_name, first_name, last_name')
+      .select('id, team_name, first_name, last_name, team_code')
       .eq('team_code', teamCode.toUpperCase())
       .single();
 
@@ -213,10 +213,11 @@ app.post('/api/auth/student-signup', async (req, res) => {
     res.json({
       success: true,
       user: {
-        id: student.id,
+        id: coach.id,
         email: student.email,
         coach_id: coach.id,
         team_name: coach.team_name,
+        team_code: coach.team_code,
         role: 'student'
       }
     });
