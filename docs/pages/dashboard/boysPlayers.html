@@ -3,434 +3,371 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Boys Players - Strike Master</title>
+  <title>Players - Strike Master</title>
   <link rel="icon" type="image/png" href="../../assets/images/StrikeMasterLogo2.png">
-  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
   <style>
+    :root {
+      --accent-color: #ffa500;
+      --main-color: #5f371c;
+      --bg-color: #f8fafc;
+      --content-bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --content-bg: #1e293b;
+      --card-bg: #1e293b;
+      --text-color: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-color);
       color: var(--text-color);
+      min-height: 100vh;
     }
 
-    .container {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-
-    .page-header {
-      text-align: center;
-      padding: 30px 0;
-    }
-
-    .page-header h1 {
-      color: var(--accent-color);
-      font-size: 36px;
-      margin-bottom: 10px;
-    }
-
-    /* Gender Toggle */
-    .gender-toggle {
+    /* Navbar */
+    .navbar {
+      background: var(--main-color);
+      padding: 12px 24px;
       display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 25px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .gender-btn {
-      padding: 12px 36px;
-      border: none;
+    .navbar .logo img { height: 40px; object-fit: contain; }
+
+    .nav-links { display: flex; gap: 8px; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links a.active { background: var(--accent-color); color: white; }
+
+    /* Container */
+    .container { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+
+    /* Page Header */
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: 32px; font-weight: 700; margin: 0 0 8px; }
+    .page-header p { margin: 0; color: var(--text-muted); font-size: 15px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: 1px solid var(--border-color);
       background: var(--card-bg);
       color: var(--text-color);
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 15px;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .gender-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-
-    .gender-btn.active {
-      background: var(--accent-color);
-      color: white;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    }
-
-    /* Add Player Section */
-    .add-player-section {
-      background: var(--card-bg);
-      border: 2px solid var(--accent-color);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 25px;
-    }
-
-    .add-player-section h3 {
-      color: var(--accent-color);
-      margin-top: 0;
-      margin-bottom: 15px;
-    }
-
-    .add-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto;
-      gap: 15px;
-      align-items: end;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group label {
-      font-weight: 600;
-      margin-bottom: 5px;
+      font-weight: 500;
       font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
     }
+
+    .tab-btn:hover { border-color: var(--accent-color); }
+    .tab-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header .icon {
+      width: 40px;
+      height: 40px;
+      background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-header .icon svg { width: 22px; height: 22px; stroke: var(--accent-color); }
+    .card-header h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .card-header p { margin: 2px 0 0; font-size: 13px; color: var(--text-muted); }
+
+    .card-body { padding: 20px; }
+
+    /* Add Player Form */
+    .add-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: end; }
+
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
 
     .form-group input, .form-group select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       font-size: 14px;
+      font-family: inherit;
       background: var(--content-bg);
       color: var(--text-color);
     }
 
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
     .add-btn {
+      padding: 12px 24px;
       background: var(--accent-color);
       color: white;
       border: none;
-      padding: 10px 25px;
-      border-radius: 5px;
-      cursor: pointer;
+      border-radius: 8px;
       font-weight: 600;
-      height: 42px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      height: fit-content;
+      transition: all 0.2s;
     }
 
-    .add-btn:hover {
-      opacity: 0.9;
-    }
+    .add-btn:hover { filter: brightness(0.95); }
 
     /* Players List */
-    .players-section {
-      background: var(--card-bg);
-      border: 2px solid var(--accent-color);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .players-section h3 {
-      color: var(--accent-color);
-      padding: 15px 20px;
-      margin: 0;
-      border-bottom: 1px solid #eee;
-    }
-
     .player-card {
-      padding: 15px 20px;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-      transition: background 0.2s;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .player-card:last-child {
-      border-bottom: none;
-    }
-
-    .player-card:hover {
-      background: rgba(0,0,0,0.03);
-    }
+    .player-card:last-child { border-bottom: none; }
+    .player-card:hover { background: var(--content-bg); }
 
     .player-card.selected {
-      background: rgba(var(--accent-color-rgb, 255, 165, 0), 0.1);
-      border-left: 4px solid var(--accent-color);
+      background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+      border-left: 3px solid var(--accent-color);
     }
 
-    .player-info h4 {
-      margin: 0 0 5px 0;
-      font-size: 18px;
-      color: var(--text-color);
-    }
+    .player-info h4 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+    .player-info span { font-size: 13px; color: var(--text-muted); }
 
-    .player-info span {
+    .player-actions { display: flex; gap: 8px; }
+
+    .remove-btn {
+      padding: 8px 16px;
+      background: transparent;
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      border-radius: 6px;
       font-size: 13px;
-      color: #888;
-    }
-
-    .player-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .delete-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 12px;
+      transition: all 0.2s;
     }
 
-    .delete-btn:hover {
-      background: #c82333;
-    }
+    .remove-btn:hover { background: #fef2f2; }
 
-    .no-players {
-      text-align: center;
-      padding: 40px;
-      color: #888;
-    }
+    .no-players { text-align: center; padding: 48px 24px; color: var(--text-muted); }
 
-    /* Player Stats Modal */
+    /* Stats Panel */
     .stats-panel {
       display: none;
       background: var(--card-bg);
-      border: 2px solid var(--accent-color);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
-      margin-top: 25px;
+      margin-top: 24px;
       overflow: hidden;
     }
 
-    .stats-panel.active {
-      display: block;
-    }
+    .stats-panel.active { display: block; }
 
     .stats-header {
       padding: 20px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .stats-header h2 {
-      margin: 0;
-      color: var(--accent-color);
-    }
+    .stats-header h2 { margin: 0; font-size: 18px; font-weight: 600; }
 
     .close-stats {
       background: none;
       border: none;
-      font-size: 28px;
+      font-size: 24px;
       cursor: pointer;
-      color: #888;
-      padding: 0 10px;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 6px;
     }
 
-    /* Filter Section */
-    .stats-filter {
-      padding: 15px 20px;
+    .close-stats:hover { background: var(--content-bg); }
+
+    /* Filters */
+    .filter-section {
+      padding: 16px 20px;
       background: var(--content-bg);
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
-      gap: 15px;
+      gap: 12px;
+      flex-wrap: wrap;
       align-items: center;
     }
 
-    .filter-label {
-      font-weight: 600;
-      color: var(--text-color);
-    }
+    .filter-label { font-weight: 600; font-size: 13px; color: var(--text-muted); }
 
     .filter-btn {
       padding: 8px 16px;
-      border: 1px solid var(--accent-color);
-      background: transparent;
-      color: var(--accent-color);
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
       border-radius: 20px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
+      font-family: inherit;
+      transition: all 0.2s;
     }
 
-    .filter-btn.active {
-      background: var(--accent-color);
-      color: white;
-    }
+    .filter-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
-    .filter-row {
-      padding: 10px 20px;
-      background: var(--content-bg);
-      border-bottom: 1px solid #eee;
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .filter-row select {
+    .filter-select {
       padding: 8px 12px;
-      border: 1px solid var(--accent-color);
-      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       background: var(--card-bg);
       color: var(--text-color);
       font-size: 13px;
+      font-family: inherit;
       cursor: pointer;
     }
 
     /* Stats Summary */
     .stats-summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 16px;
       padding: 20px;
       background: var(--content-bg);
     }
 
-    .summary-box {
-      text-align: center;
-      padding: 15px;
-      background: var(--card-bg);
-      border-radius: 8px;
-    }
-
-    .summary-label {
-      font-size: 12px;
-      color: #888;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
-
-    .summary-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--accent-color);
-    }
+    .summary-box { text-align: center; padding: 16px; background: var(--card-bg); border-radius: 10px; }
+    .summary-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .summary-value { font-size: 24px; font-weight: 700; color: var(--accent-color); }
 
     /* Match History Table */
-    .match-history {
-      padding: 20px;
-    }
+    .match-history { padding: 20px; }
+    .match-history h3 { margin: 0 0 16px; font-size: 16px; font-weight: 600; }
 
-    .match-history h3 {
-      color: var(--text-color);
-      margin-top: 0;
-      margin-bottom: 15px;
-    }
-
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .history-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
     .history-table th {
-      background: var(--accent-color);
-      color: white;
+      background: var(--content-bg);
       padding: 12px;
       text-align: center;
       font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
     }
 
-    .history-table td {
-      padding: 12px;
-      text-align: center;
-      border-bottom: 1px solid #eee;
-    }
+    .history-table td { padding: 12px; text-align: center; border-bottom: 1px solid var(--border-color); }
+    .history-table tbody tr:hover { background: var(--content-bg); }
 
-    .opponent-cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .opponent-logo-small {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
-      border-radius: 4px;
-    }
-
-    .history-table tr:hover {
-      background: rgba(0,0,0,0.02);
-    }
+    .opponent-cell { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .opponent-logo-small { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; }
 
     .varsity-badge {
       display: inline-block;
-      padding: 2px 8px;
-      background: #ffc107;
-      color: #000;
+      padding: 4px 10px;
+      background: var(--accent-color);
+      color: white;
       border-radius: 12px;
       font-size: 11px;
       font-weight: 600;
     }
 
-    .no-stats {
-      text-align: center;
-      padding: 40px;
-      color: #888;
-    }
-
-    .message {
-      padding: 12px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      text-align: center;
+    .jv-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: var(--content-bg);
+      color: var(--text-muted);
+      border-radius: 12px;
+      font-size: 11px;
       font-weight: 600;
-      display: none;
     }
 
-    .message.success {
-      background: #d4edda;
-      color: #155724;
-      display: block;
-    }
+    .no-stats { text-align: center; padding: 32px; color: var(--text-muted); }
 
-    .message.error {
-      background: #f8d7da;
-      color: #721c24;
-      display: block;
-    }
+    /* Message */
+    .message { padding: 14px 18px; margin-bottom: 24px; border-radius: 10px; font-weight: 500; font-size: 14px; display: none; }
+    .message.success { display: block; background: #dcfce7; color: #166534; }
+    .message.error { display: block; background: #fef2f2; color: #991b1b; }
 
+    /* Mobile */
     @media (max-width: 768px) {
-      .add-form {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-summary {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .history-table {
-        font-size: 13px;
-      }
-
-      .history-table th,
-      .history-table td {
-        padding: 8px 4px;
-      }
+      .navbar { padding: 12px 16px; }
+      .nav-links { gap: 4px; }
+      .nav-links a { padding: 8px 12px; font-size: 13px; }
+      .container { padding: 20px 16px; }
+      .add-form { grid-template-columns: 1fr; }
+      .stats-summary { grid-template-columns: repeat(2, 1fr); }
+      .history-table { font-size: 12px; }
+      .history-table th, .history-table td { padding: 8px 4px; }
     }
   </style>
 </head>
 <body>
   <div class="navbar">
     <a href="../../index.html" class="logo">
-      <img src="../../assets/images/Team Logos/phLogo.png" alt="Strike Master Logo">
+      <img id="navLogo" src="../../assets/images/Team Logos/phLogo.png" alt="Strike Master Logo">
     </a>
     <div class="nav-links">
       <a href="teamSelector.html">Home</a>
-      <a href="boysPlayers.html">Players</a>
+      <a href="boysPlayers.html" class="active">Players</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
-      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
+      <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
     </div>
   </div>
 
@@ -440,42 +377,66 @@
       <p>Manage players and view individual statistics</p>
     </div>
 
-    <div class="gender-toggle">
-      <button class="gender-btn active" data-gender="all">All</button>
-      <button class="gender-btn" data-gender="boys">Boys</button>
-      <button class="gender-btn" data-gender="girls">Girls</button>
+    <div class="tabs">
+      <button class="tab-btn active" data-gender="all">All</button>
+      <button class="tab-btn" data-gender="boys">Boys</button>
+      <button class="tab-btn" data-gender="girls">Girls</button>
     </div>
 
     <div id="message" class="message"></div>
 
-    <div class="add-player-section">
-      <h3>Add New Player</h3>
-      <div class="add-form">
-        <div class="form-group">
-          <label>First Name *</label>
-          <input type="text" id="firstName" placeholder="First name">
+    <!-- Add Player Card -->
+    <div class="card" id="addPlayerCard">
+      <div class="card-header">
+        <div class="icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+          </svg>
         </div>
-        <div class="form-group">
-          <label>Last Name *</label>
-          <input type="text" id="lastName" placeholder="Last name">
+        <div>
+          <h3>Add New Player</h3>
+          <p>Add a player to your roster</p>
         </div>
-        <div class="form-group">
-          <label>Grad Year *</label>
-          <select id="gradYear">
-            <option value="">Select</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
-            <option value="2028">2028</option>
-            <option value="2029">2029</option>
-          </select>
+      </div>
+      <div class="card-body">
+        <div class="add-form">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" id="firstName" placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" id="lastName" placeholder="Last name">
+          </div>
+          <div class="form-group">
+            <label>Grad Year *</label>
+            <select id="gradYear">
+              <option value="">Select</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+          </div>
+          <button class="add-btn" id="addPlayerBtn">Add Player</button>
         </div>
-        <button class="add-btn" id="addPlayerBtn">Add Player</button>
       </div>
     </div>
 
-    <div class="players-section">
-      <h3 id="playersTitle">All Players</h3>
+    <!-- Players List -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+          </svg>
+        </div>
+        <div>
+          <h3 id="playersTitle">All Players</h3>
+          <p>Click on a player to view their statistics</p>
+        </div>
+      </div>
       <div id="playersList">
         <div class="no-players">Loading players...</div>
       </div>
@@ -488,20 +449,17 @@
         <button class="close-stats" id="closeStats">&times;</button>
       </div>
 
-      <div class="stats-filter">
+      <div class="filter-section">
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" data-filter="all">All Matches</button>
         <button class="filter-btn" data-filter="varsity">Varsity Only</button>
         <button class="filter-btn" data-filter="jv">JV Only</button>
-      </div>
-
-      <div class="filter-row">
-        <span class="filter-label">Location:</span>
-        <select id="locationFilter">
+        <span class="filter-label" style="margin-left: 16px;">Location:</span>
+        <select class="filter-select" id="locationFilter">
           <option value="all">All Locations</option>
         </select>
         <span class="filter-label">Game:</span>
-        <select id="gameFilter">
+        <select class="filter-select" id="gameFilter">
           <option value="all">All Games</option>
           <option value="game1">Game 1 Only</option>
           <option value="game2">Game 2 Only</option>
@@ -515,15 +473,15 @@
           <div class="summary-value" id="totalMatches">0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg Game 1</div>
+          <div class="summary-label">Avg G1</div>
           <div class="summary-value" id="avgGame1">0.0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg Game 2</div>
+          <div class="summary-label">Avg G2</div>
           <div class="summary-value" id="avgGame2">0.0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg Game 3</div>
+          <div class="summary-label">Avg G3</div>
           <div class="summary-value" id="avgGame3">0.0</div>
         </div>
         <div class="summary-box">
@@ -539,9 +497,9 @@
             <tr>
               <th>Date</th>
               <th>Opponent</th>
-              <th>Game 1</th>
-              <th>Game 2</th>
-              <th>Game 3</th>
+              <th>G1</th>
+              <th>G2</th>
+              <th>G3</th>
               <th>Total</th>
               <th>Avg</th>
               <th>Status</th>
@@ -556,6 +514,10 @@
   </div>
 
   <script>
+    // Load saved logo
+    const savedLogo = localStorage.getItem('selectedLogo');
+    if (savedLogo) document.getElementById('navLogo').src = '../../assets/images/Team Logos/' + savedLogo;
+
     let currentGender = 'all';
     let coachId = null;
     let players = [];
@@ -565,47 +527,27 @@
     let currentLocationFilter = 'all';
     let currentGameFilter = 'all';
 
-    // Team logo mapping for opponents - uses centralized teams.js config
-    // getTeamLogo function is provided by teams.js
+    function getOpponentLogo(opponentName) { return getTeamLogo(opponentName, '../../assets/images/Team Logos/'); }
 
-    // Get opponent logo (wrapper for backward compatibility)
-    function getOpponentLogo(opponentName) {
-      return getTeamLogo(opponentName, '../../assets/images/Team Logos/');
-    }
-
-    // Check authentication
     async function checkAuth() {
       const userData = localStorage.getItem('bowling_user');
-      if (!userData) {
-        window.location.href = '../auth/login.html';
-        return null;
-      }
-      try {
-        const user = JSON.parse(userData);
-        coachId = user.id;
-        return user;
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        window.location.href = '../auth/login.html';
-        return null;
-      }
+      if (!userData) { window.location.href = '../auth/studentLogin.html'; return null; }
+      try { const user = JSON.parse(userData); coachId = user.id; return user; }
+      catch (error) { window.location.href = '../auth/studentLogin.html'; return null; }
     }
 
-    // Gender toggle
-    document.querySelectorAll('.gender-btn').forEach(btn => {
+    document.querySelectorAll('.tabs .tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentGender = btn.dataset.gender;
         document.getElementById('playersTitle').textContent = 
-          currentGender === 'all' ? 'All Players' : 
-          currentGender === 'boys' ? 'Boys Players' : 'Girls Players';
+          currentGender === 'all' ? 'All Players' : currentGender === 'boys' ? 'Boys Players' : 'Girls Players';
         closeStatsPanel();
         loadPlayers();
       });
     });
 
-    // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -615,19 +557,8 @@
       });
     });
 
-    // Location filter
-    document.getElementById('locationFilter').addEventListener('change', (e) => {
-      currentLocationFilter = e.target.value;
-      displayPlayerStats();
-    });
-
-    // Game filter
-    document.getElementById('gameFilter').addEventListener('change', (e) => {
-      currentGameFilter = e.target.value;
-      displayPlayerStats();
-    });
-
-    // Close stats panel
+    document.getElementById('locationFilter').addEventListener('change', (e) => { currentLocationFilter = e.target.value; displayPlayerStats(); });
+    document.getElementById('gameFilter').addEventListener('change', (e) => { currentGameFilter = e.target.value; displayPlayerStats(); });
     document.getElementById('closeStats').addEventListener('click', closeStatsPanel);
 
     function closeStatsPanel() {
@@ -636,69 +567,45 @@
       selectedPlayerId = null;
     }
 
-    // Populate location filter dropdown
     function populateLocationFilter() {
       const locationSelect = document.getElementById('locationFilter');
       const locations = new Set();
-      
-      playerRecords.forEach(r => {
-        if (r.match && r.match.location) {
-          locations.add(r.match.location);
-        }
-      });
-      
+      playerRecords.forEach(r => { if (r.match && r.match.location) locations.add(r.match.location); });
       locationSelect.innerHTML = '<option value="all">All Locations</option>';
       Array.from(locations).sort().forEach(loc => {
         const option = document.createElement('option');
-        option.value = loc;
-        option.textContent = loc;
-        locationSelect.appendChild(option);
+        option.value = loc; option.textContent = loc; locationSelect.appendChild(option);
       });
     }
 
-    // Logout
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('bowling_user');
-      window.location.href = '../auth/login.html';
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('bowling_user');
+        window.location.href = '../../index.html';
+      }
     });
 
-    // Load players
     async function loadPlayers() {
       const container = document.getElementById('playersList');
-      
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
-        
-        // If "all" is selected, load both boys and girls
         let allPlayers = [];
         if (currentGender === 'all') {
           const [boysRes, girlsRes] = await Promise.all([
             fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
             fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
           ]);
-          
-          if (boysRes.ok) {
-            const boysPlayers = await boysRes.json();
-            allPlayers = [...allPlayers, ...boysPlayers.map(p => ({...p, _gender: 'boys'}))];
-          }
-          if (girlsRes.ok) {
-            const girlsPlayers = await girlsRes.json();
-            allPlayers = [...allPlayers, ...girlsPlayers.map(p => ({...p, _gender: 'girls'}))];
-          }
+          if (boysRes.ok) { const bp = await boysRes.json(); allPlayers = [...allPlayers, ...bp.map(p => ({...p, _gender: 'boys'}))]; }
+          if (girlsRes.ok) { const gp = await girlsRes.json(); allPlayers = [...allPlayers, ...gp.map(p => ({...p, _gender: 'girls'}))]; }
           players = allPlayers;
         } else {
           const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${currentGender}`);
           if (!response.ok) throw new Error('Failed to fetch players');
           players = await response.json();
         }
-
-        if (!players || players.length === 0) {
-          container.innerHTML = '<div class="no-players">No players yet. Add your first player above!</div>';
-          return;
-        }
-
+        if (!players || players.length === 0) { container.innerHTML = '<div class="no-players">No players yet. Add your first player above!</div>'; return; }
         container.innerHTML = players.map(player => `
           <div class="player-card" data-player-id="${player.id}" onclick="selectPlayer('${player.id}')">
             <div class="player-info">
@@ -706,111 +613,55 @@
               <span>Class of ${player.grad_year || 'N/A'}</span>
             </div>
             <div class="player-actions">
-              <button class="delete-btn" onclick="event.stopPropagation(); deletePlayer('${player.id}')">Remove</button>
+              <button class="remove-btn" onclick="event.stopPropagation(); deletePlayer('${player.id}')">Remove</button>
             </div>
           </div>
         `).join('');
-
-      } catch (error) {
-        console.error('Error loading players:', error);
-        container.innerHTML = '<div class="no-players">Error loading players. Please try again.</div>';
-      }
+      } catch (error) { console.error('Error loading players:', error); container.innerHTML = '<div class="no-players">Error loading players.</div>'; }
     }
 
-    // Select player and show stats
     async function selectPlayer(playerId) {
       selectedPlayerId = playerId;
-      
-      // Highlight selected player
       document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
       document.querySelector(`[data-player-id="${playerId}"]`).classList.add('selected');
-
       const player = players.find(p => p.id === playerId);
       document.getElementById('statsPlayerName').textContent = `${player.first_name} ${player.last_name}'s Stats`;
-
-      // Load player records
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${playerId}/records`);
-        
-        if (response.ok) {
-          playerRecords = await response.json();
-        } else {
-          playerRecords = [];
-        }
-
-        // Populate location filter dropdown
+        if (response.ok) playerRecords = await response.json(); else playerRecords = [];
         populateLocationFilter();
-        
-        // Reset filters
-        currentLocationFilter = 'all';
-        currentGameFilter = 'all';
+        currentLocationFilter = 'all'; currentGameFilter = 'all';
         document.getElementById('locationFilter').value = 'all';
         document.getElementById('gameFilter').value = 'all';
-
         displayPlayerStats();
         document.getElementById('statsPanel').classList.add('active');
-        
-        // Scroll to stats panel
         document.getElementById('statsPanel').scrollIntoView({ behavior: 'smooth' });
-
-      } catch (error) {
-        console.error('Error loading player records:', error);
-        playerRecords = [];
-        displayPlayerStats();
-        document.getElementById('statsPanel').classList.add('active');
-      }
+      } catch (error) { playerRecords = []; displayPlayerStats(); document.getElementById('statsPanel').classList.add('active'); }
     }
 
-    // Display player stats based on filter
     function displayPlayerStats() {
       let filteredRecords = playerRecords;
+      if (currentFilter === 'varsity') filteredRecords = filteredRecords.filter(r => r.is_varsity === true);
+      else if (currentFilter === 'jv') filteredRecords = filteredRecords.filter(r => r.is_varsity === false);
+      if (currentLocationFilter !== 'all') filteredRecords = filteredRecords.filter(r => r.match && r.match.location === currentLocationFilter);
 
-      // Apply varsity/JV filter
-      if (currentFilter === 'varsity') {
-        filteredRecords = filteredRecords.filter(r => r.is_varsity === true);
-      } else if (currentFilter === 'jv') {
-        filteredRecords = filteredRecords.filter(r => r.is_varsity === false);
-      }
-
-      // Apply location filter
-      if (currentLocationFilter !== 'all') {
-        filteredRecords = filteredRecords.filter(r => r.match && r.match.location === currentLocationFilter);
-      }
-
-      // Calculate averages based on game filter
       const matchCount = filteredRecords.length;
-      let totalG1 = 0, totalG2 = 0, totalG3 = 0, totalAll = 0;
-      let countG1 = 0, countG2 = 0, countG3 = 0, countAll = 0;
+      let totalG1 = 0, totalG2 = 0, totalG3 = 0, countG1 = 0, countG2 = 0, countG3 = 0, totalAll = 0, countAll = 0;
 
       filteredRecords.forEach(r => {
-        if (currentGameFilter === 'all' || currentGameFilter === 'game1') {
-          if (r.game1) { totalG1 += r.game1; countG1++; }
-        }
-        if (currentGameFilter === 'all' || currentGameFilter === 'game2') {
-          if (r.game2) { totalG2 += r.game2; countG2++; }
-        }
-        if (currentGameFilter === 'all' || currentGameFilter === 'game3') {
-          if (r.game3) { totalG3 += r.game3; countG3++; }
-        }
-        
-        // Calculate overall average based on game filter
+        if (currentGameFilter === 'all' || currentGameFilter === 'game1') { if (r.game1) { totalG1 += r.game1; countG1++; } }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game2') { if (r.game2) { totalG2 += r.game2; countG2++; } }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game3') { if (r.game3) { totalG3 += r.game3; countG3++; } }
         let gameTotal = 0, gamesPlayed = 0;
         if (currentGameFilter === 'all') {
           if (r.game1) { gameTotal += r.game1; gamesPlayed++; }
           if (r.game2) { gameTotal += r.game2; gamesPlayed++; }
           if (r.game3) { gameTotal += r.game3; gamesPlayed++; }
-        } else if (currentGameFilter === 'game1' && r.game1) {
-          gameTotal = r.game1; gamesPlayed = 1;
-        } else if (currentGameFilter === 'game2' && r.game2) {
-          gameTotal = r.game2; gamesPlayed = 1;
-        } else if (currentGameFilter === 'game3' && r.game3) {
-          gameTotal = r.game3; gamesPlayed = 1;
-        }
-        if (gamesPlayed > 0) {
-          totalAll += gameTotal / gamesPlayed;
-          countAll++;
-        }
+        } else if (currentGameFilter === 'game1' && r.game1) { gameTotal = r.game1; gamesPlayed = 1; }
+        else if (currentGameFilter === 'game2' && r.game2) { gameTotal = r.game2; gamesPlayed = 1; }
+        else if (currentGameFilter === 'game3' && r.game3) { gameTotal = r.game3; gamesPlayed = 1; }
+        if (gamesPlayed > 0) { totalAll += gameTotal / gamesPlayed; countAll++; }
       });
 
       document.getElementById('totalMatches').textContent = matchCount;
@@ -819,15 +670,9 @@
       document.getElementById('avgGame3').textContent = countG3 > 0 ? (totalG3 / countG3).toFixed(1) : '0.0';
       document.getElementById('totalAvg').textContent = countAll > 0 ? (totalAll / countAll).toFixed(1) : '0.0';
 
-      // Build match history table
       const tbody = document.getElementById('matchHistoryBody');
-      
-      if (filteredRecords.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="no-stats">No match data available for this filter</td></tr>';
-        return;
-      }
+      if (filteredRecords.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="no-stats">No match data available for this filter</td></tr>'; return; }
 
-      // Sort by date (newest first)
       filteredRecords.sort((a, b) => {
         const dateA = a.match ? new Date(a.match.match_date) : new Date(0);
         const dateB = b.match ? new Date(b.match.match_date) : new Date(0);
@@ -836,24 +681,15 @@
 
       tbody.innerHTML = filteredRecords.map(record => {
         const match = record.match || {};
-        const date = match.match_date ? new Date(match.match_date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        }) : 'N/A';
-        
-        const g1 = record.game1 || 0;
-        const g2 = record.game2 || 0;
-        const g3 = record.game3 || 0;
+        const date = match.match_date ? new Date(match.match_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+        const g1 = record.game1 || 0, g2 = record.game2 || 0, g3 = record.game3 || 0;
         const total = g1 + g2 + g3;
         const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0);
         const avg = gamesPlayed > 0 ? (total / gamesPlayed).toFixed(1) : '0.0';
-
         const opponentLogo = getOpponentLogo(match.opponent);
         const opponentDisplay = opponentLogo 
           ? `<div class="opponent-cell"><img src="${opponentLogo}" alt="${match.opponent}" class="opponent-logo-small">${match.opponent || 'Unknown'}</div>`
           : (match.opponent || 'Unknown');
-
         return `
           <tr>
             <td>${date}</td>
@@ -863,102 +699,54 @@
             <td>${record.game3 || '-'}</td>
             <td><strong>${total}</strong></td>
             <td>${avg}</td>
-            <td>${record.is_varsity ? '<span class="varsity-badge">V</span>' : 'JV'}</td>
+            <td>${record.is_varsity ? '<span class="varsity-badge">V</span>' : '<span class="jv-badge">JV</span>'}</td>
           </tr>
         `;
       }).join('');
     }
 
-    // Add player
     document.getElementById('addPlayerBtn').addEventListener('click', async () => {
       const firstName = document.getElementById('firstName').value.trim();
       const lastName = document.getElementById('lastName').value.trim();
       const gradYear = document.getElementById('gradYear').value;
-
-      if (!firstName || !lastName || !gradYear) {
-        showMessage('Please fill in all required fields.', 'error');
-        return;
-      }
-
+      if (!firstName || !lastName || !gradYear) { showMessage('Please fill in all required fields.', 'error'); return; }
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            coachId: coachId,
-            firstName,
-            lastName,
-            gradYear: parseInt(gradYear),
-            gender: currentGender
-          })
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coachId, firstName, lastName, gradYear: parseInt(gradYear), gender: currentGender === 'all' ? 'boys' : currentGender })
         });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to add player');
-        }
-
-        // Clear form
+        if (!response.ok) { const data = await response.json(); throw new Error(data.error || 'Failed to add player'); }
         document.getElementById('firstName').value = '';
         document.getElementById('lastName').value = '';
         document.getElementById('gradYear').value = '';
-
         showMessage(`${firstName} ${lastName} added successfully!`, 'success');
         loadPlayers();
-
-      } catch (error) {
-        console.error('Error adding player:', error);
-        showMessage(error.message || 'Failed to add player.', 'error');
-      }
+      } catch (error) { showMessage(error.message || 'Failed to add player.', 'error'); }
     });
 
-    // Delete player
     async function deletePlayer(playerId) {
-      if (!confirm('Are you sure you want to remove this player? This will also delete all their records.')) {
-        return;
-      }
-
+      if (!confirm('Are you sure you want to remove this player?')) return;
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
-        const response = await fetch(`${API_BASE}/api/players/${playerId}`, {
-          method: 'DELETE'
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to remove player');
-        }
-
+        const response = await fetch(`${API_BASE}/api/players/${playerId}`, { method: 'DELETE' });
+        if (!response.ok) { const data = await response.json(); throw new Error(data.error || 'Failed to remove player'); }
         showMessage('Player removed.', 'success');
         closeStatsPanel();
         loadPlayers();
-
-      } catch (error) {
-        console.error('Error deleting player:', error);
-        showMessage(error.message || 'Failed to remove player.', 'error');
-      }
+      } catch (error) { showMessage(error.message || 'Failed to remove player.', 'error'); }
     }
 
-    // Check if user is a student (read-only access)
-    function isStudentMode() {
-      return localStorage.getItem('bowling_role') === 'student';
-    }
+    function isStudentMode() { return localStorage.getItem('bowling_role') === 'student'; }
 
-    // Apply student mode restrictions
     function applyStudentMode() {
       if (isStudentMode()) {
-        // Hide add player section
-        const addSection = document.querySelector('.add-player-section');
-        if (addSection) addSection.style.display = 'none';
-
-        // Hide remove player buttons in stats panel
-        const removeBtn = document.getElementById('removePlayerBtn');
-        if (removeBtn) removeBtn.style.display = 'none';
+        const addCard = document.getElementById('addPlayerCard');
+        if (addCard) addCard.style.display = 'none';
+        document.querySelectorAll('.remove-btn').forEach(btn => btn.style.display = 'none');
       }
     }
 
-    // Show message
     function showMessage(text, type) {
       const msg = document.getElementById('message');
       msg.textContent = text;
@@ -966,13 +754,7 @@
       setTimeout(() => { msg.className = 'message'; }, 4000);
     }
 
-    // Initialize
-    checkAuth().then(user => {
-      if (user) {
-        applyStudentMode();
-        loadPlayers();
-      }
-    });
+    checkAuth().then(user => { if (user) { applyStudentMode(); loadPlayers(); } });
   </script>
 </body>
 </html>

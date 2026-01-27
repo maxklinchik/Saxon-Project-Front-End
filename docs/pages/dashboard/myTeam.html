@@ -5,149 +5,1076 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Team - Strike Master</title>
   <link rel="icon" type="image/png" href="../../assets/images/StrikeMasterLogo2.png">
-  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
   <style>
+    :root {
+      --accent-color: #ffa500;
+      --main-color: #5f371c;
+      --bg-color: #f8fafc;
+      --content-bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --content-bg: #1e293b;
+      --card-bg: #1e293b;
+      --text-color: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-color);
       color: var(--text-color);
+      min-height: 100vh;
     }
 
+    /* Navbar */
+    .navbar {
+      background: var(--main-color);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar .logo img {
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links a.active { background: var(--accent-color); color: white; }
+
+    /* Container */
     .container {
       max-width: 1200px;
-      margin: 30px auto;
-      padding: 0 20px;
+      margin: 0 auto;
+      padding: 32px 24px;
     }
 
+    /* Page Header */
     .page-header {
-      text-align: center;
-      padding: 30px 0;
+      margin-bottom: 32px;
     }
 
     .page-header h1 {
-      color: var(--accent-color);
-      font-size: 36px;
-      margin-bottom: 10px;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--text-color);
     }
 
     .page-header p {
-      color: var(--text-color);
-      font-size: 16px;
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
     }
 
     /* View Toggle */
     .view-toggle {
       display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--content-bg);
+      padding: 6px;
+      border-radius: 12px;
+      width: fit-content;
     }
 
     .view-btn {
       padding: 12px 24px;
       border: none;
-      background: var(--card-bg);
-      color: var(--text-color);
-      border-radius: 10px;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       font-size: 14px;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-family: inherit;
+      transition: all 0.2s;
     }
 
-    .view-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
+    .view-btn:hover { color: var(--text-color); }
 
     .view-btn.active {
       background: var(--accent-color);
       color: white;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
-    /* Filters */
-    .filters {
+    /* Tabs */
+    .tabs {
       display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover { border-color: var(--accent-color); }
+
+    .tab-btn.active {
+      background: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+
+    /* Filters Row */
+    .filters-row {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
     }
 
     .filter-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
 
     .filter-group label {
       font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
     }
 
     .filter-group select {
-      padding: 8px 12px;
-      border: 2px solid var(--accent-color);
-      border-radius: 6px;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       background: var(--card-bg);
       color: var(--text-color);
       font-size: 14px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .tab-btn {
-      padding: 12px 24px;
-      border: none;
-      background: var(--card-bg);
-      color: var(--text-color);
-      border-radius: 10px;
+      font-family: inherit;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .tab-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    .filter-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
     }
 
-    .tab-btn.active {
+    /* Export Button */
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
       background: var(--accent-color);
       color: white;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    /* Stats Summary Cards */
+    .export-btn:hover {
+      filter: brightness(0.95);
+      transform: translateY(-1px);
+    }
+
+    .export-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Stats Cards */
     .stats-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .stat-card {
       background: var(--card-bg);
-      border: 2px solid var(--accent-color);
-      border-radius: 10px;
-      padding: 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
       text-align: center;
     }
 
     .stat-card .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Data Table */
+    .table-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: var(--content-bg);
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .data-table th.sortable:hover {
+      color: var(--accent-color);
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tbody tr:hover {
+      background: color-mix(in srgb, var(--accent-color) 5%, transparent);
+    }
+
+    .opponent-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .opponent-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
+    .gender-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .gender-badge.boys { background: #dbeafe; color: #1e40af; }
+    .gender-badge.girls { background: #fce7f3; color: #be185d; }
+
+    .result-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .result-badge.win { background: #dcfce7; color: #166534; }
+    .result-badge.loss { background: #fef2f2; color: #991b1b; }
+    .result-badge.tie { background: #fef9c3; color: #854d0e; }
+
+    .highlight-high { background: rgba(34, 197, 94, 0.08) !important; }
+    .highlight-low { background: rgba(239, 68, 68, 0.08) !important; }
+
+    .no-data {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+
+    /* Players View */
+    .players-section {
+      max-width: 800px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .add-btn:hover { filter: brightness(0.95); }
+
+    /* Player Form */
+    .player-form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .player-form-card.active { display: block; }
+
+    .player-form-card h3 {
+      margin: 0 0 20px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; font-family: inherit; cursor: pointer; }
+    .btn-primary { background: var(--accent-color); color: white; border: none; }
+    .btn-secondary { background: var(--content-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+
+    /* Players List */
+    .players-list-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .player-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .player-item:last-child { border-bottom: none; }
+
+    .player-item:hover { background: var(--content-bg); }
+
+    .player-info h4 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .player-info span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .remove-btn {
+      padding: 8px 16px;
+      background: transparent;
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .remove-btn:hover { background: #fef2f2; }
+
+    .no-players {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+
+    /* Message */
+    .message {
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.success { display: block; background: #dcfce7; color: #166534; }
+    .message.error { display: block; background: #fef2f2; color: #991b1b; }
+
+    /* Hide sections */
+    .stats-view, .players-view { display: none; }
+    .stats-view.active, .players-view.active { display: block; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .navbar { padding: 12px 16px; }
+      .nav-links { gap: 4px; }
+      .nav-links a { padding: 8px 12px; font-size: 13px; }
+      .container { padding: 20px 16px; }
+      .page-header h1 { font-size: 26px; }
+      .filters-row { flex-direction: column; align-items: stretch; }
+      .stats-cards { grid-template-columns: repeat(2, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+      .data-table { font-size: 13px; }
+      .data-table th, .data-table td { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="../../index.html" class="logo">
+      <img id="navLogo" src="../../assets/images/Team Logos/phLogo.png" alt="Strike Master Logo">
+    </a>
+    <div class="nav-links">
+      <a href="teamSelector.html">Home</a>
+      <a href="boysPlayers.html">Players</a>
+      <a href="../settings/appearanceSettings.html">Settings</a>
+      <a href="myTeam.html" class="active">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>My Team</h1>
+      <p id="welcomeMsg">View your team's season statistics and match history.</p>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="stats">Match Stats</button>
+      <button class="view-btn" data-view="players">Manage Players</button>
+    </div>
+
+    <!-- Match Stats View -->
+    <div class="stats-view active" id="statsView">
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>Season:</label>
+          <select id="seasonFilter">
+            <option value="2025-2026">2025-2026</option>
+            <option value="2024-2025">2024-2025</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+        <button class="export-btn" id="exportBtn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          Export CSV
+        </button>
+      </div>
+
+      <div class="tabs" id="statsTabs">
+        <button class="tab-btn active" data-gender="all">All</button>
+        <button class="tab-btn" data-gender="boys">Boys</button>
+        <button class="tab-btn" data-gender="girls">Girls</button>
+      </div>
+
+      <!-- Season Stats Summary -->
+      <div class="stats-cards" id="statsCards">
+        <div class="stat-card">
+          <div class="stat-value" id="totalMatches">0</div>
+          <div class="stat-label">Matches</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="winRecord">0-0</div>
+          <div class="stat-label">Record (W-L)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="teamAverage">0</div>
+          <div class="stat-label">Team Avg</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="highGame">0</div>
+          <div class="stat-label">High Game</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="lowGame">0</div>
+          <div class="stat-label">Low Game</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="highMatch">0</div>
+          <div class="stat-label">High Match</div>
+        </div>
+      </div>
+
+      <!-- Matches Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Match History</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="date">Date</th>
+              <th>Opponent</th>
+              <th>Location</th>
+              <th class="sortable" data-sort="total">Total Wood</th>
+              <th class="sortable" data-sort="avg">Avg/Player</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody">
+            <tr><td colspan="8" class="no-data">Loading matches...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Players View -->
+    <div class="players-view" id="playersView">
+      <div class="players-section">
+        <div class="tabs" id="playersTabs">
+          <button class="tab-btn active" data-gender="boys">Boys Team</button>
+          <button class="tab-btn" data-gender="girls">Girls Team</button>
+        </div>
+
+        <div class="section-header">
+          <h2 id="teamTitle">Boys Team</h2>
+          <button class="add-btn" id="addPlayerBtn">+ Add Player</button>
+        </div>
+
+        <div class="player-form-card" id="playerForm">
+          <h3>Add New Player</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" id="firstName" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" id="lastName" required>
+            </div>
+            <div class="form-group">
+              <label>Graduation Year *</label>
+              <select id="gradYear" required>
+                <option value="">Select Year</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Email (optional)</label>
+              <input type="email" id="playerEmail" placeholder="student@email.com">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+            <button class="btn btn-primary" id="savePlayerBtn">Add Player</button>
+          </div>
+        </div>
+
+        <div class="players-list-card" id="playersList">
+          <div class="no-players">Loading players...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load saved logo
+    const savedLogo = localStorage.getItem('selectedLogo');
+    if (savedLogo) {
+      document.getElementById('navLogo').src = '../../assets/images/Team Logos/' + savedLogo;
+    }
+
+    // Require authentication
+    if (!auth.requireAuth('../auth/studentLogin.html')) {
+      throw new Error('Not authenticated');
+    }
+
+    const currentUser = auth.getUser();
+    let coachId = currentUser?.id;
+    let currentStatsGender = 'all';
+    let currentPlayerGender = 'boys';
+    let currentSeason = '2025-2026';
+    let allMatches = [];
+    let players = [];
+    let sortColumn = 'date';
+    let sortDirection = 'desc';
+
+    // Update welcome message
+    document.getElementById('welcomeMsg').textContent = 
+      `${auth.getDisplayName()}'s team statistics and match history.`;
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
+      }
+    });
+
+    // View Toggle
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const view = btn.dataset.view;
+        document.getElementById('statsView').classList.toggle('active', view === 'stats');
+        document.getElementById('playersView').classList.toggle('active', view === 'players');
+        if (view === 'players') loadPlayers();
+      });
+    });
+
+    // Stats Tab switching
+    document.querySelectorAll('#statsTabs .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#statsTabs .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatsGender = btn.dataset.gender;
+        renderData();
+      });
+    });
+
+    // Season filter
+    document.getElementById('seasonFilter').addEventListener('change', (e) => {
+      currentSeason = e.target.value;
+      loadMatches();
+    });
+
+    // Sortable columns
+    document.querySelectorAll('.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.dataset.sort;
+        if (sortColumn === col) {
+          sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortColumn = col;
+          sortDirection = 'desc';
+        }
+        renderData();
+      });
+    });
+
+    // Export CSV
+    document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+
+    function exportToCSV() {
+      const matches = getFilteredMatches();
+      if (matches.length === 0) {
+        showMessage('No data to export', 'error');
+        return;
+      }
+
+      const headers = ['Date', 'Opponent', 'Gender', 'Location', 'Total Wood', 'Avg/Player', 'High Game', 'Low Game', 'Result'];
+      const rows = matches.map(match => {
+        const date = new Date(match.match_date).toLocaleDateString('en-US');
+        const total = getMatchTotal(match);
+        const avg = getMatchAvg(match).toFixed(1);
+        const high = getMatchHighGame(match);
+        const low = getMatchLowGame(match);
+        const result = match.result ? match.result.charAt(0).toUpperCase() + match.result.slice(1) : '-';
+        return [date, match.opponent, match.gender, match.location || '-', total, avg, high, low, result];
+      });
+
+      const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `team_stats_${currentSeason}_${currentStatsGender}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showMessage('CSV exported successfully!', 'success');
+    }
+
+    // Load matches from API
+    async function loadMatches() {
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/matches?coachId=${coachId}`);
+        if (!response.ok) throw new Error('Failed to load matches');
+        allMatches = await response.json();
+        
+        for (const match of allMatches) {
+          try {
+            const recordsRes = await fetch(`${API_BASE}/api/records?matchId=${match.id}`);
+            if (recordsRes.ok) match.records = await recordsRes.json();
+            else match.records = [];
+          } catch (err) { match.records = []; }
+        }
+        renderData();
+      } catch (error) {
+        console.error('Error loading matches:', error);
+        document.getElementById('matchesBody').innerHTML = '<tr><td colspan="8" class="no-data">Error loading matches</td></tr>';
+      }
+    }
+
+    function getFilteredMatches() {
+      let filtered = allMatches;
+      if (currentStatsGender !== 'all') filtered = filtered.filter(m => m.gender === currentStatsGender);
+      if (currentSeason !== 'all') {
+        const [startYear, endYear] = currentSeason.split('-').map(Number);
+        filtered = filtered.filter(m => {
+          const matchDate = new Date(m.match_date);
+          const month = matchDate.getMonth();
+          const year = matchDate.getFullYear();
+          if (month >= 8) return year === startYear;
+          else return year === endYear;
+        });
+      }
+      filtered.sort((a, b) => {
+        let valA, valB;
+        switch (sortColumn) {
+          case 'date': valA = new Date(a.match_date); valB = new Date(b.match_date); break;
+          case 'total': valA = getMatchTotal(a); valB = getMatchTotal(b); break;
+          case 'avg': valA = getMatchAvg(a); valB = getMatchAvg(b); break;
+          default: valA = new Date(a.match_date); valB = new Date(b.match_date);
+        }
+        return sortDirection === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+      });
+      return filtered;
+    }
+
+    function getMatchTotal(match) {
+      if (!match.records || match.records.length === 0) return match.total_wood || 0;
+      const varsity = match.records.filter(r => r.is_varsity);
+      if (varsity.length === 0) return match.total_wood || 0;
+      return varsity.reduce((sum, r) => sum + (r.total || 0), 0);
+    }
+
+    function getMatchAvg(match) {
+      if (!match.records || match.records.length === 0) return 0;
+      const varsity = match.records.filter(r => r.is_varsity);
+      if (varsity.length === 0) return 0;
+      return varsity.reduce((sum, r) => sum + (r.total || 0), 0) / varsity.length;
+    }
+
+    function getMatchHighGame(match) {
+      if (!match.records || match.records.length === 0) return 0;
+      let high = 0;
+      match.records.forEach(r => {
+        if (r.game1 && r.game1 > high) high = r.game1;
+        if (r.game2 && r.game2 > high) high = r.game2;
+        if (r.game3 && r.game3 > high) high = r.game3;
+      });
+      return high;
+    }
+
+    function getMatchLowGame(match) {
+      if (!match.records || match.records.length === 0) return 0;
+      let low = 300;
+      const varsity = match.records.filter(r => r.is_varsity);
+      varsity.forEach(r => {
+        if (r.game1 && r.game1 > 0 && r.game1 < low) low = r.game1;
+        if (r.game2 && r.game2 > 0 && r.game2 < low) low = r.game2;
+        if (r.game3 && r.game3 > 0 && r.game3 < low) low = r.game3;
+      });
+      return low === 300 ? 0 : low;
+    }
+
+    function renderData() {
+      const matches = getFilteredMatches();
+      let totalMatches = matches.length;
+      let wins = 0, losses = 0;
+      let allGames = [];
+      let allMatchTotals = [];
+      let totalAvgSum = 0;
+      
+      matches.forEach(m => {
+        if (m.result === 'win') wins++;
+        else if (m.result === 'loss') losses++;
+        const matchTotal = getMatchTotal(m);
+        if (matchTotal > 0) {
+          allMatchTotals.push(matchTotal);
+          totalAvgSum += getMatchAvg(m);
+        }
+        if (m.records) {
+          const varsity = m.records.filter(r => r.is_varsity);
+          varsity.forEach(r => {
+            if (r.game1 && r.game1 > 0) allGames.push(r.game1);
+            if (r.game2 && r.game2 > 0) allGames.push(r.game2);
+            if (r.game3 && r.game3 > 0) allGames.push(r.game3);
+          });
+        }
+      });
+      
+      document.getElementById('totalMatches').textContent = totalMatches;
+      document.getElementById('winRecord').textContent = `${wins}-${losses}`;
+      document.getElementById('teamAverage').textContent = totalMatches > 0 ? (totalAvgSum / totalMatches).toFixed(1) : '0';
+      document.getElementById('highGame').textContent = allGames.length > 0 ? Math.max(...allGames) : '0';
+      document.getElementById('lowGame').textContent = allGames.length > 0 ? Math.min(...allGames) : '0';
+      document.getElementById('highMatch').textContent = allMatchTotals.length > 0 ? Math.max(...allMatchTotals) : '0';
+      
+      const highMatchTotal = allMatchTotals.length > 0 ? Math.max(...allMatchTotals) : 0;
+      const lowMatchTotal = allMatchTotals.length > 0 ? Math.min(...allMatchTotals) : 0;
+      
+      const tbody = document.getElementById('matchesBody');
+      if (matches.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">No matches found for this filter.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = matches.map(match => {
+        const date = new Date(match.match_date);
+        const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const total = getMatchTotal(match);
+        const avg = getMatchAvg(match).toFixed(1);
+        const high = getMatchHighGame(match);
+        const low = getMatchLowGame(match);
+        const opponentLogo = getTeamLogo(match.opponent) || '';
+        
+        let resultBadge = '';
+        if (match.result === 'win') resultBadge = '<span class="result-badge win">W</span>';
+        else if (match.result === 'loss') resultBadge = '<span class="result-badge loss">L</span>';
+        else if (match.result === 'tie') resultBadge = '<span class="result-badge tie">T</span>';
+        else resultBadge = '-';
+        
+        let rowClass = '';
+        if (total === highMatchTotal && total > 0) rowClass = 'highlight-high';
+        else if (total === lowMatchTotal && total > 0 && matches.length > 1) rowClass = 'highlight-low';
+        
+        const genderBadge = match.gender === 'boys' 
+          ? '<span class="gender-badge boys">B</span>' 
+          : match.gender === 'girls' ? '<span class="gender-badge girls">G</span>' : '';
+        
+        return `
+          <tr class="${rowClass}">
+            <td>${formattedDate}</td>
+            <td>
+              <div class="opponent-cell">
+                ${opponentLogo ? `<img src="${opponentLogo}" class="opponent-logo" alt="">` : ''}
+                ${match.opponent}${genderBadge}
+              </div>
+            </td>
+            <td>${match.location || '-'}</td>
+            <td><strong>${total || '-'}</strong></td>
+            <td>${avg}</td>
+            <td>${high || '-'}</td>
+            <td>${low || '-'}</td>
+            <td>${resultBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ====== PLAYERS MANAGEMENT ======
+    document.querySelectorAll('#playersTabs .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#playersTabs .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPlayerGender = btn.dataset.gender;
+        document.getElementById('teamTitle').textContent = currentPlayerGender === 'boys' ? 'Boys Team' : 'Girls Team';
+        loadPlayers();
+      });
+    });
+
+    async function loadPlayers() {
+      if (!currentUser || !currentUser.id) {
+        showMessage('User session invalid. Please log in again.', 'error');
+        document.getElementById('playersList').innerHTML = '<div class="no-players">Please log in to manage your team.</div>';
+        return;
+      }
+      try {
+        const res = await api.get(`/api/players?coachId=${currentUser.id}&gender=${currentPlayerGender}`);
+        if (!res.ok) {
+          const err = await res.json();
+          showMessage(err.error || 'Failed to load players.', 'error');
+          document.getElementById('playersList').innerHTML = '<div class="no-players">Failed to load players.</div>';
+          return;
+        }
+        players = await res.json();
+        renderPlayers();
+      } catch (err) {
+        console.error('Failed to load players:', err);
+        document.getElementById('playersList').innerHTML = '<div class="no-players">Failed to load players.</div>';
+      }
+    }
+
+    function renderPlayers() {
+      const list = document.getElementById('playersList');
+      if (players.length === 0) {
+        list.innerHTML = '<div class="no-players">No players yet. Click "+ Add Player" to get started!</div>';
+        return;
+      }
+      list.innerHTML = players.map(player => `
+        <div class="player-item">
+          <div class="player-info">
+            <h4>${player.first_name} ${player.last_name}</h4>
+            <span>Class of ${player.grad_year || 'N/A'}${player.email ? ' • ' + player.email : ''}</span>
+          </div>
+          <button class="remove-btn" onclick="removePlayer('${player.id}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    async function addPlayer() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const gradYear = document.getElementById('gradYear').value;
+      const email = document.getElementById('playerEmail').value.trim();
+      if (!firstName || !lastName || !gradYear) { showMessage('Please fill in all required fields.', 'error'); return; }
+      if (!currentUser || !currentUser.id) { showMessage('Not logged in. Please log in again.', 'error'); return; }
+      try {
+        const res = await api.post('/api/players', { coachId: currentUser.id, firstName, lastName, gradYear, gender: currentPlayerGender });
+        if (!res.ok) { const data = await res.json(); showMessage(data.error || 'Failed to add player', 'error'); return; }
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('gradYear').value = '';
+        document.getElementById('playerEmail').value = '';
+        document.getElementById('playerForm').classList.remove('active');
+        showMessage(`${firstName} ${lastName} added successfully!`, 'success');
+        loadPlayers();
+      } catch (err) { console.error('Add player failed:', err); showMessage('Failed to add player.', 'error'); }
+    }
+
+    async function removePlayer(playerId) {
+      if (!confirm('Are you sure you want to remove this player?')) return;
+      try {
+        const res = await api.delete(`/api/players/${playerId}`);
+        if (res.ok) { showMessage('Player removed.', 'success'); loadPlayers(); }
+        else showMessage('Failed to remove player.', 'error');
+      } catch (err) { console.error('Remove player failed:', err); showMessage('Failed to remove player.', 'error'); }
+    }
+
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+      setTimeout(() => { msg.className = 'message'; }, 4000);
+    }
+
+    document.getElementById('addPlayerBtn').addEventListener('click', () => document.getElementById('playerForm').classList.toggle('active'));
+    document.getElementById('cancelBtn').addEventListener('click', () => document.getElementById('playerForm').classList.remove('active'));
+    document.getElementById('savePlayerBtn').addEventListener('click', addPlayer);
+
+    loadMatches();
+  </script>
+</body>
+</html>
       font-size: 28px;
       font-weight: 700;
       color: var(--accent-color);
