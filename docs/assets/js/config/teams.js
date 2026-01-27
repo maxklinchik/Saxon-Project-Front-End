@@ -12,6 +12,14 @@ const TEAMS_CONFIG = {
     accentColor: '#CC0000', // Red
     mainColor: '#FFD700'    // Yellow
   },
+  // Bergen County Technical High School - Gold and Black
+  'bergen tech': {
+    name: 'Bergen County Technical High School',
+    shortName: 'Bergen Tech',
+    logo: 'btLogo.png',
+    accentColor: '#FFD700', // Gold
+    mainColor: '#000000'    // Black
+  },
   // Bergenfield High School - Maroon and White
   'bergenfield': {
     name: 'Bergenfield High School',
@@ -60,6 +68,21 @@ const TEAMS_CONFIG = {
     accentColor: '#FF6600', // Orange
     mainColor: '#FFFFFF'    // White
   },
+  // Don Bosco Prep - Maroon and Silver
+  'don bosco prep': {
+    name: 'Don Bosco Preparatory High School',
+    shortName: 'Don Bosco Prep',
+    logo: 'dbLogo.png',
+    accentColor: '#800000', // Maroon
+    mainColor: '#C0C0C0'    // Silver
+  },
+  'don bosco': {
+    name: 'Don Bosco Preparatory High School',
+    shortName: 'Don Bosco Prep',
+    logo: 'dbLogo.png',
+    accentColor: '#800000',
+    mainColor: '#C0C0C0'
+  },
   // Dwight Morrow High School - Dark Red and Black
   'dwight morrow': {
     name: 'Dwight Morrow High School',
@@ -75,6 +98,14 @@ const TEAMS_CONFIG = {
     logo: 'flLogo.png',
     accentColor: '#CC0000', // Red
     mainColor: '#FFFFFF'    // White
+  },
+  // Fort Lee High School - Orange and Black
+  'fort lee': {
+    name: 'Fort Lee High School',
+    shortName: 'Fort Lee',
+    logo: 'fortleeLogo.png',
+    accentColor: '#FF6600', // Orange
+    mainColor: '#000000'    // Black
   },
   // Hackensack High School - Blue and Gold
   'hackensack': {
@@ -239,6 +270,14 @@ const TEAMS_CONFIG = {
     accentColor: '#FF6600', // Orange
     mainColor: '#003087'    // Blue
   },
+  // Paterson Kennedy High School - Red and Black
+  'paterson kennedy': {
+    name: 'John F. Kennedy High School (Paterson)',
+    shortName: 'Paterson Kennedy',
+    logo: 'patkennLogo.png',
+    accentColor: '#CC0000', // Red
+    mainColor: '#000000'    // Black
+  },
   // Ramapo High School - Green and Black
   'ramapo': {
     name: 'Ramapo High School',
@@ -285,6 +324,28 @@ const TEAMS_CONFIG = {
     logo: 'rdLogo.png',
     accentColor: '#FFD700',
     mainColor: '#000000'
+  },
+  // St. Joseph Regional High School - Green and Gold
+  'st. joseph': {
+    name: 'St. Joseph Regional High School',
+    shortName: 'St. Joseph',
+    logo: 'sjLogo.png',
+    accentColor: '#006400', // Green
+    mainColor: '#FFD700'    // Gold
+  },
+  'st joseph': {
+    name: 'St. Joseph Regional High School',
+    shortName: 'St. Joseph',
+    logo: 'sjLogo.png',
+    accentColor: '#006400',
+    mainColor: '#FFD700'
+  },
+  'sj': {
+    name: 'St. Joseph Regional High School',
+    shortName: 'St. Joseph',
+    logo: 'sjLogo.png',
+    accentColor: '#006400',
+    mainColor: '#FFD700'
   },
   // Teaneck High School - Blue and Black
   'teaneck': {
@@ -339,14 +400,17 @@ const TEAMS_CONFIG = {
 // List of all schools for dropdowns (sorted alphabetically by name)
 const SCHOOLS_LIST = [
   { value: 'Bergen Catholic', name: 'Bergen Catholic High School' },
+  { value: 'Bergen Tech', name: 'Bergen County Technical High School' },
   { value: 'Bergenfield', name: 'Bergenfield High School' },
   { value: 'Cliffside Park', name: 'Cliffside Park High School' },
   { value: 'Clifton', name: 'Clifton High School' },
   { value: 'Demarest', name: 'Northern Valley at Demarest' },
   { value: 'DePaul Catholic', name: 'DePaul Catholic High School' },
+  { value: 'Don Bosco Prep', name: 'Don Bosco Preparatory High School' },
   { value: 'Dumont', name: 'Dumont High School' },
   { value: 'Dwight Morrow', name: 'Dwight Morrow High School' },
   { value: 'Fair Lawn', name: 'Fair Lawn High School' },
+  { value: 'Fort Lee', name: 'Fort Lee High School' },
   { value: 'Hackensack', name: 'Hackensack High School' },
   { value: 'Holy Angels', name: 'Academy of the Holy Angels' },
   { value: 'Immaculate Heart Academy', name: 'Immaculate Heart Academy' },
@@ -363,11 +427,13 @@ const SCHOOLS_LIST = [
   { value: 'Passaic', name: 'Passaic High School' },
   { value: 'Passaic Valley', name: 'Passaic Valley High School' },
   { value: 'Paterson Eastside', name: 'Paterson Eastside High School' },
+  { value: 'Paterson Kennedy', name: 'John F. Kennedy High School (Paterson)' },
   { value: 'Ramapo', name: 'Ramapo High School' },
   { value: 'Ramsey', name: 'Ramsey High School' },
   { value: 'Ridgefield Park', name: 'Ridgefield Park High School' },
   { value: 'Ridgewood', name: 'Ridgewood High School' },
   { value: 'River Dell', name: 'River Dell Regional High School' },
+  { value: 'St. Joseph', name: 'St. Joseph Regional High School' },
   { value: 'Teaneck', name: 'Teaneck High School' },
   { value: 'Tenafly', name: 'Tenafly High School' },
   { value: 'Wayne Hills', name: 'Wayne Hills High School' },
