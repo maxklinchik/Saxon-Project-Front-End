@@ -532,10 +532,7 @@
       const localUser = auth.getUser();
       // Try to get user from Supabase if possible
       try {
-        if (window.supabase && localUser && localUser.email) {
-          const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
-          const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
-          const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        if (supabase && localUser && localUser.email) {
           let { data, error } = await supabase
             .from('users')
             .select('first_name,last_name,email,team_code')
