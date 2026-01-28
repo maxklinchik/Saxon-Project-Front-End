@@ -527,25 +527,42 @@
     // Ensure DOM is loaded before accessing elements
     document.addEventListener('DOMContentLoaded', function() {
       const currentUser = auth.getUser();
+      console.log('[Account Info] Loaded user:', currentUser);
+      let hasError = false;
       if (currentUser) {
         // Get display name robustly
         let displayName = '';
         if (isStudent) {
-          displayName = currentUser.name || currentUser.display_name || currentUser.first_name || currentUser.last_name || 'Student';
+          displayName = currentUser.name || currentUser.display_name || currentUser.first_name || currentUser.last_name || '';
         } else {
-          displayName = auth.getDisplayName() || [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.name || currentUser.display_name || 'Coach';
+          displayName = auth.getDisplayName() || [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.name || currentUser.display_name || '';
         }
         const displayNameInput = document.getElementById('displayName');
         if (displayNameInput) displayNameInput.value = displayName.trim();
+        else hasError = true;
 
         const emailInput = document.getElementById('email');
         if (emailInput) emailInput.value = currentUser.email || currentUser.username || '';
+        else hasError = true;
 
         const codeDisplay = document.getElementById('userCode');
-        if (codeDisplay) codeDisplay.textContent = currentUser.team_code || currentUser.coach_code || currentUser.code || '------';
+        if (codeDisplay) codeDisplay.textContent = currentUser.team_code || currentUser.coach_code || currentUser.code || '';
+        else hasError = true;
+
+        // If any field is missing, show error
+        if (!displayName || !currentUser.email || !(currentUser.team_code || currentUser.coach_code || currentUser.code)) {
+          hasError = true;
+        }
       } else {
-        // No user data - redirect to login
+        hasError = true;
         console.error('No user data found');
+      }
+      if (hasError) {
+        let msg = document.getElementById('message');
+        if (msg) {
+          msg.className = 'message error';
+          msg.textContent = 'Unable to load your account info. Please log in again or contact support.';
+        }
       }
     });
 
