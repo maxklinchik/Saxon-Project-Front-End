@@ -169,51 +169,6 @@
       padding: 0 16px;
     }
 
-    .features {
-      display: flex;
-      gap: 40px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 60px;
-      padding: 0 20px;
-      animation: fadeIn 0.6s ease 0.4s backwards;
-    }
-
-    .feature {
-      text-align: center;
-      max-width: 160px;
-    }
-
-    .feature-icon {
-      width: 48px;
-      height: 48px;
-      margin: 0 auto 12px;
-      background: var(--neutral-100);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .feature-icon svg {
-      width: 24px;
-      height: 24px;
-      stroke: var(--neutral-700);
-    }
-
-    .feature h3 {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 0 0 4px;
-      color: var(--neutral-900);
-    }
-
-    .feature p {
-      font-size: 13px;
-      color: var(--neutral-500);
-      margin: 0;
-    }
-
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -235,9 +190,6 @@
       .btn {
         padding: 12px 28px;
         font-size: 14px;
-      }
-      .features {
-        gap: 24px;
       }
     }
   </style>
@@ -266,30 +218,6 @@
       </svg>
       Continue with Google
     </button>
-
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        </div>
-        <h3>Track Matches</h3>
-        <p>Log scores for every game</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        </div>
-        <h3>View Stats</h3>
-        <p>Player & team analytics</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-        </div>
-        <h3>Team Access</h3>
-        <p>Share with students</p>
-      </div>
-    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

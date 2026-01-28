@@ -6,6 +6,7 @@
   <link rel="icon" type="image/png" href="../../assets/images/StrikeMasterLogo2.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/config/teams.js"></script>
   <style>
     :root {
       --neutral-900: #111827;
@@ -132,7 +133,7 @@
     label:first-of-type {
       margin-top: 0;
     }
-    input {
+    input, select {
       width: 100%;
       padding: 12px 14px;
       margin-top: 6px;
@@ -142,8 +143,9 @@
       font-size: 15px;
       font-family: inherit;
       transition: border-color 0.2s, box-shadow 0.2s;
+      background: white;
     }
-    input:focus {
+    input:focus, select:focus {
       outline: none;
       border-color: var(--neutral-900);
       box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
@@ -378,8 +380,16 @@
       <label for="coachPassword">Password</label>
       <input type="password" id="coachPassword" placeholder="Create a password" required minlength="6">
       
-      <label for="teamName">Team Name</label>
-      <input type="text" id="teamName" placeholder="e.g., Lincoln High Bowling" required>
+      <label for="schoolSelect">School</label>
+      <select id="schoolSelect" required>
+        <option value="">Select your school...</option>
+        <option value="other">Other (Enter manually)</option>
+      </select>
+      
+      <div id="customTeamNameContainer" style="display: none;">
+        <label for="teamName">Team Name</label>
+        <input type="text" id="teamName" placeholder="e.g., Lincoln High Bowling">
+      </div>
       
       <button type="submit" id="coachSubmitBtn">Create Coach Account</button>
     </form>
@@ -405,9 +415,45 @@
       const googleEmailSpan = document.getElementById('googleEmail');
       const googleBtn = document.getElementById('googleSignUp');
       const roleSelector = document.getElementById('roleSelector');
+      const schoolSelect = document.getElementById('schoolSelect');
+      const customTeamNameContainer = document.getElementById('customTeamNameContainer');
+      const teamNameInput = document.getElementById('teamName');
 
       let selectedRole = 'student';
       let pendingGoogleUser = null;
+      let selectedSchoolColors = null;
+
+      // Populate school dropdown
+      if (typeof SCHOOLS_LIST !== 'undefined') {
+        SCHOOLS_LIST.forEach(school => {
+          const option = document.createElement('option');
+          option.value = school.value;
+          option.textContent = school.name;
+          schoolSelect.appendChild(option);
+        });
+      }
+
+      // Handle school selection
+      schoolSelect.addEventListener('change', function() {
+        const value = this.value;
+        if (value === 'other') {
+          customTeamNameContainer.style.display = 'block';
+          teamNameInput.required = true;
+          selectedSchoolColors = null;
+        } else if (value) {
+          customTeamNameContainer.style.display = 'none';
+          teamNameInput.required = false;
+          teamNameInput.value = '';
+          // Get colors for selected school
+          if (typeof getTeamColors !== 'undefined') {
+            selectedSchoolColors = getTeamColors(value);
+          }
+        } else {
+          customTeamNameContainer.style.display = 'none';
+          teamNameInput.required = false;
+          selectedSchoolColors = null;
+        }
+      });
 
       // Check for pending Google signup
       const pendingGoogle = localStorage.getItem('pending_google_signup');
@@ -569,10 +615,31 @@
         const lastName = document.getElementById('coachLastName').value.trim();
         const email = document.getElementById('coachEmail').value.trim();
         const password = document.getElementById('coachPassword').value;
-        const teamName = document.getElementById('teamName').value.trim();
+        const schoolValue = schoolSelect.value;
+        const customTeamName = document.getElementById('teamName').value.trim();
         
-        if (!firstName || !lastName || !email || !password || !teamName) {
-          showMessage('Please fill in all fields', 'error');
+        // Determine team name from school selection or custom input
+        let finalTeamName = '';
+        if (schoolValue && schoolValue !== 'other') {
+          // Use the school name from the dropdown
+          const selectedOption = schoolSelect.options[schoolSelect.selectedIndex];
+          finalTeamName = selectedOption.textContent;
+        } else if (schoolValue === 'other' && customTeamName) {
+          finalTeamName = customTeamName;
+        }
+        
+        if (!firstName || !lastName || !email || !password) {
+          showMessage('Please fill in all required fields', 'error');
+          return;
+        }
+        
+        if (!schoolValue) {
+          showMessage('Please select a school or choose "Other"', 'error');
+          return;
+        }
+        
+        if (schoolValue === 'other' && !customTeamName) {
+          showMessage('Please enter your team name', 'error');
           return;
         }
 
@@ -587,8 +654,15 @@
             lastName,
             email,
             password,
-            teamName
+            teamName: finalTeamName,
+            schoolCode: schoolValue !== 'other' ? schoolValue : null
           };
+          
+          // Include colors if a school was selected
+          if (selectedSchoolColors) {
+            payload.accentColor = selectedSchoolColors.accentColor;
+            payload.mainColor = selectedSchoolColors.mainColor;
+          }
 
           // If linking with Google
           if (pendingGoogleUser) {
@@ -614,6 +688,12 @@
           if (data.user) {
             localStorage.setItem('bowling_user', JSON.stringify(data.user));
             localStorage.setItem('bowling_role', 'coach');
+          }
+          
+          // Apply team colors to localStorage
+          if (selectedSchoolColors) {
+            localStorage.setItem('accentColor', selectedSchoolColors.accentColor);
+            localStorage.setItem('mainColor', selectedSchoolColors.mainColor);
           }
 
           showMessage(`Welcome, Coach ${firstName}! Your team code is: <strong>${data.teamCode}</strong><br>Redirecting...`, 'success');
