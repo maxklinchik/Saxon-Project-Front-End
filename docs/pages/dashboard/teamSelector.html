@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home - Strike Master</title>
-  <link rel="icon" type="image/png" href="../../assets/images/StrikeMasterLogo2.png">
+  <title>Home - StrikeMasterLogo</title>
+  <link rel="icon" type="image/png" href="../../assets/images/StrikeMasterIcon.png">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/accent-loader.js"></script>
@@ -966,7 +966,7 @@
 <body>
   <div class="navbar">
     <a href="../../index.html" class="logo">
-      <img id="navLogo" src="../../assets/images/Team Logos/phLogo.png" alt="Strike Master Logo">
+      <img id="navLogo" src="../../assets/images/StrikeMasterIcon.png" alt="StrikeMasterIcon" style="height:48px;width:48px;object-fit:contain;" />
     </a>
     <div class="nav-links">
       <a href="teamSelector.html" class="active">Home</a>
@@ -978,8 +978,9 @@
   </div>
 
   <div class="container">
-    <div class="page-header">
-      <h1>Strike Master</h1>
+    <div class="page-header" style="text-align:center;">
+      <img src="../../assets/images/StrikeMasterLogo.png" alt="StrikeMasterLogo" style="max-width:320px;width:100%;margin-bottom:12px;" />
+      <h1>StrikeMasterLogo</h1>
       <p>Match history and performance tracking</p>
     </div>
 
@@ -1424,12 +1425,7 @@
       resetModal();
     });
 
-    document.getElementById('matchModal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('matchModal')) {
-        document.getElementById('matchModal').classList.remove('active');
-        resetModal();
-      }
-    });
+    // Modal click-to-close handler removed as requested
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
