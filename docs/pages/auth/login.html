@@ -260,100 +260,113 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // DOM elements
-    const form = document.getElementById('loginForm');
-    const msgEl = document.getElementById('message');
-    const submitBtn = document.getElementById('submitBtn');
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM elements
+      const form = document.getElementById('loginForm');
+      const msgEl = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
 
-    // Show message helper
-    function showMessage(text, type) {
-      msgEl.textContent = text;
-      msgEl.className = `message ${type}`;
-      msgEl.style.display = 'block';
-    }
+      // Show message helper
+      function showMessage(text, type) {
+        msgEl.textContent = text;
+        msgEl.className = `message ${type}`;
+        msgEl.style.display = 'block';
+      }
 
-    // Initialize Supabase
-    const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      // Initialize Supabase (only if available)
+      let supabase = null;
+      if (window.supabase) {
+        const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      }
 
-    // Google Sign In handler
-    document.getElementById('googleSignIn').addEventListener('click', async () => {
-      try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin + '/StrikeMaster/pages/auth/callback.html'
+      // Google Sign In handler
+      const googleBtn = document.getElementById('googleSignIn');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', async () => {
+          if (!supabase) {
+            showMessage('Google Sign-In is not available. Please use email login.', 'error');
+            return;
+          }
+          try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: window.location.origin + '/StrikeMaster/pages/auth/callback.html'
+              }
+            });
+            
+            if (error) {
+              console.error('Google sign in error:', error);
+              showMessage('Failed to sign in with Google. Please try again.', 'error');
+            }
+          } catch (err) {
+            console.error('Google OAuth error:', err);
+            showMessage('Failed to connect to Google. Please try again.', 'error');
           }
         });
-        
-        if (error) {
-          console.error('Google sign in error:', error);
-          showMessage('Failed to sign in with Google. Please try again.', 'error');
-        }
-      } catch (err) {
-        console.error('Google OAuth error:', err);
-        showMessage('Failed to connect to Google. Please try again.', 'error');
       }
-    });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Logging in...';
-      showMessage('Checking credentials...', 'loading');
-
-      // Try coach login first
-      try {
-        const coachRes = await api.post('/api/auth/login', { email, password });
-        const coachData = await coachRes.json();
+      // Form submit handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        if (coachRes.ok && coachData.user) {
-          // Coach login successful
-          if (coachData.token) {
-            localStorage.setItem('bowling_token', coachData.token);
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+        showMessage('Checking credentials...', 'loading');
+
+        // Try coach login first
+        try {
+          const coachRes = await api.post('/api/auth/login', { email, password });
+          const coachData = await coachRes.json();
+          
+          if (coachRes.ok && coachData.user) {
+            // Coach login successful
+            if (coachData.token) {
+              localStorage.setItem('bowling_token', coachData.token);
+            }
+            localStorage.setItem('bowling_user', JSON.stringify(coachData.user));
+            localStorage.setItem('bowling_role', 'coach');
+            
+            showMessage('Welcome back, Coach! Redirecting...', 'success');
+            setTimeout(() => {
+              window.location.href = '../dashboard/teamSelector.html';
+            }, 1000);
+            return;
           }
-          localStorage.setItem('bowling_user', JSON.stringify(coachData.user));
-          localStorage.setItem('bowling_role', 'coach');
-          
-          showMessage('Welcome back, Coach! Redirecting...', 'success');
-          setTimeout(() => {
-            window.location.href = '../dashboard/teamSelector.html';
-          }, 1000);
-          return;
+        } catch (err) {
+          console.log('Coach login failed, trying student...');
         }
-      } catch (err) {
-        console.log('Coach login failed, trying student...');
-      }
 
-      // Try student login
-      try {
-        const studentRes = await api.post('/api/auth/student-login', { email, password });
-        const studentData = await studentRes.json();
-        
-        if (studentRes.ok && studentData.user) {
-          // Student login successful
-          localStorage.setItem('bowling_user', JSON.stringify(studentData.user));
-          localStorage.setItem('bowling_role', 'student');
+        // Try student login
+        try {
+          const studentRes = await api.post('/api/auth/student-login', { email, password });
+          const studentData = await studentRes.json();
           
-          showMessage('Welcome! Redirecting...', 'success');
-          setTimeout(() => {
-            window.location.href = '../dashboard/teamSelector.html';
-          }, 1000);
-          return;
+          if (studentRes.ok && studentData.user) {
+            // Student login successful
+            localStorage.setItem('bowling_user', JSON.stringify(studentData.user));
+            localStorage.setItem('bowling_role', 'student');
+            
+            showMessage('Welcome! Redirecting...', 'success');
+            setTimeout(() => {
+              window.location.href = '../dashboard/teamSelector.html';
+            }, 1000);
+            return;
+          }
+        } catch (err) {
+          console.log('Student login also failed');
         }
-      } catch (err) {
-        console.log('Student login also failed');
-      }
 
-      // Both failed
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Log In';
-      showMessage('Invalid email or password. Please try again.', 'error');
+        // Both failed
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log In';
+        showMessage('Invalid email or password. Please try again.', 'error');
+      });
     });
   </script>
 </body>

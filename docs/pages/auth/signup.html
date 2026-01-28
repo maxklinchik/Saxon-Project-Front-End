@@ -265,92 +265,105 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // DOM elements
-    const form = document.getElementById('signupForm');
-    const msgEl = document.getElementById('message');
-    const submitBtn = document.getElementById('submitBtn');
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM elements
+      const form = document.getElementById('signupForm');
+      const msgEl = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
 
-    // Show message helper
-    function showMessage(text, type) {
-      msgEl.innerHTML = text;
-      msgEl.className = `message ${type}`;
-      msgEl.style.display = 'block';
-    }
+      // Show message helper
+      function showMessage(text, type) {
+        msgEl.innerHTML = text;
+        msgEl.className = `message ${type}`;
+        msgEl.style.display = 'block';
+      }
 
-    // Initialize Supabase
-    const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      // Initialize Supabase (only if available)
+      let supabase = null;
+      if (window.supabase) {
+        const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      }
 
-    // Google Sign Up handler
-    document.getElementById('googleSignUp').addEventListener('click', async () => {
-      try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin + '/StrikeMaster/pages/auth/callback.html'
+      // Google Sign Up handler
+      const googleBtn = document.getElementById('googleSignUp');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', async () => {
+          if (!supabase) {
+            showMessage('Google Sign-Up is not available. Please use email signup.', 'error');
+            return;
+          }
+          try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: window.location.origin + '/StrikeMaster/pages/auth/callback.html'
+              }
+            });
+            
+            if (error) {
+              console.error('Google sign up error:', error);
+              showMessage('Failed to sign up with Google. Please try again.', 'error');
+            }
+          } catch (err) {
+            console.error('Google OAuth error:', err);
+            showMessage('Failed to connect to Google. Please try again.', 'error');
           }
         });
-        
-        if (error) {
-          console.error('Google sign up error:', error);
-          showMessage('Failed to sign up with Google. Please try again.', 'error');
-        }
-      } catch (err) {
-        console.error('Google OAuth error:', err);
-        showMessage('Failed to connect to Google. Please try again.', 'error');
-      }
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const teamCode = document.getElementById('teamCode').value.trim().toUpperCase();
-      
-      if (!email || !password || !teamCode) {
-        showMessage('Please fill in all fields', 'error');
-        return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Creating account...';
-      showMessage('Verifying team code...', 'loading');
-
-      try {
-        const res = await api.post('/api/auth/student-signup', {
-          email,
-          password,
-          teamCode
-        });
-        const data = await res.json();
+      // Form submit handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        if (!res.ok) {
-          showMessage(data.error || 'Sign up failed', 'error');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Create Account';
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const teamCode = document.getElementById('teamCode').value.trim().toUpperCase();
+        
+        if (!email || !password || !teamCode) {
+          showMessage('Please fill in all fields', 'error');
           return;
         }
 
-        // Store auth
-        if (data.user) {
-          localStorage.setItem('bowling_user', JSON.stringify(data.user));
-          localStorage.setItem('bowling_role', 'student');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+        showMessage('Verifying team code...', 'loading');
+
+        try {
+          const res = await api.post('/api/auth/student-signup', {
+            email,
+            password,
+            teamCode
+          });
+          const data = await res.json();
+          
+          if (!res.ok) {
+            showMessage(data.error || 'Sign up failed', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
+            return;
+          }
+
+          // Store auth
+          if (data.user) {
+            localStorage.setItem('bowling_user', JSON.stringify(data.user));
+            localStorage.setItem('bowling_role', 'student');
+          }
+
+          showMessage(`Account created! Welcome to ${data.teamName || 'the team'}!<br>Redirecting...`, 'success');
+
+          setTimeout(() => {
+            window.location.href = '../dashboard/teamSelector.html';
+          }, 1500);
+          
+        } catch (err) {
+          console.error(err);
+          showMessage('Network error. Please try again.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Account';
         }
-
-        showMessage(`Account created! Welcome to ${data.teamName || 'the team'}!<br>Redirecting...`, 'success');
-
-        setTimeout(() => {
-          window.location.href = '../dashboard/teamSelector.html';
-        }, 1500);
-        
-      } catch (err) {
-        console.error(err);
-        showMessage('Network error. Please try again.', 'error');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Create Account';
-      }
+      });
     });
   </script>
 </body>
