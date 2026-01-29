@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title></title>
-  <link rel="icon" type="image/png" href="assets/images/StrikeMasterIcon.png">
+  <link rel="icon" type="image/png" href="assets/images/BowlingPinCartoon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -39,21 +39,20 @@
     }
 
     .brand-icon {
-      width: 80px;
-      height: 80px;
       margin-bottom: 24px;
-      background: var(--neutral-900);
-      border-radius: 20px;
+      background: transparent;
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       animation: fadeIn 0.6s ease;
     }
 
-    .brand-icon svg {
-      width: 44px;
-      height: 44px;
-      stroke: white;
+    .brand-icon img {
+      width: 220px;
+      height: 220px;
+      object-fit: contain;
+      display: block;
     }
 
     .brand-name {
@@ -184,6 +183,10 @@
       .brand-name {
         font-size: 32px;
       }
+      .brand-icon img {
+        width: 160px;
+        height: 160px;
+      }
       .hero .tagline {
         font-size: 16px;
       }
@@ -197,7 +200,7 @@
 <body>
   <main class="hero">
     <div class="brand-icon">
-      <img src="assets/images/StrikeMasterIcon.png" alt="StrikeMasterIcon" style="width: 180px; height: 180px; border-radius: 32px;" />
+      <img src="assets/images/BowlingPinCartoon.png" alt="BowlingPinCartoon" />
     </div>
     <img src="assets/images/StrikeMasterLogo.png" alt="StrikeMasterLogo" style="max-width: 320px; width: 100%; margin: 24px auto 0 auto; display: block;" />
     <p class="tagline">The simple, secure scoreboard for high school bowling teams. Track players, enter scores, and view team stats.</p>
