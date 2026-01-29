@@ -59,6 +59,11 @@
   document.documentElement.setAttribute("data-theme", savedTheme);
 })();
 
+(function () {
+  const simpleUi = localStorage.getItem("simpleUi") === "true";
+  document.documentElement.setAttribute("data-ui", simpleUi ? "simple" : "cartoon");
+})();
+
 // Team logo loader - updates navbar logo on page load
 document.addEventListener('DOMContentLoaded', function() {
   const savedLogo = localStorage.getItem('teamLogo');

@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/config/teams.js"></script>
@@ -539,6 +541,16 @@
             <span class="toggle-slider"></span>
           </label>
         </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Simple UI</h3>
+            <p>Use the original clean layout</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="simpleUiToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
 
       <!-- Accent Color Card -->
@@ -641,6 +653,7 @@
     function init() {
       initLogoGrid();
       initTheme();
+      initUiMode();
       initColors();
     }
 
@@ -723,6 +736,19 @@
         const theme = e.target.checked ? 'dark' : 'light';
         document.documentElement.setAttribute("data-theme", theme);
         localStorage.setItem("theme", theme);
+      });
+    }
+
+    function initUiMode() {
+      const simpleToggle = document.getElementById('simpleUiToggle');
+      const isSimple = localStorage.getItem("simpleUi") === "true";
+      simpleToggle.checked = isSimple;
+      document.documentElement.setAttribute("data-ui", isSimple ? "simple" : "cartoon");
+
+      simpleToggle.addEventListener('change', (e) => {
+        const simple = e.target.checked;
+        localStorage.setItem("simpleUi", simple);
+        document.documentElement.setAttribute("data-ui", simple ? "simple" : "cartoon");
       });
     }
 
