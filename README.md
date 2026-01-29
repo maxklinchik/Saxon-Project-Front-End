@@ -35,13 +35,13 @@ StrikeMaster/
 │       │   ├── teacherLogin.html
 │       │   └── teacherSignUp.html
 │       ├── dashboard/             # Main application pages
-│       │   ├── boysPlayers.html
+│       │   ├── players.html
 │       │   ├── boysRecords.html
 │       │   ├── girlsPlayers.html
 │       │   ├── girlsRecords.html
 │       │   ├── myTeam.html
 │       │   ├── playerProfile.html
-│       │   └── teamSelector.html
+│       │   └── home.html
 │       ├── rankings/              # Statistics & rankings
 │       │   ├── countyRanking.html
 │       │   ├── divisionRankings.html
@@ -147,10 +147,10 @@ StrikeMaster/
 | `studentLogin.html` | Student code-based login |
 | `teacherLogin.html` | Teacher email/password login |
 | `teacherSignUp.html` | New teacher registration |
-| `teamSelector.html` | Select season and team level |
+| `home.html` | Select season and team level |
 | `boysRecords.html` | Boys team score records |
 | `girlsRecords.html` | Girls team score records |
-| `boysPlayers.html` | Manage boys team players |
+| `players.html` | Manage boys team players |
 | `girlsPlayers.html` | Manage girls team players |
 | `playerProfile.html` | Individual player statistics |
 | `myTeam.html` | Team dashboard menu |

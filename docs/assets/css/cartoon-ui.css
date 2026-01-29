@@ -4,7 +4,11 @@
     radial-gradient(circle at 10% 10%, rgba(255, 209, 102, 0.35), transparent 45%),
     radial-gradient(circle at 90% 15%, rgba(185, 245, 216, 0.4), transparent 45%),
     radial-gradient(circle at 15% 85%, rgba(255, 138, 91, 0.28), transparent 40%),
-    var(--bg-color);
+    repeating-linear-gradient(35deg, rgba(43, 43, 43, 0.035) 0 1px, transparent 1px 14px),
+    radial-gradient(rgba(43, 43, 43, 0.06) 1px, transparent 1px),
+    linear-gradient(var(--bg-color), var(--bg-color));
+  background-size: auto, auto, auto, 36px 36px, 24px 24px, auto;
+  background-position: 0 0, 0 0, 0 0, 0 0, 8px 8px, 0 0;
 }
 
 [data-ui="cartoon"][data-theme="dark"] body {
@@ -12,7 +16,11 @@
     radial-gradient(circle at 10% 10%, rgba(255, 209, 102, 0.15), transparent 45%),
     radial-gradient(circle at 90% 15%, rgba(185, 245, 216, 0.18), transparent 45%),
     radial-gradient(circle at 15% 85%, rgba(255, 138, 91, 0.16), transparent 40%),
-    var(--bg-color);
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 14px),
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(var(--bg-color), var(--bg-color));
+  background-size: auto, auto, auto, 36px 36px, 24px 24px, auto;
+  background-position: 0 0, 0 0, 0 0, 0 0, 8px 8px, 0 0;
 }
 
 [data-ui="cartoon"] .navbar {

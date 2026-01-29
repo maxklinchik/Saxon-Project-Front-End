@@ -160,7 +160,7 @@ Supabase (Database + Auth)
 - `api/server.js` - All API endpoints
 - `database/cleanup-and-reset.sql` - Fresh database setup
 - `docs/pages/auth/teacherSignUp.html` - Coach registration
-- `docs/pages/dashboard/boysPlayers.html` - Player management
+- `docs/pages/dashboard/players.html` - Player management
 - `docs/assets/js/auth-helper.js` - Auth utilities
 - `docs/assets/js/config/api.js` - API client
 

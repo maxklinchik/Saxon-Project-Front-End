@@ -142,7 +142,7 @@
         localStorage.setItem('bowling_role', 'student');
         msgEl.textContent = 'Logged in — redirecting...'; 
         msgEl.style.color = 'green';
-        setTimeout(() => window.location.href = '../dashboard/teamSelector.html', 700);
+        setTimeout(() => window.location.href = '../dashboard/home.html', 700);
       } catch (err) { 
         console.error(err); 
         msgEl.textContent = 'Network error'; 
@@ -173,7 +173,7 @@
         localStorage.setItem('bowling_role', 'student');
         msgEl.textContent = 'Account created — redirecting...'; 
         msgEl.style.color = 'green';
-        setTimeout(() => window.location.href = '../dashboard/teamSelector.html', 700);
+        setTimeout(() => window.location.href = '../dashboard/home.html', 700);
       } catch (err) { 
         console.error(err); 
         msgEl.textContent = 'Network error'; 

@@ -631,7 +631,7 @@
           showMessage(`Account created! Welcome to ${data.teamName || 'the team'}!<br>Redirecting...`, 'success');
 
           setTimeout(() => {
-            window.location.href = '../dashboard/teamSelector.html';
+            window.location.href = '../dashboard/home.html';
           }, 1500);
           
         } catch (err) {
@@ -734,7 +734,7 @@
           showMessage(`Welcome, Coach ${firstName}! Your team code is: <strong>${data.teamCode}</strong><br>Redirecting...`, 'success');
 
           setTimeout(() => {
-            window.location.href = '../dashboard/teamSelector.html';
+            window.location.href = '../dashboard/home.html';
           }, 2000);
           
         } catch (err) {
