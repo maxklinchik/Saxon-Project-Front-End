@@ -103,6 +103,7 @@
     .nav-links {
       display: flex;
       gap: 8px;
+      align-items: center;
     }
 
     .nav-links a {
@@ -117,6 +118,17 @@
 
     .nav-links a:hover { background: rgba(255,255,255,0.1); }
     .nav-links a.active { background: var(--accent-color); color: var(--accent-text-color, white); }
+    
+    .nav-team-logo {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 10px;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.25));
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.18));
+    }
     }
 
     /* View Toggle */
@@ -129,7 +141,7 @@
 
     .view-btn {
       padding: 12px 24px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--button-border-color, var(--border-color));
       background: var(--card-bg);
       color: var(--text-color);
       border-radius: 8px;
@@ -137,7 +149,7 @@
       font-weight: 700;
       font-size: 14px;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
     .view-btn:hover {
@@ -182,14 +194,14 @@
     .export-btn {
       background: var(--accent-color);
       color: var(--accent-text-color, white);
-      border: 2px solid rgba(0, 0, 0, 0.18);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
       padding: 10px 20px;
       border-radius: 999px;
       cursor: pointer;
       font-weight: 700;
       font-size: 14px;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
     .export-btn:hover {
@@ -205,7 +217,7 @@
 
     .tab-btn {
       padding: 12px 24px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--button-border-color, var(--border-color));
       background: var(--card-bg);
       color: var(--text-color);
       border-radius: 8px;
@@ -213,7 +225,7 @@
       font-weight: 700;
       font-size: 14px;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
     .tab-btn:hover {
@@ -350,8 +362,9 @@
 
     .add-player-btn {
       background: var(--accent-color);
-      color: white;
-      border: none;
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
       padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
@@ -412,12 +425,16 @@
 
     .btn-save {
       background: var(--accent-color);
-      color: white;
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
     .btn-cancel {
       background: #ccc;
       color: #333;
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.25));
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
     .players-list {
@@ -515,6 +532,7 @@
       .season-select label { display: none; }
       .nav-links { gap: 4px; }
       .nav-links a { padding: 8px 12px; font-size: 13px; }
+      .nav-team-logo { width: 30px; height: 30px; padding: 3px; }
       .container { padding: 20px 16px; }
       .view-toggle, .tabs { flex-wrap: wrap; justify-content: center; }
     }
@@ -541,6 +559,7 @@
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html" class="active">My Team</a>
       <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
+      <img class="nav-team-logo" data-team-logo src="../../assets/images/Team Logos/phLogo.png" alt="Team logo">
     </div>
   </div>
 
@@ -682,7 +701,14 @@
   <script>
     // Load saved logo
     const savedLogo = localStorage.getItem('teamLogo') || localStorage.getItem('selectedLogo');
-    if (savedLogo) document.getElementById('navLogo').src = '../../assets/images/Team Logos/' + savedLogo;
+    if (savedLogo) {
+      const basePath = '../../assets/images/Team Logos/';
+      const navLogo = document.getElementById('navLogo');
+      if (navLogo) navLogo.src = basePath + savedLogo;
+      document.querySelectorAll('[data-team-logo]').forEach(img => {
+        img.src = basePath + savedLogo;
+      });
+    }
 
     // Require authentication
     if (!auth.requireAuth('../auth/login.html')) {

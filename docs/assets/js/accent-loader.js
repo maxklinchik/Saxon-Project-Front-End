@@ -52,6 +52,28 @@
       document.documentElement.style.setProperty("--accent-text-color", "#ffffff");
     }
   }
+
+  const buttonColor = accentColor || saved;
+  if (buttonColor) {
+    const c = buttonColor.replace('#', '').trim();
+    if (c.length >= 6) {
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+      if (luminance > 0.85) {
+        document.documentElement.style.setProperty("--button-border-color", "rgba(0, 0, 0, 0.45)");
+        document.documentElement.style.setProperty("--button-shadow-color", "rgba(0, 0, 0, 0.28)");
+      } else if (luminance > 0.65) {
+        document.documentElement.style.setProperty("--button-border-color", "rgba(0, 0, 0, 0.32)");
+        document.documentElement.style.setProperty("--button-shadow-color", "rgba(0, 0, 0, 0.22)");
+      } else {
+        document.documentElement.style.setProperty("--button-border-color", "rgba(0, 0, 0, 0.22)");
+        document.documentElement.style.setProperty("--button-shadow-color", "rgba(0, 0, 0, 0.16)");
+      }
+    }
+  }
 })();
 
 (function () {

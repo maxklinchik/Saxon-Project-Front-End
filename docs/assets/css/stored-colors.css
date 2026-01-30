@@ -4,6 +4,8 @@
   --main-color: #6ecbff;
   --sidebar-text-color: #111111;
   --accent-text-color: #111111;
+  --button-border-color: rgba(0, 0, 0, 0.25);
+  --button-shadow-color: rgba(0, 0, 0, 0.18);
 
   /* Theme colors */
   --bg-color: #fff4c2;

@@ -752,6 +752,7 @@
     function selectLogo(logoFile, accentColor, mainColor) {
       currentLogo = logoFile;
       localStorage.setItem('teamLogo', logoFile);
+      updateTeamLogoImages(logoFile);
 
       document.querySelectorAll('.logo-option').forEach(opt => {
         opt.classList.toggle('selected', opt.dataset.logo === logoFile);
@@ -774,6 +775,20 @@
 
       updateCurrentLogoPreview();
       showMessage('Theme updated! Changes apply across all pages.', 'success');
+    }
+
+    function updateTeamLogoImages(logoFile) {
+      const logoImgs = document.querySelectorAll('[data-team-logo]');
+      if (!logoImgs.length) return;
+
+      const currentPath = window.location.pathname;
+      const basePath = currentPath.includes('/pages/')
+        ? '../../assets/images/Team Logos/'
+        : 'assets/images/Team Logos/';
+
+      logoImgs.forEach(img => {
+        img.src = `${basePath}${logoFile}`;
+      });
     }
     
     function updateAccentTextColor(hex) {
