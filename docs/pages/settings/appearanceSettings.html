@@ -856,6 +856,7 @@
         document.documentElement.style.setProperty("--main-color", savedMain);
         updateSidebarTextColor(savedMain);
       }
+      updateDashboardButtonStyles(mainPicker.value, accentPicker.value);
 
       updatePresetSelection('accentPresets', savedAccent || "#ffa500");
       updatePresetSelection('mainPresets', savedMain || "#5f371c");
@@ -867,6 +868,7 @@
         document.documentElement.style.setProperty("--accent-color", color);
         updatePresetSelection('accentPresets', color);
         updateAccentTextColor(color);
+        updateDashboardButtonStyles(mainPicker.value, color);
       });
 
       document.querySelectorAll('#accentPresets .preset-color').forEach(preset => {
@@ -877,6 +879,7 @@
           document.documentElement.style.setProperty("--accent-color", color);
           updatePresetSelection('accentPresets', color);
           updateAccentTextColor(color);
+          updateDashboardButtonStyles(mainPicker.value, color);
         });
       });
 
@@ -887,6 +890,7 @@
         document.documentElement.style.setProperty("--main-color", color);
         updateSidebarTextColor(color);
         updatePresetSelection('mainPresets', color);
+        updateDashboardButtonStyles(color, accentPicker.value);
       });
 
       document.querySelectorAll('#mainPresets .preset-color').forEach(preset => {
@@ -897,6 +901,7 @@
           document.documentElement.style.setProperty("--main-color", color);
           updateSidebarTextColor(color);
           updatePresetSelection('mainPresets', color);
+          updateDashboardButtonStyles(color, accentPicker.value);
         });
       });
 
@@ -910,6 +915,7 @@
         localStorage.setItem("accentColor", defaultColor);
         updatePresetSelection('accentPresets', defaultColor);
         updateAccentTextColor(defaultColor);
+        updateDashboardButtonStyles(mainPicker.value, defaultColor);
         showMessage('Accent color reset to team default', 'success');
       });
 
@@ -922,6 +928,7 @@
         localStorage.setItem("mainColor", defaultColor);
         updatePresetSelection('mainPresets', defaultColor);
         updateSidebarTextColor(defaultColor);
+        updateDashboardButtonStyles(defaultColor, accentPicker.value);
         showMessage('Main color reset to team default', 'success');
       });
     }

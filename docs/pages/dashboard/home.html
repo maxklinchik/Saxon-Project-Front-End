@@ -111,17 +111,6 @@
     .nav-links a:hover { background: rgba(255,255,255,0.1); }
     .nav-links a.active { background: var(--accent-color); color: var(--accent-text-color, white); }
 
-    .nav-team-logo {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      border-radius: 10px;
-      padding: 4px;
-      background: rgba(255, 255, 255, 0.85);
-      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.25));
-      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.18));
-    }
-
     .container {
       max-width: 1000px;
       margin: 0 auto;
@@ -159,9 +148,9 @@
 
     .tab-btn {
       padding: 10px 24px;
-      border: 2px solid var(--button-border-color, var(--border-color));
-      background: var(--card-bg);
-      color: var(--text-color);
+      border: 2px solid var(--dashboard-button-border, var(--button-border-color, var(--border-color)));
+      background: var(--dashboard-button-bg, var(--card-bg));
+      color: var(--dashboard-button-text, var(--text-color));
       border-radius: 8px;
       cursor: pointer;
       font-weight: 500;
@@ -195,6 +184,34 @@
       filter: brightness(0.95);
       transform: translateY(-1px);
     }
+
+    .match-type-content {
+      max-width: 420px;
+    }
+
+    .match-type-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 4px 0 8px;
+    }
+
+    .match-type-btn {
+      padding: 12px 20px;
+      border: 2px solid var(--dashboard-button-border, var(--button-border-color, rgba(0, 0, 0, 0.2)));
+      background: var(--dashboard-button-bg, var(--card-bg));
+      color: var(--dashboard-button-text, var(--text-color));
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.12));
+    }
+
+    .match-type-btn:hover { border-color: var(--accent-color); }
 
     /* Match Entry Modal */
     .modal-overlay {
@@ -698,6 +715,11 @@
       color: #9d174d;
     }
 
+    .gender-badge.coed {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
     .location-wrapper {
       display: flex;
       gap: 8px;
@@ -999,7 +1021,6 @@
       .season-select label { display: none; }
       .nav-links { gap: 4px; }
       .nav-links a { padding: 8px 12px; font-size: 13px; }
-      .nav-team-logo { width: 30px; height: 30px; padding: 3px; }
       .container { padding: 20px 16px; }
 
       .form-row {
@@ -1051,7 +1072,6 @@
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
       <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
-      <img class="nav-team-logo" data-team-logo src="../../assets/images/Team Logos/phLogo.png" alt="Team logo">
     </div>
   </div>
 
@@ -1078,6 +1098,20 @@
           <p>No matches recorded yet.</p>
           <p>Click "Log New Match" to add your first match!</p>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="matchTypeModal">
+    <div class="modal-content match-type-content">
+      <div class="modal-header">
+        <h2>Select Match Type</h2>
+        <button class="close-modal" id="closeMatchType">&times;</button>
+      </div>
+      <div class="match-type-buttons">
+        <button type="button" class="match-type-btn" data-gender="boys">Boys</button>
+        <button type="button" class="match-type-btn" data-gender="girls">Girls</button>
+        <button type="button" class="match-type-btn" data-gender="coed">Coed</button>
       </div>
     </div>
   </div>
@@ -1229,6 +1263,7 @@
     }
 
     let currentGender = 'all';
+    let selectedMatchGender = 'boys';
     let currentSeason = window.SeasonContext ? SeasonContext.getSeason() : '2025-2026';
     let coachId = null;
     let players = [];
@@ -1488,6 +1523,9 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentGender = btn.dataset.gender;
+        if (currentGender !== 'all') {
+          selectedMatchGender = currentGender;
+        }
         document.getElementById('sectionTitle').textContent = 
           currentGender === 'boys' ? 'Boys Recent Matches' : 
           currentGender === 'girls' ? 'Girls Recent Matches' : 'All Recent Matches';
@@ -1496,13 +1534,30 @@
       });
     });
 
-    // Modal controls
-    document.getElementById('logMatchBtn').addEventListener('click', () => {
+    function openMatchModal(gender) {
       resetModal();
       document.getElementById('matchModal').classList.add('active');
       document.getElementById('matchDate').valueAsDate = new Date();
-      // Load players for the modal
-      loadPlayers();
+      loadPlayers(gender);
+    }
+
+    // Modal controls
+    document.getElementById('logMatchBtn').addEventListener('click', () => {
+      if (isStudentMode()) return;
+      const matchTypeModal = document.getElementById('matchTypeModal');
+      if (matchTypeModal) matchTypeModal.classList.add('active');
+    });
+
+    document.querySelectorAll('.match-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedMatchGender = btn.dataset.gender;
+        document.getElementById('matchTypeModal').classList.remove('active');
+        openMatchModal(selectedMatchGender);
+      });
+    });
+
+    document.getElementById('closeMatchType').addEventListener('click', () => {
+      document.getElementById('matchTypeModal').classList.remove('active');
     });
 
     document.getElementById('closeModal').addEventListener('click', () => {
@@ -1523,11 +1578,12 @@
     });
 
     // Load players for the form
-    async function loadPlayers() {
+    async function loadPlayers(genderOverride) {
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
-        
-        if (currentGender === 'all') {
+        const activeGender = genderOverride || currentGender;
+
+        if (activeGender === 'all' || activeGender === 'coed') {
           // Load both boys and girls players
           const [boysResponse, girlsResponse] = await Promise.all([
             fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
@@ -1541,7 +1597,7 @@
           players = [...allPlayers.boys, ...allPlayers.girls];
           renderAllPlayersTable();
         } else {
-          const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${currentGender}`);
+          const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${activeGender}`);
           
           if (!response.ok) throw new Error('Failed to fetch players');
           
@@ -1620,6 +1676,62 @@
       tbody.innerHTML = html;
     }
 
+    function renderAllPlayersTableWithScores(records) {
+      const tbody = document.getElementById('playersTableBody');
+      
+      if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No players found.</td></tr>';
+        return;
+      }
+
+      const recordMap = {};
+      records.forEach(record => {
+        recordMap[record.player_id] = record;
+      });
+
+      let html = '';
+      if (allPlayers.boys.length > 0) {
+        html += '<tr><td colspan="6" class="gender-separator">Boys Team</td></tr>';
+        html += allPlayers.boys.map(player => {
+          const record = recordMap[player.id];
+          const hasRecord = !!record;
+          const isDNP = !hasRecord;
+          return `
+            <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-gender="boys">
+              <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+              <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (allPlayers.girls.length > 0) {
+        html += '<tr><td colspan="6" class="gender-separator">Girls Team</td></tr>';
+        html += allPlayers.girls.map(player => {
+          const record = recordMap[player.id];
+          const hasRecord = !!record;
+          const isDNP = !hasRecord;
+          return `
+            <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-gender="girls">
+              <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+              <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      tbody.innerHTML = html;
+      setTimeout(() => calculateTeamTotals(), 100);
+    }
+
     // Calculate team totals from varsity player scores
     function calculateTeamTotals() {
       let teamG1 = 0, teamG2 = 0, teamG3 = 0;
@@ -1671,7 +1783,7 @@
       e.preventDefault();
       
       const isEditing = editingMatchId !== null;
-      const isAllMode = currentGender === 'all' && !isEditing;
+      const selectedGender = selectedMatchGender || currentGender;
       
       const baseMatchData = {
         coachId: coachId,
@@ -1722,86 +1834,9 @@
           });
           
           showMessage('Match updated successfully!', 'success');
-        } else if (isAllMode) {
-          // Create separate matches for boys and girls
-          const boysRows = document.querySelectorAll('.player-row[data-gender="boys"]');
-          const girlsRows = document.querySelectorAll('.player-row[data-gender="girls"]');
-          
-          // Check if there are any scores for boys
-          const hasBoysScores = Array.from(boysRows).some(row => {
-            const dnp = row.querySelector('.dnp-checkbox').checked;
-            if (dnp) return false;
-            const game1 = row.querySelector('.game1').value;
-            const game2 = row.querySelector('.game2').value;
-            const game3 = row.querySelector('.game3').value;
-            return game1 || game2 || game3;
-          });
-          
-          // Check if there are any scores for girls
-          const hasGirlsScores = Array.from(girlsRows).some(row => {
-            const dnp = row.querySelector('.dnp-checkbox').checked;
-            if (dnp) return false;
-            const game1 = row.querySelector('.game1').value;
-            const game2 = row.querySelector('.game2').value;
-            const game3 = row.querySelector('.game3').value;
-            return game1 || game2 || game3;
-          });
-          
-          let matchesCreated = 0;
-          
-          // Create boys match if there are scores
-          if (hasBoysScores) {
-            const boysMatchData = { ...baseMatchData, gender: 'boys' };
-            const boysResponse = await fetch(`${API_BASE}/api/matches`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(boysMatchData)
-            });
-            
-            if (!boysResponse.ok) throw new Error('Failed to create boys match');
-            const boysMatch = await boysResponse.json();
-            const boysTotalWood = await savePlayerRecords(boysMatch.id, 'boys');
-            
-            // Update match with total wood
-            await fetch(`${API_BASE}/api/matches/${boysMatch.id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ourScore: boysTotalWood })
-            });
-            matchesCreated++;
-          }
-          
-          // Create girls match if there are scores
-          if (hasGirlsScores) {
-            const girlsMatchData = { ...baseMatchData, gender: 'girls' };
-            const girlsResponse = await fetch(`${API_BASE}/api/matches`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(girlsMatchData)
-            });
-            
-            if (!girlsResponse.ok) throw new Error('Failed to create girls match');
-            const girlsMatch = await girlsResponse.json();
-            const girlsTotalWood = await savePlayerRecords(girlsMatch.id, 'girls');
-            
-            // Update match with total wood
-            await fetch(`${API_BASE}/api/matches/${girlsMatch.id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ourScore: girlsTotalWood })
-            });
-            matchesCreated++;
-          }
-          
-          if (matchesCreated === 0) {
-            showMessage('Please enter scores for at least one player.', 'error');
-            return;
-          }
-          
-          showMessage(`${matchesCreated} match${matchesCreated > 1 ? 'es' : ''} saved successfully!`, 'success');
         } else {
-          // Create single gender match
-          const matchData = { ...baseMatchData, gender: currentGender };
+          // Create single match (boys, girls, or coed)
+          const matchData = { ...baseMatchData, gender: selectedGender };
           
           const matchResponse = await fetch(`${API_BASE}/api/matches`, {
             method: 'POST',
@@ -2004,7 +2039,8 @@
           // Get opponent logo
           const opponentLogo = getOpponentLogo(match.opponent);
 
-          const genderBadge = currentGender === 'all' ? `<span class="gender-badge ${match.gender}">${match.gender === 'boys' ? 'Boys' : 'Girls'}</span>` : '';
+          const badgeText = match.gender === 'coed' ? 'Coed' : match.gender === 'boys' ? 'Boys' : 'Girls';
+          const genderBadge = currentGender === 'all' ? `<span class="gender-badge ${match.gender || ''}">${badgeText}</span>` : '';
 
           html += `
             <div class="match-card" data-match-id="${match.id}">
@@ -2143,6 +2179,7 @@
         // Set editing state
         editingMatchId = matchId;
         editingMatchGender = match.gender;
+        selectedMatchGender = match.gender;
         
         // Update modal title
         document.querySelector('.modal-header h2').textContent = 'Edit Match';
@@ -2166,10 +2203,22 @@
         calculateMatchResult();
         
         // Load players for this match's gender
-        const playersResponse = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${match.gender}`);
-        if (playersResponse.ok) {
-          players = await playersResponse.json();
-          renderPlayersTableWithScores(records);
+        if (match.gender === 'coed') {
+          const [boysResponse, girlsResponse] = await Promise.all([
+            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
+            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
+          ]);
+          if (boysResponse.ok && girlsResponse.ok) {
+            allPlayers.boys = await boysResponse.json();
+            allPlayers.girls = await girlsResponse.json();
+            renderAllPlayersTableWithScores(records);
+          }
+        } else {
+          const playersResponse = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${match.gender}`);
+          if (playersResponse.ok) {
+            players = await playersResponse.json();
+            renderPlayersTableWithScores(records);
+          }
         }
         
         // Show modal
@@ -2260,11 +2309,10 @@
       document.getElementById('teamTotal').textContent = '0';
       document.getElementById('oppTotal').textContent = '0';
       document.getElementById('pointsResultCard').style.display = 'none';
-      
-      if (currentGender === 'all') {
-        renderAllPlayersTable();
-      } else {
-        renderPlayersTable();
+
+      const tbody = document.getElementById('playersTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Loading players...</td></tr>';
       }
     }
 

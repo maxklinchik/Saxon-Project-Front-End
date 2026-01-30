@@ -7,23 +7,28 @@
 })();
 
 (function () {
-  const saved = localStorage.getItem("mainColor");
-  if (saved) {
-    document.documentElement.style.setProperty("--main-color", saved);
-    
-    // Check if color is light and set text color accordingly
-    const isLightColor = (hex) => {
-      const c = hex.replace('#', '').trim();
-      if (c.length < 6) return false;
-      const r = parseInt(c.substr(0, 2), 16);
-      const g = parseInt(c.substr(2, 2), 16);
-      const b = parseInt(c.substr(4, 2), 16);
-      // Calculate luminance
-      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      return luminance > 0.5;
-    };
-    
-    if (isLightColor(saved)) {
+  const savedMain = localStorage.getItem("mainColor");
+  if (savedMain) {
+    document.documentElement.style.setProperty("--main-color", savedMain);
+  }
+
+  const mainColor = savedMain
+    || getComputedStyle(document.documentElement).getPropertyValue("--main-color").trim();
+  const accentColor = localStorage.getItem("accentColor")
+    || getComputedStyle(document.documentElement).getPropertyValue("--accent-color").trim();
+
+  const isLightColor = (hex) => {
+    const c = hex.replace('#', '').trim();
+    if (c.length < 6) return false;
+    const r = parseInt(c.substr(0, 2), 16);
+    const g = parseInt(c.substr(2, 2), 16);
+    const b = parseInt(c.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+  };
+
+  if (mainColor) {
+    if (isLightColor(mainColor)) {
       document.documentElement.style.setProperty("--sidebar-text-color", "#000000");
       document.documentElement.classList.add('light-sidebar');
     } else {
@@ -31,29 +36,14 @@
       document.documentElement.classList.remove('light-sidebar');
     }
   }
-  
-  // Also check accent color for readability
-  const accentColor = localStorage.getItem("accentColor");
+
+  let accentTextColor = null;
   if (accentColor) {
-    const isLightAccent = (hex) => {
-      const c = hex.replace('#', '').trim();
-      if (c.length < 6) return false;
-      const r = parseInt(c.substr(0, 2), 16);
-      const g = parseInt(c.substr(2, 2), 16);
-      const b = parseInt(c.substr(4, 2), 16);
-      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      return luminance > 0.5;
-    };
-    
-    // If accent is light, set accent text to dark
-    if (isLightAccent(accentColor)) {
-      document.documentElement.style.setProperty("--accent-text-color", "#000000");
-    } else {
-      document.documentElement.style.setProperty("--accent-text-color", "#ffffff");
-    }
+    accentTextColor = isLightColor(accentColor) ? "#000000" : "#ffffff";
+    document.documentElement.style.setProperty("--accent-text-color", accentTextColor);
   }
 
-  const buttonColor = accentColor || saved;
+  const buttonColor = accentColor || mainColor;
   if (buttonColor) {
     const c = buttonColor.replace('#', '').trim();
     if (c.length >= 6) {
@@ -71,6 +61,31 @@
       } else {
         document.documentElement.style.setProperty("--button-border-color", "rgba(0, 0, 0, 0.22)");
         document.documentElement.style.setProperty("--button-shadow-color", "rgba(0, 0, 0, 0.16)");
+      }
+    }
+  }
+
+  if (mainColor && accentColor) {
+    const c = mainColor.replace('#', '').trim();
+    if (c.length >= 6) {
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const chroma = max - min;
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const isVeryLight = luminance > 0.88;
+      const isGray = chroma < 18;
+
+      if (isVeryLight || isGray) {
+        document.documentElement.style.setProperty("--dashboard-button-bg", accentColor);
+        document.documentElement.style.setProperty("--dashboard-button-text", accentTextColor || "#ffffff");
+        document.documentElement.style.setProperty("--dashboard-button-border", "rgba(0, 0, 0, 0.28)");
+      } else {
+        document.documentElement.style.setProperty("--dashboard-button-bg", "var(--card-bg)");
+        document.documentElement.style.setProperty("--dashboard-button-text", "var(--text-color)");
+        document.documentElement.style.setProperty("--dashboard-button-border", "var(--button-border-color)");
       }
     }
   }
