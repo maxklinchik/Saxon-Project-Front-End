@@ -773,6 +773,7 @@
         updateSidebarTextColor(mainColor);
       }
 
+      updateDashboardButtonStyles(mainColor, accentColor);
       updateCurrentLogoPreview();
       showMessage('Theme updated! Changes apply across all pages.', 'success');
     }
@@ -802,6 +803,37 @@
         document.documentElement.style.setProperty("--accent-text-color", "#000000");
       } else {
         document.documentElement.style.setProperty("--accent-text-color", "#ffffff");
+      }
+    }
+
+    function updateDashboardButtonStyles(mainHex, accentHex) {
+      if (!mainHex || !accentHex) return;
+      const c = mainHex.replace('#', '').trim();
+      if (c.length < 6) return;
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const chroma = max - min;
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const isVeryLight = luminance > 0.88;
+      const isGray = chroma < 18;
+      const accentC = accentHex.replace('#', '').trim();
+      const ar = parseInt(accentC.substr(0, 2), 16);
+      const ag = parseInt(accentC.substr(2, 2), 16);
+      const ab = parseInt(accentC.substr(4, 2), 16);
+      const accentLum = (0.299 * ar + 0.587 * ag + 0.114 * ab) / 255;
+      const accentText = accentLum > 0.5 ? '#000000' : '#ffffff';
+
+      if (isVeryLight || isGray) {
+        document.documentElement.style.setProperty('--dashboard-button-bg', accentHex);
+        document.documentElement.style.setProperty('--dashboard-button-text', accentText);
+        document.documentElement.style.setProperty('--dashboard-button-border', 'rgba(0, 0, 0, 0.28)');
+      } else {
+        document.documentElement.style.setProperty('--dashboard-button-bg', 'var(--card-bg)');
+        document.documentElement.style.setProperty('--dashboard-button-text', 'var(--text-color)');
+        document.documentElement.style.setProperty('--dashboard-button-border', 'var(--button-border-color)');
       }
     }
 
