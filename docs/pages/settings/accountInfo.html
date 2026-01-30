@@ -7,11 +7,13 @@
   <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -46,6 +48,7 @@
 
     .layout { display: flex; min-height: 100vh; }
 
+    /* Sidebar (copied from appearanceSettings.html) */
     .sidebar {
       width: 240px;
       background: var(--main-color);
@@ -56,7 +59,6 @@
       display: flex;
       flex-direction: column;
     }
-
     .sidebar-header {
       padding: 0 20px 24px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -105,11 +107,11 @@
       font-family: inherit;
     }
 
-    .season-select select:focus { outline: none; }
-
+    .season-select select:focus {
+      outline: none;
+    }
     .sidebar-header h2 { margin: 0; font-size: 20px; font-weight: 600; }
     .sidebar-header p { margin: 4px 0 0; font-size: 13px; opacity: 0.7; }
-
     .sidebar a, .sidebar button {
       display: flex;
       align-items: center;
@@ -127,11 +129,9 @@
       width: 100%;
       font-family: inherit;
     }
-
     .sidebar a:hover, .sidebar button:hover { background: rgba(255,255,255,0.1); }
     .sidebar a.active { background: var(--accent-color); color: var(--accent-text-color, white); }
     .sidebar a svg, .sidebar button svg { width: 20px; height: 20px; stroke: currentColor; flex-shrink: 0; }
-
     #logoutBtn {
       margin-top: auto;
       color: #fca5a5;
@@ -139,118 +139,52 @@
       padding-top: 16px;
       margin-top: 16px;
     }
-
     #logoutBtn:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 
-    .content {
-      flex: 1;
-      margin-left: 240px;
-      padding: 32px 40px;
-      max-width: 900px;
-    }
-
-    .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px; }
-    .page-header p { margin: 0; color: var(--text-muted); font-size: 15px; }
-
-    .card {
+    /* Main content */
+    .content { flex: 1; margin-left: 240px; padding: 32px 40px; max-width: 900px; }
+    .profile-card {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 24px;
+      padding: 32px 32px 24px 32px;
+      margin-bottom: 32px;
       border: 1px solid var(--border-color);
-      margin-bottom: 24px;
-    }
-
-    .card-header {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
       display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .card-header .icon {
-      width: 40px;
-      height: 40px;
-      background: color-mix(in srgb, var(--accent-color) 15%, transparent);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-header .icon svg { width: 22px; height: 22px; stroke: var(--accent-color); }
-    .card-header h2 { margin: 0; font-size: 17px; font-weight: 600; }
-    .card-header p { margin: 2px 0 0; font-size: 13px; color: var(--text-muted); }
-
-    .info-row {
-      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
       gap: 18px;
-      align-items: center;
-      font-size: 15px;
-      margin-bottom: 14px;
     }
-
-    .info-row:last-of-type { margin-bottom: 0; }
-
-    .info-label {
+    .profile-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile-info-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 16px;
+    }
+    .profile-label {
       font-weight: 600;
       color: var(--text-muted);
       min-width: 120px;
     }
-
-    .info-value {
+    .profile-value {
       color: var(--text-color);
       font-weight: 500;
       word-break: break-all;
-    }
-
-    .button-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: inherit;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-primary { background: var(--accent-color); color: var(--accent-text-color, white); }
-    .btn-primary:hover { filter: brightness(0.95); transform: translateY(-1px); }
-
-    .message {
-      padding: 14px 18px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      font-weight: 500;
-      font-size: 14px;
-      display: none;
-    }
-
-    .message.success { display: block; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .message.error { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .content { margin-left: 0; padding: 20px; }
     }
   </style>
 </head>
 <body>
   <div class="layout">
+    <!-- Sidebar (identical to appearanceSettings.html) -->
     <div class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-brand">
@@ -271,6 +205,10 @@
         <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
         Appearance
       </a>
+      <a href="teamsSettings.html">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+        Teams
+      </a>
       <a href="accountInfo.html" class="active">
         <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         Account
@@ -284,8 +222,306 @@
         Logout
       </button>
     </div>
-
     <div class="content">
+      <div class="profile-card" id="profileCard">
+        <div class="profile-title">
+          <svg fill="none" viewBox="0 0 24 24" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          My Profile
+        </div>
+        <div class="profile-info-row"><span class="profile-label">Display Name:</span> <span class="profile-value" id="profileDisplayName">Loading...</span></div>
+        <div class="profile-info-row"><span class="profile-label">Email:</span> <span class="profile-value" id="profileEmail">Loading...</span></div>
+        <div class="profile-info-row"><span class="profile-label">Coach Code:</span> <span class="profile-value" id="profileCoachCode">Loading...</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Require authentication
+    if (!auth.requireAuth('../auth/studentLogin.html')) {
+      throw new Error('Not authenticated');
+    }
+    // Attach logout event
+    document.addEventListener('DOMContentLoaded', function() {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          if (confirm('Are you sure you want to logout?')) auth.logout('../../index.html');
+        });
+      }
+    });
+    // Fetch user data from Supabase and populate profile
+    document.addEventListener('DOMContentLoaded', async function() {
+      const localUser = auth.getUser();
+      let userData = null;
+      let supabase = null;
+      if (window.supabase && localUser && localUser.email) {
+        const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        let { data, error } = await supabase
+          .from('users')
+          .select('first_name,last_name,email,team_code')
+          .eq('email', localUser.email)
+          .single();
+        if (error) {
+          console.error('[Account Info] Supabase error:', error);
+          userData = localUser;
+        } else {
+          userData = data;
+        }
+      } else {
+        userData = localUser;
+      }
+      // Populate profile fields
+      const displayName = [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.name || userData.display_name || '';
+      document.getElementById('profileDisplayName').textContent = displayName || 'N/A';
+      document.getElementById('profileEmail').textContent = userData.email || 'N/A';
+      document.getElementById('profileCoachCode').textContent = userData.team_code || userData.coach_code || userData.code || 'N/A';
+    });
+  </script>
+</body>
+</html>
+    .content { flex: 1; margin-left: 240px; padding: 32px 40px; max-width: 900px; }
+
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px; color: var(--text-color); }
+    .page-header p { margin: 0; color: var(--text-muted); font-size: 15px; }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header .icon {
+      width: 40px;
+      height: 40px;
+      background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-header .icon svg { width: 22px; height: 22px; stroke: var(--accent-color); }
+    .card-header h2 { margin: 0; font-size: 17px; font-weight: 600; }
+    .card-header p { margin: 2px 0 0; font-size: 13px; color: var(--text-muted); }
+
+    /* Form groups */
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text-color); }
+    .form-group .hint { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+    .input-wrapper { position: relative; }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
+    }
+
+    .form-group input:read-only { background: var(--border-color); cursor: default; }
+    .form-group input:read-only:focus { border-color: var(--border-color); box-shadow: none; }
+
+    .edit-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--accent-color);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+    }
+
+    .edit-btn:hover { color: color-mix(in srgb, var(--accent-color) 70%, black); }
+    .edit-btn svg { width: 18px; height: 18px; }
+
+    /* Code display */
+    .code-display {
+      background: var(--content-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    /* Password section */
+    .password-grid { display: grid; gap: 16px; }
+
+    .show-password {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .show-password input { width: 16px; height: 16px; cursor: pointer; }
+
+    .password-strength { margin-top: 8px; height: 4px; border-radius: 2px; background: var(--border-color); overflow: hidden; }
+    .password-strength-bar { height: 100%; width: 0; transition: all 0.3s; border-radius: 2px; }
+    .password-strength-bar.weak { width: 33%; background: #ef4444; }
+    .password-strength-bar.medium { width: 66%; background: #f59e0b; }
+    .password-strength-bar.strong { width: 100%; background: #22c55e; }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary { background: var(--accent-color); color: var(--accent-text-color, white); }
+    .btn-primary:hover { filter: brightness(0.95); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Message */
+    .message { padding: 14px 18px; margin-bottom: 24px; border-radius: 10px; font-weight: 500; font-size: 14px; display: none; }
+    .message.success { display: block; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .message.error { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    [data-theme="dark"] .message.success { background: rgba(34, 197, 94, 0.15); color: #86efac; border-color: rgba(34, 197, 94, 0.3); }
+    [data-theme="dark"] .message.error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+
+    /* Student notice */
+    .student-notice {
+      background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-color);
+      font-size: 14px;
+    }
+
+    .student-notice svg { width: 20px; height: 20px; stroke: var(--accent-color); flex-shrink: 0; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { margin-left: 0; padding: 20px; }
+      .mobile-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+      .mobile-back { display: flex; align-items: center; gap: 8px; color: var(--accent-color); text-decoration: none; font-weight: 500; font-size: 14px; }
+      .mobile-back svg { width: 20px; height: 20px; }
+    }
+
+    @media (min-width: 769px) { .mobile-header { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img data-team-logo src="../../assets/images/BowlingPinCartoon.png" alt="School logo">
+          <div class="season-select">
+            <label for="seasonSelectAlt">Season</label>
+            <select id="seasonSelectAlt" data-season-select>
+              <option value="2025-2026">2025-26</option>
+              <option value="2024-2025">2024-25</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+        </div>
+        <h2>Settings</h2>
+        <p>Manage your account</p>
+      </div>
+
+
+      <a href="appearanceSettings.html">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+        Appearance
+      </a>
+      <a href="teamsSettings.html">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+        Teams
+      </a>
+
+      <a href="accountInfo.html" class="active">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        Account Info
+      </a>
+
+      <a href="../dashboard/home.html">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
+        Back to Dashboard
+      </a>
+
+      <button id="logoutBtn">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Logout
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <!-- Mobile Header -->
+      <div class="mobile-header">
+        <a href="../dashboard/home.html" class="mobile-back">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back
+        </a>
+        <button id="mobileLogoutBtn" style="background: none; border: none; color: #ef4444; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <svg fill="none" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Logout
+        </button>
+      </div>
+
       <div class="page-header">
         <h1>Account Information</h1>
         <p>Manage your profile and security settings</p>
@@ -293,6 +529,14 @@
 
       <div id="message" class="message"></div>
 
+      <div id="studentNotice" class="student-notice" style="display: none;">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+        </svg>
+        <span>You're viewing as a student. Account settings are read-only.</span>
+      </div>
+
+      <!-- Profile Card -->
       <div class="card">
         <div class="card-header">
           <div class="icon">
@@ -306,25 +550,144 @@
           </div>
         </div>
 
-        <div class="info-row">
-          <span class="info-label">Display Name:</span>
-          <span class="info-value" id="profileDisplayName">Loading...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Email:</span>
-          <span class="info-value" id="profileEmail">Loading...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Coach Code:</span>
-          <span class="info-value" id="profileCoachCode">Loading...</span>
+        <div class="form-group">
+          <label for="displayName">Display Name</label>
+          <div class="input-wrapper">
+            <input type="text" id="displayName" readonly>
+            <button type="button" class="edit-btn" onclick="enableEdit('displayName')" title="Edit">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
+            </button>
+          </div>
         </div>
 
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="email" readonly>
+            <button type="button" class="edit-btn" onclick="enableEdit('email')" title="Edit">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Your Coach Code</label>
+          <div class="code-display" id="userCode">------</div>
+          <p class="hint">Share this code with students to let them view your team's data</p>
+        </div>
+
+        <div class="button-row" id="profileButtons">
+          <button type="button" class="btn btn-primary" id="saveProfileBtn">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" width="18" height="18" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="card" id="passwordCard">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <div>
+            <h2>Change Password</h2>
+            <p>Update your account password</p>
+          </div>
+        </div>
+
+        <div class="password-grid">
+          <div class="form-group">
+            <label for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" placeholder="Enter your current password">
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new password" oninput="checkPasswordStrength()">
+            <div class="password-strength">
+              <div class="password-strength-bar" id="strengthBar"></div>
+            </div>
+            <p class="hint" id="strengthText">Use at least 8 characters with letters and numbers</p>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm new password" oninput="checkPasswordMatch()">
+            <p class="hint" id="matchText"></p>
+          </div>
+        </div>
+
+        <label class="show-password">
+          <input type="checkbox" id="showPasswords" onchange="togglePasswordVisibility()">
+          Show passwords
+        </label>
+
         <div class="button-row">
-          <button type="button" class="btn btn-primary" id="changePasswordPromptBtn">
+          <button type="button" class="btn btn-primary" id="changePasswordBtn" onclick="changePassword()">
             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" width="18" height="18" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
             Change Password
+          </button>
+        </div>
+      </div>
+
+      <!-- Google Account Card -->
+      <div class="card" id="googleCard">
+        <div class="card-header">
+          <div class="icon" style="background: #f0f9ff;">
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+          </div>
+          <div>
+            <h2>Google Account</h2>
+            <p>Link or unlink your Google account for easy sign-in</p>
+          </div>
+        </div>
+
+        <div id="googleNotLinked" style="display: none;">
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
+            Link your Google account to sign in faster without entering your password.
+          </p>
+          <button type="button" class="btn" id="linkGoogleBtn" style="background: white; color: var(--text-color); border: 1px solid var(--border-color); gap: 10px;">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Link Google Account
+          </button>
+        </div>
+
+        <div id="googleLinked" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f0fdf4; border-radius: 8px; margin-bottom: 16px;">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#16a34a" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span style="color: #166534; font-size: 14px; font-weight: 500;">Google account linked</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">
+            You can sign in using your Google account. Click below to unlink.
+          </p>
+          <button type="button" class="btn" id="unlinkGoogleBtn" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.181 8.68a4.503 4.503 0 011.903 6.405m-9.768-2.782L3.56 14.06a4.5 4.5 0 006.364 6.365l.659-.66m-.659.66L12 17.657m0 0l2.121 2.121m-2.121-2.121L9.879 15.536m2.121 2.121L14.121 15.536M3.56 9.94a4.5 4.5 0 016.364-6.365l.659.66m6.182 8.086l1.756-1.757a4.5 4.5 0 00-6.364-6.364l-.659.659" />
+            </svg>
+            Unlink Google Account
           </button>
         </div>
       </div>
@@ -333,56 +696,289 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // Require authentication
     if (!auth.requireAuth('../auth/studentLogin.html')) {
       throw new Error('Not authenticated');
     }
 
     const isStudent = auth.isStudent();
+    const currentRole = isStudent ? 'student' : 'coach';
 
+    // Initialize Supabase for Google OAuth
+    let supabase = null;
+    if (window.supabase) {
+      const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    }
+
+
+    // Attach logout event listeners after DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
           if (confirm('Are you sure you want to logout?')) auth.logout('../../index.html');
         });
+      } else {
+        console.error('[Account Info] Logout button not found!');
       }
-
-      document.getElementById('changePasswordPromptBtn')?.addEventListener('click', promptChangePassword);
-      if (isStudent) {
-        document.getElementById('changePasswordPromptBtn').style.display = 'none';
+      const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+      if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', () => {
+          if (confirm('Are you sure you want to logout?')) auth.logout('../../index.html');
+        });
       }
     });
 
-    document.addEventListener('DOMContentLoaded', async function() {
-      const localUser = auth.getUser();
-      if (!localUser) {
-        showMessage('Unable to load your account info. Please log in again.', 'error');
-        return;
-      }
 
-      let userData = localUser;
-      if (window.supabase && localUser.email) {
-        const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-        try {
-          const { data, error } = await supabase
+    // Ensure DOM is loaded before accessing elements
+    document.addEventListener('DOMContentLoaded', async function() {
+      let hasError = false;
+      let userData = null;
+      // Try to get user from localStorage first
+      const localUser = auth.getUser();
+      // Try to get user from Supabase if possible
+      try {
+        if (supabase && localUser && localUser.email) {
+          let { data, error } = await supabase
             .from('users')
             .select('first_name,last_name,email,team_code')
             .eq('email', localUser.email)
             .single();
-          if (!error && data) userData = data;
-        } catch (err) {
-          console.error('[Account Info] Supabase error:', err);
+          if (error) {
+            console.error('[Account Info] Supabase error:', error);
+            userData = localUser;
+          } else {
+            userData = data;
+          }
+        } else {
+          userData = localUser;
         }
+      } catch (e) {
+        console.error('[Account Info] Error fetching user from Supabase:', e);
+        userData = localUser;
       }
 
-      const displayName = [userData.first_name, userData.last_name].filter(Boolean).join(' ')
-        || userData.name || userData.display_name || 'N/A';
-      document.getElementById('profileDisplayName').textContent = displayName;
-      document.getElementById('profileEmail').textContent = userData.email || 'N/A';
-      document.getElementById('profileCoachCode').textContent = userData.team_code || userData.coach_code || userData.code || 'N/A';
+      console.log('[Account Info] Loaded user:', userData);
+      if (userData) {
+        // Get display name robustly
+        let displayName = '';
+        if (isStudent) {
+          displayName = userData.name || userData.display_name || userData.first_name || userData.last_name || '';
+        } else {
+          displayName = [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.name || userData.display_name || '';
+        }
+        const displayNameInput = document.getElementById('displayName');
+        if (displayNameInput) displayNameInput.value = displayName.trim();
+        else hasError = true;
+
+        const emailInput = document.getElementById('email');
+        if (emailInput) emailInput.value = userData.email || userData.username || '';
+        else hasError = true;
+
+        const codeDisplay = document.getElementById('userCode');
+        if (codeDisplay) codeDisplay.textContent = userData.team_code || userData.coach_code || userData.code || '';
+        else hasError = true;
+
+        // If any field is missing, show error
+        if (!displayName || !userData.email || !(userData.team_code || userData.coach_code || userData.code)) {
+          hasError = true;
+        }
+      } else {
+        hasError = true;
+        console.error('No user data found');
+      }
+      if (hasError) {
+        let msg = document.getElementById('message');
+        if (msg) {
+          msg.className = 'message error';
+          msg.textContent = 'Unable to load your account info. Please log in again or contact support.';
+        }
+      }
     });
+
+    // For students, hide editable features
+    if (isStudent) {
+      document.getElementById('studentNotice').style.display = 'flex';
+      document.querySelectorAll('.edit-btn').forEach(btn => btn.style.display = 'none');
+      document.getElementById('profileButtons').style.display = 'none';
+      document.getElementById('passwordCard').style.display = 'none';
+    }
+
+    // Check Google link status and setup Google card
+    async function checkGoogleStatus() {
+      const googleCard = document.getElementById('googleCard');
+      const googleNotLinked = document.getElementById('googleNotLinked');
+      const googleLinked = document.getElementById('googleLinked');
+      
+      try {
+        const res = await api.get(`/api/auth/google-status?email=${encodeURIComponent(currentUser.email)}&role=${currentRole}`);
+        const data = await res.json();
+        
+        if (data.linked) {
+          googleNotLinked.style.display = 'none';
+          googleLinked.style.display = 'block';
+        } else {
+          googleNotLinked.style.display = 'block';
+          googleLinked.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Error checking Google status:', err);
+        // Show link button by default
+        googleNotLinked.style.display = 'block';
+        googleLinked.style.display = 'none';
+      }
+    }
+    
+    checkGoogleStatus();
+
+    // Handle pending Google link (after OAuth redirect)
+    const pendingGoogleLink = localStorage.getItem('pending_google_link');
+    if (pendingGoogleLink) {
+      try {
+        const googleData = JSON.parse(pendingGoogleLink);
+        localStorage.removeItem('pending_google_link');
+        
+        // Link the Google account
+        api.post('/api/auth/link-google', {
+          email: currentUser.email,
+          googleId: googleData.googleId,
+          avatarUrl: googleData.avatar_url,
+          role: currentRole
+        }).then(res => res.json()).then(data => {
+          if (data.success) {
+            showMessage('Google account linked successfully!', 'success');
+            checkGoogleStatus();
+          } else {
+            showMessage(data.error || 'Failed to link Google account', 'error');
+          }
+        }).catch(err => {
+          console.error('Link error:', err);
+          showMessage('Failed to link Google account', 'error');
+        });
+      } catch (e) {
+        localStorage.removeItem('pending_google_link');
+      }
+    }
+
+    // Link Google button
+    document.getElementById('linkGoogleBtn')?.addEventListener('click', async () => {
+      if (!supabase) {
+        showMessage('Google linking is not available', 'error');
+        return;
+      }
+      
+      // Store flag to indicate we're linking, not signing up
+      localStorage.setItem('google_link_mode', 'true');
+      
+      try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/StrikeMaster/pages/auth/google-link-callback.html'
+          }
+        });
+        
+        if (error) {
+          console.error('Google OAuth error:', error);
+          showMessage('Failed to connect to Google', 'error');
+        }
+      } catch (err) {
+        console.error('OAuth error:', err);
+        showMessage('Failed to connect to Google', 'error');
+      }
+    });
+
+    // Unlink Google button
+    document.getElementById('unlinkGoogleBtn')?.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to unlink your Google account? You will still be able to sign in with your email and password.')) {
+        return;
+      }
+      
+      try {
+        const res = await api.post('/api/auth/unlink-google', {
+          email: currentUser.email,
+          role: currentRole
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          showMessage('Google account unlinked successfully', 'success');
+          checkGoogleStatus();
+        } else {
+          showMessage(data.error || 'Failed to unlink Google account', 'error');
+        }
+      } catch (err) {
+        console.error('Unlink error:', err);
+        showMessage('Failed to unlink Google account', 'error');
+      }
+    });
+
+    function enableEdit(fieldId) {
+      if (isStudent) return;
+      const field = document.getElementById(fieldId);
+      field.removeAttribute('readonly');
+      field.focus();
+      field.style.background = 'var(--card-bg)';
+    }
+
+    function togglePasswordVisibility() {
+      const show = document.getElementById('showPasswords').checked;
+      const type = show ? 'text' : 'password';
+      document.getElementById('currentPassword').type = type;
+      document.getElementById('newPassword').type = type;
+      document.getElementById('confirmPassword').type = type;
+    }
+
+    function checkPasswordStrength() {
+      const password = document.getElementById('newPassword').value;
+      const bar = document.getElementById('strengthBar');
+      const text = document.getElementById('strengthText');
+
+      if (!password) {
+        bar.className = 'password-strength-bar';
+        text.textContent = 'Use at least 8 characters with letters and numbers';
+        text.style.color = '';
+        return;
+      }
+
+      let strength = 0;
+      if (password.length >= 8) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+      if (strength <= 1) {
+        bar.className = 'password-strength-bar weak';
+        text.textContent = 'Weak password';
+        text.style.color = '#ef4444';
+      } else if (strength <= 2) {
+        bar.className = 'password-strength-bar medium';
+        text.textContent = 'Medium password';
+        text.style.color = '#f59e0b';
+      } else {
+        bar.className = 'password-strength-bar strong';
+        text.textContent = 'Strong password';
+        text.style.color = '#22c55e';
+      }
+    }
+
+    function checkPasswordMatch() {
+      const newPass = document.getElementById('newPassword').value;
+      const confirmPass = document.getElementById('confirmPassword').value;
+      const text = document.getElementById('matchText');
+
+      if (!confirmPass) { text.textContent = ''; return; }
+
+      if (newPass === confirmPass) {
+        text.textContent = 'Passwords match';
+        text.style.color = '#22c55e';
+      } else {
+        text.textContent = 'Passwords do not match';
+        text.style.color = '#ef4444';
+      }
+    }
 
     function showMessage(text, type) {
       const msg = document.getElementById('message');
@@ -391,22 +987,40 @@
       setTimeout(() => { msg.className = 'message'; }, 5000);
     }
 
-    function promptChangePassword() {
+    document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
       if (isStudent) return;
-      const currentPassword = prompt('Enter your current password');
-      if (currentPassword === null) return;
-      if (!currentPassword) { showMessage('Please enter your current password', 'error'); return; }
+      const name = document.getElementById('displayName').value;
+      const email = document.getElementById('email').value;
 
-      const newPassword = prompt('Enter your new password');
-      if (newPassword === null) return;
+      if (!name || !email) { showMessage('Please fill in all fields', 'error'); return; }
+
+      showMessage('Profile updated successfully!', 'success');
+      document.getElementById('displayName').setAttribute('readonly', true);
+      document.getElementById('displayName').style.background = '';
+      document.getElementById('email').setAttribute('readonly', true);
+      document.getElementById('email').style.background = '';
+    });
+
+    async function changePassword() {
+      if (isStudent) return;
+
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!currentPassword) { showMessage('Please enter your current password', 'error'); return; }
       if (!newPassword) { showMessage('Please enter a new password', 'error'); return; }
       if (newPassword.length < 8) { showMessage('New password must be at least 8 characters', 'error'); return; }
-
-      const confirmPassword = prompt('Confirm your new password');
-      if (confirmPassword === null) return;
       if (newPassword !== confirmPassword) { showMessage('New passwords do not match', 'error'); return; }
 
       showMessage('Password changed successfully!', 'success');
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('strengthBar').className = 'password-strength-bar';
+      document.getElementById('strengthText').textContent = 'Use at least 8 characters with letters and numbers';
+      document.getElementById('strengthText').style.color = '';
+      document.getElementById('matchText').textContent = '';
     }
   </script>
 </body>
