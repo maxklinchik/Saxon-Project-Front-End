@@ -145,12 +145,69 @@
     }
 
     .brand-logo svg {
-      width: min(320px, 100%);
+      width: min(380px, 100%);
       height: auto;
+      background: transparent;
+      clip-path: inset(3px 0 0 3px);
     }
 
-    .brand-logo svg [fill] {
+    .brand-logo svg [stroke] {
+      stroke: transparent !important;
+    }
+
+    .brand-logo svg path:first-of-type {
+      fill: transparent !important;
+    }
+
+    .brand-logo {
+      --logo-light: #f2f2f2;
+    }
+
+    .brand-logo svg [fill="#F3D3A8"],
+    .brand-logo svg [fill="#F4D5A9"],
+    .brand-logo svg [fill="#F5D4AA"],
+    .brand-logo svg [fill="#F4DEB8"],
+    .brand-logo svg [fill="#FBE7C0"],
+    .brand-logo svg [fill="#F8EDD5"],
+    .brand-logo svg [fill="#CFB78E"],
+    .brand-logo svg [fill="#CEB68E"],
+    .brand-logo svg [fill="#CCB48C"] {
+      fill: var(--logo-light) !important;
+    }
+
+    .brand-logo svg [fill="#EF6825"],
+    .brand-logo svg [fill="#ED792E"],
+    .brand-logo svg [fill="#EE792E"],
+    .brand-logo svg [fill="#EB6726"],
+    .brand-logo svg [fill="#EF8F32"] {
       fill: var(--accent-color) !important;
+    }
+
+    .brand-logo svg [fill="#4D291C"],
+    .brand-logo svg [fill="#4B291B"],
+    .brand-logo svg [fill="#4E2E1E"],
+    .brand-logo svg [fill="#6E5C49"],
+    .brand-logo svg [fill="#766553"],
+    .brand-logo svg [fill="#954525"],
+    .brand-logo svg [fill="#BB5021"],
+    .brand-logo svg [fill="#64240C"],
+    .brand-logo svg [fill="#884224"],
+    .brand-logo svg [fill="#C57528"],
+    .brand-logo svg [fill="#804023"],
+    .brand-logo svg [fill="#884429"],
+    .brand-logo svg [fill="#5E2913"],
+    .brand-logo svg [fill="#4E2818"],
+    .brand-logo svg [fill="#4E2717"],
+    .brand-logo svg [fill="#C2511F"],
+    .brand-logo svg [fill="#B14C20"],
+    .brand-logo svg [fill="#6D3118"],
+    .brand-logo svg [fill="#6A2A11"],
+    .brand-logo svg [fill="#512A1D"],
+    .brand-logo svg [fill="#572D1E"],
+    .brand-logo svg [fill="#562C1D"],
+    .brand-logo svg [fill="#61321E"],
+    .brand-logo svg [fill="#CD5F26"] {
+      fill: var(--main-color) !important;
     }
 
     .brand-logo svg [stroke] {
