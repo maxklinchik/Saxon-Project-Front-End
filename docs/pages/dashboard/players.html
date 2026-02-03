@@ -14,6 +14,7 @@
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --accent-color: #ff6b6b;
@@ -328,6 +329,32 @@
       align-items: center;
     }
 
+    .stats-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .trend-toggle {
+      padding: 8px 14px;
+      border: 2px solid var(--dashboard-button-border, var(--button-border-color, var(--border-color)));
+      background: var(--dashboard-button-bg, var(--card-bg));
+      color: var(--dashboard-button-text, var(--text-color));
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 3px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.12));
+    }
+
+    .trend-toggle.active {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border-color: var(--accent-color);
+    }
+
     .stats-header h2 { margin: 0; font-size: 18px; font-weight: 600; }
 
     .close-stats {
@@ -393,6 +420,46 @@
     .summary-box { text-align: center; padding: 16px; background: var(--card-bg); border-radius: 10px; }
     .summary-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }
     .summary-value { font-size: 24px; font-weight: 700; color: var(--accent-color); }
+
+    /* Trend Chart */
+    .trend-section {
+      padding: 20px;
+      border-top: 1px solid var(--border-color);
+      background: var(--card-bg);
+      display: none;
+    }
+
+    .trend-section.active { display: block; }
+
+    .trend-section canvas {
+      width: 100%;
+      height: 240px;
+    }
+
+    .trend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .trend-header h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .trend-note {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .trend-empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 16px 0 8px;
+      font-size: 13px;
+    }
 
     /* Match History Table */
     .match-history { padding: 20px; }
@@ -598,7 +665,10 @@
     <div class="stats-panel" id="statsPanel">
       <div class="stats-header">
         <h2 id="statsPlayerName">Player Stats</h2>
-        <button class="close-stats" id="closeStats">&times;</button>
+        <div class="stats-actions">
+          <button class="trend-toggle" id="trendToggle" type="button">Show Trend</button>
+          <button class="close-stats" id="closeStats" type="button">&times;</button>
+        </div>
       </div>
 
       <div class="filter-section">
@@ -640,6 +710,15 @@
           <div class="summary-label">Total Avg</div>
           <div class="summary-value" id="totalAvg">0.0</div>
         </div>
+      </div>
+
+      <div class="trend-section" id="trendSection">
+        <div class="trend-header">
+          <h3>Season Trend</h3>
+          <span class="trend-note">Game average vs. max per match</span>
+        </div>
+        <canvas id="trendChart" height="200"></canvas>
+        <div class="trend-empty" id="trendEmpty" style="display: none;">No match data available for trend.</div>
       </div>
 
       <div class="match-history">
@@ -687,6 +766,8 @@
     let currentFilter = 'all';
     let currentLocationFilter = 'all';
     let currentGameFilter = 'all';
+    let trendChart = null;
+    let trendVisible = false;
 
     function getOpponentLogo(opponentName) { return getTeamLogo(opponentName, '../../assets/images/Team Logos/'); }
 
@@ -737,11 +818,31 @@
     document.getElementById('locationFilter').addEventListener('change', (e) => { currentLocationFilter = e.target.value; displayPlayerStats(); });
     document.getElementById('gameFilter').addEventListener('change', (e) => { currentGameFilter = e.target.value; displayPlayerStats(); });
     document.getElementById('closeStats').addEventListener('click', closeStatsPanel);
+    document.getElementById('trendToggle').addEventListener('click', () => {
+      trendVisible = !trendVisible;
+      const trendSection = document.getElementById('trendSection');
+      const toggleBtn = document.getElementById('trendToggle');
+      if (trendVisible) {
+        trendSection.classList.add('active');
+        toggleBtn.classList.add('active');
+        toggleBtn.textContent = 'Hide Trend';
+        updateTrendChart();
+      } else {
+        trendSection.classList.remove('active');
+        toggleBtn.classList.remove('active');
+        toggleBtn.textContent = 'Show Trend';
+      }
+    });
 
     function closeStatsPanel() {
       document.getElementById('statsPanel').classList.remove('active');
       document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
       selectedPlayerId = null;
+      trendVisible = false;
+      document.getElementById('trendSection').classList.remove('active');
+      const toggleBtn = document.getElementById('trendToggle');
+      toggleBtn.classList.remove('active');
+      toggleBtn.textContent = 'Show Trend';
     }
 
     function isMatchInSeason(matchDate, season) {
@@ -910,9 +1011,110 @@
         document.getElementById('locationFilter').value = 'all';
         document.getElementById('gameFilter').value = 'all';
         displayPlayerStats();
+        updateTrendChart();
         document.getElementById('statsPanel').classList.add('active');
         document.getElementById('statsPanel').scrollIntoView({ behavior: 'smooth' });
       } catch (error) { playerRecords = []; displayPlayerStats(); document.getElementById('statsPanel').classList.add('active'); }
+    }
+
+    function buildTrendData() {
+      let trendRecords = getSeasonFilteredRecords(playerRecords);
+      if (currentFilter === 'varsity') trendRecords = trendRecords.filter(r => r.is_varsity === true);
+      else if (currentFilter === 'jv') trendRecords = trendRecords.filter(r => r.is_varsity === false);
+      if (currentLocationFilter !== 'all') trendRecords = trendRecords.filter(r => r.match && r.match.location === currentLocationFilter);
+
+      trendRecords = trendRecords.filter(r => r.match && r.match.match_date).sort((a, b) => {
+        return new Date(a.match.match_date) - new Date(b.match.match_date);
+      });
+
+      const labels = [];
+      const avgSeries = [];
+      const maxSeries = [];
+
+      trendRecords.forEach(record => {
+        const games = [record.game1, record.game2, record.game3].filter(g => g !== null && g !== undefined);
+        if (games.length === 0) return;
+        const avg = games.reduce((sum, g) => sum + g, 0) / games.length;
+        const max = Math.max(...games);
+        const dateLabel = new Date(record.match.match_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        labels.push(dateLabel);
+        avgSeries.push(Number(avg.toFixed(1)));
+        maxSeries.push(max);
+      });
+
+      return { labels, avgSeries, maxSeries };
+    }
+
+    function updateTrendChart() {
+      if (!trendVisible) return;
+      const { labels, avgSeries, maxSeries } = buildTrendData();
+      const emptyState = document.getElementById('trendEmpty');
+      const canvas = document.getElementById('trendChart');
+
+      if (!labels.length) {
+        emptyState.style.display = 'block';
+        canvas.style.display = 'none';
+        if (trendChart) { trendChart.destroy(); trendChart = null; }
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      canvas.style.display = 'block';
+
+      const data = {
+        labels,
+        datasets: [
+          {
+            label: 'Game Average',
+            data: avgSeries,
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79, 70, 229, 0.15)',
+            tension: 0.25,
+            fill: true,
+            pointRadius: 3
+          },
+          {
+            label: 'Max Game',
+            data: maxSeries,
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249, 115, 22, 0.15)',
+            tension: 0.25,
+            fill: true,
+            pointRadius: 3
+          }
+        ]
+      };
+
+      const textColor = getComputedStyle(document.body).getPropertyValue('--text-color') || '#1f1f1f';
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: textColor },
+            grid: { color: 'rgba(0,0,0,0.08)' }
+          },
+          x: {
+            ticks: { color: textColor },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: textColor }
+          },
+          tooltip: { mode: 'index', intersect: false }
+        }
+      };
+
+      if (trendChart) {
+        trendChart.data = data;
+        trendChart.options = options;
+        trendChart.update();
+      } else {
+        trendChart = new Chart(canvas.getContext('2d'), { type: 'line', data, options });
+      }
     }
 
     function displayPlayerStats() {
@@ -944,6 +1146,8 @@
       document.getElementById('avgGame2').textContent = countG2 > 0 ? (totalG2 / countG2).toFixed(1) : '0.0';
       document.getElementById('avgGame3').textContent = countG3 > 0 ? (totalG3 / countG3).toFixed(1) : '0.0';
       document.getElementById('totalAvg').textContent = countAll > 0 ? (totalAll / countAll).toFixed(1) : '0.0';
+
+      updateTrendChart();
 
       const tbody = document.getElementById('matchHistoryBody');
       if (filteredRecords.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="no-stats">No match data available for this filter</td></tr>'; return; }
@@ -1037,6 +1241,7 @@
           currentLocationFilter = 'all';
           document.getElementById('locationFilter').value = 'all';
           displayPlayerStats();
+          updateTrendChart();
         }
         if (currentView === 'sheet') {
           loadSpreadsheetData();
