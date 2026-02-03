@@ -380,6 +380,110 @@
       font-weight: 500;
     }
 
+    /* Share Match */
+    .share-section {
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--content-bg);
+    }
+
+    .share-section label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .share-row input[type="text"] {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .share-row input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .share-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+
+    .share-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+
+    .share-add-btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.2));
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .share-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .share-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+
+    .share-item span {
+      font-weight: 600;
+    }
+
+    .share-item small {
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .remove-share-btn {
+      border: none;
+      background: transparent;
+      color: #ef4444;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .share-hint {
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
     /* Comments */
     .comments-section {
       margin-top: 20px;
@@ -1245,6 +1349,20 @@
           <textarea id="comments" placeholder="Add any notes about the match..."></textarea>
         </div>
 
+        <div class="share-section">
+          <label>Share with other coaches</label>
+          <div class="share-row">
+            <input type="text" id="shareCoachIdentifier" placeholder="Coach email or coach code">
+            <label class="share-toggle">
+              <input type="checkbox" id="shareCanEdit">
+              <span>Can edit</span>
+            </label>
+            <button type="button" class="share-add-btn" id="addShareBtn">Add</button>
+          </div>
+          <div class="share-list" id="shareList"></div>
+          <p class="share-hint">Shared coaches can view this match. Enable edit to allow changes.</p>
+        </div>
+
         <button type="submit" class="submit-match-btn">Save Match</button>
       </form>
     </div>
@@ -1268,6 +1386,7 @@
     let coachId = null;
     let players = [];
     let allPlayers = { boys: [], girls: [] };
+    let sharedCoachEntries = [];
 
     // Calculate match result based on opponent scores
     function calculateMatchResult() {
@@ -1804,6 +1923,69 @@
       return `${yyyy}-${mm}-${dd}`;
     }
 
+    function normalizeIdentifier(value) {
+      return value.trim().toLowerCase();
+    }
+
+    function renderShareList() {
+      const list = document.getElementById('shareList');
+      if (!list) return;
+      if (!sharedCoachEntries.length) {
+        list.innerHTML = '';
+        return;
+      }
+      list.innerHTML = sharedCoachEntries.map((entry, index) => {
+        const label = entry.display || entry.identifier || 'Unknown';
+        const permission = entry.canEdit ? 'Can edit' : 'View only';
+        return `
+          <div class="share-item">
+            <div>
+              <span>${label}</span>
+              <small>${permission}</small>
+            </div>
+            <button type="button" class="remove-share-btn" onclick="removeSharedCoach(${index})">Remove</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addSharedCoach() {
+      const input = document.getElementById('shareCoachIdentifier');
+      const canEditToggle = document.getElementById('shareCanEdit');
+      if (!input) return;
+      const identifier = input.value.trim();
+      if (!identifier) {
+        showMessage('Enter a coach email or code to share.', 'error');
+        return;
+      }
+      const normalized = normalizeIdentifier(identifier);
+      const alreadyAdded = sharedCoachEntries.some(entry => normalizeIdentifier(entry.identifier || entry.display || '') === normalized);
+      if (alreadyAdded) {
+        showMessage('That coach is already added.', 'error');
+        return;
+      }
+      sharedCoachEntries.push({ identifier, canEdit: !!canEditToggle?.checked });
+      input.value = '';
+      if (canEditToggle) canEditToggle.checked = false;
+      renderShareList();
+    }
+
+    function removeSharedCoach(index) {
+      sharedCoachEntries.splice(index, 1);
+      renderShareList();
+    }
+
+    function getSharedCoachesPayload() {
+      return sharedCoachEntries.map(entry => {
+        if (entry.coachId) {
+          return { coachId: entry.coachId, canEdit: !!entry.canEdit };
+        }
+        return { identifier: entry.identifier, canEdit: !!entry.canEdit };
+      });
+    }
+
+    document.getElementById('addShareBtn')?.addEventListener('click', addSharedCoach);
+
     // Submit match form
     document.getElementById('matchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1826,7 +2008,8 @@
         teamG3: parseInt(document.getElementById('teamG3').value) || 0,
         oppG1: parseInt(document.getElementById('oppG1').value) || 0,
         oppG2: parseInt(document.getElementById('oppG2').value) || 0,
-        oppG3: parseInt(document.getElementById('oppG3').value) || 0
+        oppG3: parseInt(document.getElementById('oppG3').value) || 0,
+        sharedCoaches: getSharedCoachesPayload()
       };
 
       try {
@@ -2154,9 +2337,9 @@
                   </div>
                 ` : '<p style="text-align: center; color: #888; padding: 20px;">No player scores recorded</p>'}
                 ${match.comments ? `<div class="match-comments"><strong>Notes:</strong> ${match.comments}</div>` : ''}
-                ${!isStudentMode() ? `<div class="match-actions">
+                ${!isStudentMode() && match.can_edit ? `<div class="match-actions">
                   <button class="edit-match-btn" onclick="event.stopPropagation(); editMatch('${match.id}')">Edit Match</button>
-                  <button class="delete-match-btn" onclick="event.stopPropagation(); deleteMatch('${match.id}')">Delete</button>
+                  ${match.is_owner ? `<button class="delete-match-btn" onclick="event.stopPropagation(); deleteMatch('${match.id}')">Delete</button>` : ''}
                 </div>` : ''}
               </div>
             </div>
@@ -2199,9 +2382,14 @@
         const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
         
         // Fetch match details
-        const matchResponse = await fetch(`${API_BASE}/api/matches/${matchId}`);
+        const matchResponse = await fetch(`${API_BASE}/api/matches/${matchId}?coachId=${coachId}`);
         if (!matchResponse.ok) throw new Error('Failed to fetch match');
         const match = await matchResponse.json();
+
+        if (match.can_edit === false) {
+          showMessage('You only have view access for this match.', 'error');
+          return;
+        }
         
         // Fetch records for this match
         const recordsResponse = await fetch(`${API_BASE}/api/records?matchId=${matchId}`);
@@ -2221,6 +2409,14 @@
         document.getElementById('opponent').value = match.opponent;
         populateLocationDropdown(match.location || '');
         document.getElementById('comments').value = match.comments || '';
+
+        sharedCoachEntries = (match.shared_coaches || []).map(entry => ({
+          coachId: entry.coach_id || entry.coachId,
+          identifier: entry.email || entry.team_code || entry.identifier || '',
+          display: entry.email || entry.team_code || entry.identifier || 'Coach',
+          canEdit: !!entry.can_edit
+        }));
+        renderShareList();
         
         // Fill in team game scores (if stored)
         document.getElementById('teamG1').value = match.team_g1 || '';
@@ -2234,10 +2430,12 @@
         calculateMatchResult();
         
         // Load players for this match's gender
+        const ownerCoachId = match.coach_id || coachId;
+
         if (match.gender === 'coed') {
           const [boysResponse, girlsResponse] = await Promise.all([
-            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
-            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
+            fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=boys`),
+            fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=girls`)
           ]);
           if (boysResponse.ok && girlsResponse.ok) {
             allPlayers.boys = await boysResponse.json();
@@ -2245,7 +2443,7 @@
             renderAllPlayersTableWithScores(records);
           }
         } else {
-          const playersResponse = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${match.gender}`);
+          const playersResponse = await fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=${match.gender}`);
           if (playersResponse.ok) {
             players = await playersResponse.json();
             renderPlayersTableWithScores(records);
@@ -2341,6 +2539,13 @@
       document.getElementById('oppTotal').textContent = '0';
       document.getElementById('pointsResultCard').style.display = 'none';
 
+      sharedCoachEntries = [];
+      const shareInput = document.getElementById('shareCoachIdentifier');
+      const shareToggle = document.getElementById('shareCanEdit');
+      if (shareInput) shareInput.value = '';
+      if (shareToggle) shareToggle.checked = false;
+      renderShareList();
+
       const tbody = document.getElementById('playersTableBody');
       if (tbody) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Loading players...</td></tr>';
@@ -2358,6 +2563,9 @@
         // Hide "Log New Match" button
         const logBtn = document.getElementById('logMatchBtn');
         if (logBtn) logBtn.style.display = 'none';
+
+        const shareSection = document.querySelector('.share-section');
+        if (shareSection) shareSection.style.display = 'none';
 
         // Add a read-only notice
         const noticeDiv = document.createElement('div');

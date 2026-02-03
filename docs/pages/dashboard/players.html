@@ -1069,25 +1069,28 @@
       const labels = [];
       const avgSeries = [];
       const maxSeries = [];
+      const totalSeries = [];
 
       trendRecords.forEach(record => {
         const games = [record.game1, record.game2, record.game3].filter(g => g !== null && g !== undefined);
         if (games.length === 0) return;
         const avg = games.reduce((sum, g) => sum + g, 0) / games.length;
         const max = Math.max(...games);
+        const total = (record.game1 || 0) + (record.game2 || 0) + (record.game3 || 0);
         const dateValue = parseLocalDate(record.match.match_date);
         const dateLabel = dateValue ? dateValue.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
         labels.push(dateLabel);
         avgSeries.push(Number(avg.toFixed(1)));
         maxSeries.push(max);
+        totalSeries.push(total);
       });
 
-      return { labels, avgSeries, maxSeries };
+      return { labels, avgSeries, maxSeries, totalSeries };
     }
 
     function updateTrendChart() {
       if (!trendVisible) return;
-      const { labels, avgSeries, maxSeries } = buildTrendData();
+      const { labels, avgSeries, maxSeries, totalSeries } = buildTrendData();
       const emptyState = document.getElementById('trendEmpty');
       const canvas = document.getElementById('trendChart');
 
@@ -1121,6 +1124,16 @@
             tension: 0.25,
             fill: true,
             pointRadius: 3
+          },
+          {
+            label: '3-Game Total',
+            data: totalSeries,
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.12)',
+            tension: 0.25,
+            fill: true,
+            pointRadius: 3,
+            yAxisID: 'y1'
           }
         ]
       };
@@ -1134,6 +1147,12 @@
             beginAtZero: true,
             ticks: { color: textColor },
             grid: { color: 'rgba(0,0,0,0.08)' }
+          },
+          y1: {
+            beginAtZero: true,
+            position: 'right',
+            ticks: { color: textColor },
+            grid: { drawOnChartArea: false }
           },
           x: {
             ticks: { color: textColor },

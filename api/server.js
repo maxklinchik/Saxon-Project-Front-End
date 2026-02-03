@@ -32,6 +32,52 @@ app.use(cors({
 
 app.use(express.json());
 
+async function resolveCoachByIdentifier(identifier) {
+  if (!identifier) return null;
+  const trimmed = identifier.trim();
+  if (!trimmed) return null;
+  const isEmail = trimmed.includes('@');
+  if (isEmail) {
+    const { data } = await supabase
+      .from('users')
+      .select('id, email, team_code')
+      .eq('email', trimmed.toLowerCase())
+      .single();
+    return data || null;
+  }
+  const { data } = await supabase
+    .from('users')
+    .select('id, email, team_code')
+    .eq('team_code', trimmed.toUpperCase())
+    .single();
+  return data || null;
+}
+
+async function resolveSharedCoaches(sharedCoaches, ownerCoachId) {
+  if (!Array.isArray(sharedCoaches) || sharedCoaches.length === 0) return [];
+  const resolved = [];
+  const seen = new Set();
+
+  for (const entry of sharedCoaches) {
+    if (!entry) continue;
+    const canEdit = !!entry.canEdit;
+    let coachId = entry.coachId;
+    if (!coachId && entry.identifier) {
+      const coach = await resolveCoachByIdentifier(entry.identifier);
+      if (!coach) {
+        throw new Error(`Coach not found for "${entry.identifier}"`);
+      }
+      coachId = coach.id;
+    }
+    if (!coachId || coachId === ownerCoachId) continue;
+    if (seen.has(coachId)) continue;
+    seen.add(coachId);
+    resolved.push({ coach_id: coachId, can_edit: canEdit });
+  }
+
+  return resolved;
+}
+
 // ==================== HEALTH CHECK ====================
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -842,19 +888,63 @@ app.get('/api/matches', async (req, res) => {
       return res.status(400).json({ error: 'coachId is required' });
     }
 
-    let query = supabase
+    let ownQuery = supabase
       .from('matches')
       .select('*')
-      .eq('coach_id', coachId)
-      .order('match_date', { ascending: false });
+      .eq('coach_id', coachId);
 
     if (gender) {
-      query = query.eq('gender', gender);
+      ownQuery = ownQuery.eq('gender', gender);
     }
 
-    const { data, error } = await query;
-    if (error) throw error;
-    res.json(data || []);
+    const { data: ownMatches, error: ownError } = await ownQuery;
+    if (ownError) throw ownError;
+
+    const { data: permissions, error: permError } = await supabase
+      .from('match_permissions')
+      .select('match_id, can_edit')
+      .eq('coach_id', coachId);
+    if (permError) throw permError;
+
+    const sharedMatchIds = (permissions || []).map(p => p.match_id);
+    let sharedMatches = [];
+    if (sharedMatchIds.length > 0) {
+      let sharedQuery = supabase
+        .from('matches')
+        .select('*')
+        .in('id', sharedMatchIds);
+      if (gender) {
+        sharedQuery = sharedQuery.eq('gender', gender);
+      }
+      const { data: sharedData, error: sharedError } = await sharedQuery;
+      if (sharedError) throw sharedError;
+      sharedMatches = sharedData || [];
+    }
+
+    const permissionMap = new Map((permissions || []).map(p => [p.match_id, p.can_edit]));
+    const matchMap = new Map();
+
+    (ownMatches || []).forEach(match => {
+      matchMap.set(match.id, { ...match, can_edit: true, is_owner: true });
+    });
+
+    sharedMatches.forEach(match => {
+      if (!matchMap.has(match.id)) {
+        matchMap.set(match.id, {
+          ...match,
+          can_edit: !!permissionMap.get(match.id),
+          is_owner: false
+        });
+      }
+    });
+
+    const merged = Array.from(matchMap.values()).sort((a, b) => {
+      const dateA = a.match_date ? new Date(a.match_date) : new Date(0);
+      const dateB = b.match_date ? new Date(b.match_date) : new Date(0);
+      return dateB - dateA;
+    });
+
+    res.json(merged);
 
   } catch (error) {
     console.error('Get matches error:', error);
@@ -869,6 +959,8 @@ app.get('/api/matches/:id', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
+    const { coachId } = req.query;
+
     const { data, error } = await supabase
       .from('matches')
       .select('*')
@@ -876,6 +968,51 @@ app.get('/api/matches/:id', async (req, res) => {
       .single();
 
     if (error) throw error;
+    if (coachId && data.coach_id !== coachId) {
+      const { data: permission } = await supabase
+        .from('match_permissions')
+        .select('can_edit')
+        .eq('match_id', req.params.id)
+        .eq('coach_id', coachId)
+        .single();
+
+      if (!permission) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      data.can_edit = !!permission.can_edit;
+      data.is_owner = false;
+    } else {
+      data.can_edit = true;
+      data.is_owner = true;
+    }
+
+    const { data: sharedPermissions } = await supabase
+      .from('match_permissions')
+      .select('coach_id, can_edit')
+      .eq('match_id', req.params.id);
+
+    const sharedCoachIds = (sharedPermissions || []).map(p => p.coach_id);
+    let sharedCoaches = [];
+    if (sharedCoachIds.length > 0) {
+      const { data: coaches } = await supabase
+        .from('users')
+        .select('id, email, team_code')
+        .in('id', sharedCoachIds);
+
+      const coachMap = new Map((coaches || []).map(c => [c.id, c]));
+      sharedCoaches = (sharedPermissions || []).map(entry => {
+        const coach = coachMap.get(entry.coach_id);
+        return {
+          coach_id: entry.coach_id,
+          can_edit: entry.can_edit,
+          email: coach?.email || null,
+          team_code: coach?.team_code || null
+        };
+      });
+    }
+
+    data.shared_coaches = sharedCoaches;
     res.json(data);
 
   } catch (error) {
@@ -891,11 +1028,13 @@ app.post('/api/matches', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, gender, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, oppG1, oppG2, oppG3 } = req.body;
+    const { coachId, gender, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, oppG1, oppG2, oppG3, sharedCoaches } = req.body;
 
     if (!coachId || !gender || !opponent || !matchDate) {
       return res.status(400).json({ error: 'Required: coachId, gender, opponent, matchDate' });
     }
+
+    const resolvedShared = await resolveSharedCoaches(sharedCoaches, coachId);
 
     const { data, error } = await supabase
       .from('matches')
@@ -921,6 +1060,21 @@ app.post('/api/matches', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    if (resolvedShared.length > 0) {
+      const sharePayload = resolvedShared.map(entry => ({
+        match_id: data.id,
+        coach_id: entry.coach_id,
+        can_edit: entry.can_edit
+      }));
+
+      const { error: shareError } = await supabase
+        .from('match_permissions')
+        .insert(sharePayload);
+
+      if (shareError) throw shareError;
+    }
+
     res.json(data);
 
   } catch (error) {
@@ -936,7 +1090,32 @@ app.put('/api/matches/:id', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { opponent, matchDate, location, ourScore, opponentScore, result, isComplete, comments, teamG1, teamG2, teamG3, oppG1, oppG2, oppG3 } = req.body;
+    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, comments, teamG1, teamG2, teamG3, oppG1, oppG2, oppG3, sharedCoaches } = req.body;
+
+    if (coachId) {
+      const { data: matchOwner, error: ownerError } = await supabase
+        .from('matches')
+        .select('coach_id')
+        .eq('id', req.params.id)
+        .single();
+
+      if (ownerError || !matchOwner) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+
+      if (matchOwner.coach_id !== coachId) {
+        const { data: permission } = await supabase
+          .from('match_permissions')
+          .select('can_edit')
+          .eq('match_id', req.params.id)
+          .eq('coach_id', coachId)
+          .single();
+
+        if (!permission || !permission.can_edit) {
+          return res.status(403).json({ error: 'Edit access denied' });
+        }
+      }
+    }
 
     const updateData = {};
     if (opponent !== undefined) updateData.opponent = opponent;
@@ -954,6 +1133,8 @@ app.put('/api/matches/:id', async (req, res) => {
     if (oppG2 !== undefined) updateData.opp_g2 = oppG2 ? parseInt(oppG2) : null;
     if (oppG3 !== undefined) updateData.opp_g3 = oppG3 ? parseInt(oppG3) : null;
 
+    const resolvedShared = await resolveSharedCoaches(sharedCoaches, coachId);
+
     const { data, error } = await supabase
       .from('matches')
       .update(updateData)
@@ -962,6 +1143,28 @@ app.put('/api/matches/:id', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    if (Array.isArray(sharedCoaches)) {
+      await supabase
+        .from('match_permissions')
+        .delete()
+        .eq('match_id', req.params.id);
+
+      if (resolvedShared.length > 0) {
+        const sharePayload = resolvedShared.map(entry => ({
+          match_id: req.params.id,
+          coach_id: entry.coach_id,
+          can_edit: entry.can_edit
+        }));
+
+        const { error: shareError } = await supabase
+          .from('match_permissions')
+          .insert(sharePayload);
+
+        if (shareError) throw shareError;
+      }
+    }
+
     res.json(data);
 
   } catch (error) {

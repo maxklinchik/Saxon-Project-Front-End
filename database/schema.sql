@@ -6,6 +6,7 @@
 
 -- Drop existing tables if they exist (in correct order due to foreign keys)
 DROP TABLE IF EXISTS records CASCADE;
+DROP TABLE IF EXISTS match_permissions CASCADE;
 DROP TABLE IF EXISTS matches CASCADE;
 DROP TABLE IF EXISTS players CASCADE;
 DROP TABLE IF EXISTS students CASCADE;
@@ -89,6 +90,21 @@ CREATE INDEX idx_matches_gender ON matches(gender);
 CREATE INDEX idx_matches_date ON matches(match_date);
 
 -- =====================================================
+-- 3B. MATCH PERMISSIONS (Shared coach access)
+-- =====================================================
+CREATE TABLE match_permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  match_id UUID REFERENCES matches(id) ON DELETE CASCADE,
+  coach_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  can_edit BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(match_id, coach_id)
+);
+
+CREATE INDEX idx_match_permissions_match ON match_permissions(match_id);
+CREATE INDEX idx_match_permissions_coach ON match_permissions(coach_id);
+
+-- =====================================================
 -- 4. RECORDS TABLE (Player game scores per match)
 -- =====================================================
 CREATE TABLE records (
@@ -114,6 +130,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE match_permissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE records ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
@@ -123,6 +140,7 @@ CREATE POLICY "Service role full access" ON users FOR ALL USING (true) WITH CHEC
 CREATE POLICY "Service role full access" ON students FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON players FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON matches FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON match_permissions FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service role full access" ON records FOR ALL USING (true) WITH CHECK (true);
 
 -- =====================================================
@@ -137,4 +155,5 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
 -- users: id, email, first_name, last_name, team_name, team_code, created_at
 -- players: id, first_name, last_name, gender, grad_year, coach_id, is_active, created_at
 -- matches: id, coach_id, gender, opponent, match_date, our_score, opponent_score, result, location, is_complete, created_at
+-- match_permissions: id, match_id, coach_id, can_edit, created_at
 -- records: id, match_id, player_id, game1, game2, game3, total (auto-calculated), created_at
