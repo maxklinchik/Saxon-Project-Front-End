@@ -12,6 +12,7 @@
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -284,6 +285,30 @@
     .btn-primary { background: var(--accent-color); color: var(--accent-text-color, white); }
     .btn-primary:hover { filter: brightness(0.95); transform: translateY(-1px); }
 
+    .btn-google {
+      background: #ffffff;
+      color: #1f1f1f;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-google img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .linked-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
     .message {
       padding: 14px 18px;
       margin-bottom: 24px;
@@ -436,6 +461,26 @@
             </svg>
           </div>
           <div>
+            <h2>Linked Accounts</h2>
+            <p>Connect Google to sign in faster</p>
+          </div>
+        </div>
+
+        <button class="btn btn-google" id="linkGoogleBtn" type="button">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Link Google Account
+        </button>
+        <div class="linked-pill" id="googleLinkedPill" style="display: none;">Google linked</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0-10v2m8 3a8 8 0 11-16 0 8 8 0 0116 0z" />
+            </svg>
+          </div>
+          <div>
             <h2>Security</h2>
             <p>Update your password</p>
           </div>
@@ -532,6 +577,15 @@
         || profile?.team_code
         || profile?.teamCode
         || 'N/A';
+
+      const googleLinked = !!(currentUser.google_id || profile?.google_id);
+      const linkGoogleBtn = document.getElementById('linkGoogleBtn');
+      const googleLinkedPill = document.getElementById('googleLinkedPill');
+
+      if (googleLinked) {
+        if (linkGoogleBtn) linkGoogleBtn.style.display = 'none';
+        if (googleLinkedPill) googleLinkedPill.style.display = 'inline-flex';
+      }
 
       document.getElementById('profileUsername').textContent = username;
       document.getElementById('profileEmail').textContent = email;
@@ -673,6 +727,64 @@
       if (coachCode === 'N/A') {
         showMessage('Coach code not found. Please log out and log back in.', 'error');
       }
+
+      const pendingGoogleLink = localStorage.getItem('pending_google_link');
+      if (pendingGoogleLink) {
+        try {
+          const googleUser = JSON.parse(pendingGoogleLink);
+          if (!googleUser?.email || googleUser.email.toLowerCase() !== email.toLowerCase()) {
+            showMessage('Google email does not match this account.', 'error');
+            localStorage.removeItem('pending_google_link');
+          } else {
+            const linkRes = await api.post('/api/auth/link-google', {
+              email: googleUser.email,
+              googleId: googleUser.googleId,
+              avatarUrl: googleUser.avatar_url,
+              role: isStudent ? 'student' : 'coach'
+            });
+
+            if (!linkRes.ok) {
+              const errorMessage = await readResponseMessage(linkRes, 'Failed to link Google account');
+              throw new Error(errorMessage);
+            }
+
+            const linked = await linkRes.json().catch(() => ({}));
+            localStorage.removeItem('pending_google_link');
+
+            const updatedUser = { ...currentUser, google_id: googleUser.googleId, avatar_url: googleUser.avatar_url, ...linked.user };
+            localStorage.setItem('bowling_user', JSON.stringify(updatedUser));
+
+            if (linkGoogleBtn) linkGoogleBtn.style.display = 'none';
+            if (googleLinkedPill) googleLinkedPill.style.display = 'inline-flex';
+            showMessage('Google account linked successfully.', 'success');
+          }
+        } catch (err) {
+          showMessage(err.message || 'Failed to link Google account.', 'error');
+          localStorage.removeItem('pending_google_link');
+        }
+      }
+
+      linkGoogleBtn?.addEventListener('click', async () => {
+        if (googleLinked) return;
+        const supabaseClient = createSupabaseClient();
+        if (!supabaseClient) {
+          showMessage('Google linking is not available right now.', 'error');
+          return;
+        }
+        try {
+          const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin + '/StrikeMaster/pages/auth/google-link-callback.html'
+            }
+          });
+          if (error) {
+            showMessage('Failed to connect Google account.', 'error');
+          }
+        } catch (err) {
+          showMessage('Failed to connect Google account.', 'error');
+        }
+      });
     });
 
     function showMessage(text, type) {
@@ -693,6 +805,13 @@
         return `${fallback} (server returned HTML — check API deployment).`;
       }
       return text || fallback;
+    }
+
+    function createSupabaseClient() {
+      if (!window.supabase) return null;
+      const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
+      return window.supabase.createClient(supabaseUrl, supabaseKey);
     }
   </script>
 </body>
