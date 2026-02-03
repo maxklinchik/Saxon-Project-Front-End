@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS schools CASCADE;
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) NOT NULL UNIQUE,
+  username VARCHAR(50) UNIQUE,
   first_name VARCHAR(100),
   last_name VARCHAR(100),
   team_name VARCHAR(255),           -- e.g., "Pascack Hills"
@@ -152,7 +153,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
 -- =====================================================
 -- SCHEMA SUMMARY:
 -- =====================================================
--- users: id, email, first_name, last_name, team_name, team_code, created_at
+-- users: id, email, username, first_name, last_name, team_name, team_code, created_at
 -- players: id, first_name, last_name, gender, grad_year, coach_id, is_active, created_at
 -- matches: id, coach_id, gender, opponent, match_date, our_score, opponent_score, result, location, is_complete, created_at
 -- match_permissions: id, match_id, coach_id, can_edit, created_at

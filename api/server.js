@@ -466,6 +466,117 @@ app.get('/api/auth/profile/:userId', async (req, res) => {
   }
 });
 
+// Update user profile (username/email)
+app.put('/api/auth/profile/:userId', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const { username, email } = req.body;
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID required' });
+    }
+
+    if (username && /\s/.test(username)) {
+      return res.status(400).json({ error: 'Username cannot contain spaces' });
+    }
+
+    if (email && !email.includes('@')) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    if (email) {
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .neq('id', userId)
+        .single();
+      if (existing) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+    }
+
+    if (username) {
+      const { data: existingUsername } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', username)
+        .neq('id', userId)
+        .single();
+      if (existingUsername) {
+        return res.status(400).json({ error: 'Username already in use' });
+      }
+    }
+
+    const updates = {};
+    if (username !== undefined) updates.username = username || null;
+    if (email !== undefined) updates.email = email.toLowerCase();
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No updates provided' });
+    }
+
+    if (email) {
+      const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
+        email: email.toLowerCase()
+      });
+      if (authError) throw authError;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Change password (requires old password)
+app.post('/api/auth/change-password', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const { userId, email, oldPassword, newPassword } = req.body;
+
+    if (!userId || !email || !oldPassword || !newPassword) {
+      return res.status(400).json({ error: 'userId, email, oldPassword, and newPassword are required' });
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: oldPassword
+    });
+
+    if (signInError) {
+      return res.status(401).json({ error: 'Old password is incorrect' });
+    }
+
+    const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+      password: newPassword
+    });
+
+    if (updateError) throw updateError;
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Link Google Account to existing user
 app.post('/api/auth/link-google', async (req, res) => {
   try {

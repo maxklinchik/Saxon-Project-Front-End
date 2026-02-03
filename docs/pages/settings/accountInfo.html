@@ -209,6 +209,56 @@
       word-break: break-all;
     }
 
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-group input {
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .form-group input:focus { outline: none; border-color: var(--accent-color); }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+
+    .btn-secondary:hover { background: var(--content-bg); }
+
     .button-row {
       display: flex;
       gap: 12px;
@@ -354,6 +404,65 @@
           <span class="info-value" id="profileCoachCode">Loading...</span>
         </div>
 
+        <div class="button-row" id="profileActions">
+          <button class="btn btn-primary" id="editProfileBtn" type="button">Edit Profile</button>
+        </div>
+
+        <div id="editProfileForm" style="display: none;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="editUsername">Username</label>
+              <input type="text" id="editUsername" placeholder="Username (no spaces)">
+              <span class="form-hint">No spaces allowed.</span>
+            </div>
+            <div class="form-group">
+              <label for="editEmail">Email</label>
+              <input type="email" id="editEmail" placeholder="Email address">
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-primary" id="saveProfileBtn" type="button">Save Changes</button>
+            <button class="btn btn-secondary" id="cancelProfileBtn" type="button">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0-10v2m8 3a8 8 0 11-16 0 8 8 0 0116 0z" />
+            </svg>
+          </div>
+          <div>
+            <h2>Security</h2>
+            <p>Update your password</p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="changePasswordBtn" type="button">Change Password</button>
+
+        <div id="passwordForm" style="display: none; margin-top: 16px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="oldPassword">Old Password</label>
+              <input type="password" id="oldPassword" placeholder="Enter old password">
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-primary" id="savePasswordBtn" type="button">Update Password</button>
+            <button class="btn btn-secondary" id="cancelPasswordBtn" type="button">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -403,7 +512,7 @@
         profile?.last_name
       ].filter(Boolean).join(' ');
 
-      const username = currentUser.username
+      let username = currentUser.username
         || currentUser.display_name
         || currentUser.name
         || currentName
@@ -412,7 +521,7 @@
         || (!isStudent ? profile?.email : '')
         || 'N/A';
 
-      const email = currentUser.email
+      let email = currentUser.email
         || (!isStudent ? profile?.email : '')
         || 'N/A';
 
@@ -428,6 +537,139 @@
       document.getElementById('profileEmail').textContent = email;
       document.getElementById('profileCoachCode').textContent = coachCode;
 
+      const editProfileBtn = document.getElementById('editProfileBtn');
+      const editProfileForm = document.getElementById('editProfileForm');
+      const saveProfileBtn = document.getElementById('saveProfileBtn');
+      const cancelProfileBtn = document.getElementById('cancelProfileBtn');
+      const editUsername = document.getElementById('editUsername');
+      const editEmail = document.getElementById('editEmail');
+
+      const changePasswordBtn = document.getElementById('changePasswordBtn');
+      const passwordForm = document.getElementById('passwordForm');
+      const savePasswordBtn = document.getElementById('savePasswordBtn');
+      const cancelPasswordBtn = document.getElementById('cancelPasswordBtn');
+
+      const syncEditFields = () => {
+        if (editUsername) editUsername.value = username || '';
+        if (editEmail) editEmail.value = email || '';
+      };
+
+      const hideEditForm = () => {
+        if (editProfileForm) editProfileForm.style.display = 'none';
+      };
+
+      const showEditForm = () => {
+        if (editProfileForm) editProfileForm.style.display = 'block';
+      };
+
+      const hidePasswordForm = () => {
+        if (passwordForm) passwordForm.style.display = 'none';
+        document.getElementById('oldPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+      };
+
+      if (isStudent) {
+        if (editProfileBtn) editProfileBtn.style.display = 'none';
+        if (changePasswordBtn) changePasswordBtn.style.display = 'none';
+      } else {
+        syncEditFields();
+        editProfileBtn?.addEventListener('click', () => {
+          syncEditFields();
+          showEditForm();
+        });
+
+        editUsername?.addEventListener('input', () => {
+          editUsername.value = editUsername.value.replace(/\s+/g, '');
+        });
+
+        cancelProfileBtn?.addEventListener('click', () => {
+          hideEditForm();
+        });
+
+        saveProfileBtn?.addEventListener('click', async () => {
+          const nextUsername = editUsername.value.trim();
+          const nextEmail = editEmail.value.trim();
+
+          if (nextUsername && /\s/.test(nextUsername)) {
+            showMessage('Username cannot contain spaces.', 'error');
+            return;
+          }
+
+          if (!nextUsername || !nextEmail) {
+            showMessage('Username and email are required.', 'error');
+            return;
+          }
+
+          try {
+            const res = await api.put(`/api/auth/profile/${currentUser.id}`, {
+              username: nextUsername,
+              email: nextEmail
+            });
+
+            if (!res.ok) {
+              const errorMessage = await readResponseMessage(res, 'Failed to update profile');
+              throw new Error(errorMessage);
+            }
+
+            const updated = await res.json().catch(() => ({}));
+            const updatedUser = { ...currentUser, ...updated };
+            localStorage.setItem('bowling_user', JSON.stringify(updatedUser));
+
+            username = updated.username || nextUsername;
+            email = updated.email || nextEmail;
+            document.getElementById('profileUsername').textContent = username;
+            document.getElementById('profileEmail').textContent = email;
+
+            showMessage('Profile updated successfully.', 'success');
+            hideEditForm();
+          } catch (err) {
+            showMessage(err.message || 'Failed to update profile.', 'error');
+          }
+        });
+
+        changePasswordBtn?.addEventListener('click', () => {
+          passwordForm.style.display = 'block';
+        });
+
+        cancelPasswordBtn?.addEventListener('click', hidePasswordForm);
+
+        savePasswordBtn?.addEventListener('click', async () => {
+          const oldPassword = document.getElementById('oldPassword').value;
+          const newPassword = document.getElementById('newPassword').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+
+          if (!oldPassword || !newPassword || !confirmPassword) {
+            showMessage('Please fill in all password fields.', 'error');
+            return;
+          }
+
+          if (newPassword !== confirmPassword) {
+            showMessage('New password and confirmation do not match.', 'error');
+            return;
+          }
+
+          try {
+            const res = await api.post('/api/auth/change-password', {
+              userId: currentUser.id,
+              email: email,
+              oldPassword,
+              newPassword
+            });
+
+            if (!res.ok) {
+              const errorMessage = await readResponseMessage(res, 'Failed to update password');
+              throw new Error(errorMessage);
+            }
+
+            showMessage('Password updated successfully.', 'success');
+            hidePasswordForm();
+          } catch (err) {
+            showMessage(err.message || 'Failed to update password.', 'error');
+          }
+        });
+      }
+
       if (coachCode === 'N/A') {
         showMessage('Coach code not found. Please log out and log back in.', 'error');
       }
@@ -438,6 +680,19 @@
       msg.textContent = text;
       msg.className = `message ${type}`;
       setTimeout(() => { msg.className = 'message'; }, 5000);
+    }
+
+    async function readResponseMessage(response, fallback) {
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await response.json().catch(() => null);
+        return data?.error || fallback;
+      }
+      const text = await response.text().catch(() => '');
+      if (text && text.includes('<!DOCTYPE')) {
+        return `${fallback} (server returned HTML — check API deployment).`;
+      }
+      return text || fallback;
     }
   </script>
 </body>
