@@ -524,7 +524,9 @@ app.put('/api/auth/profile/:userId', async (req, res) => {
       const { error: authError } = await supabase.auth.admin.updateUserById(userId, {
         email: email.toLowerCase()
       });
-      if (authError) throw authError;
+      if (authError) {
+        throw new Error(`Auth email update failed: ${authError.message || authError}`);
+      }
     }
 
     const { data, error } = await supabase
@@ -568,7 +570,9 @@ app.post('/api/auth/change-password', async (req, res) => {
       password: newPassword
     });
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      throw new Error(`Auth password update failed: ${updateError.message || updateError}`);
+    }
 
     res.json({ success: true });
   } catch (error) {
