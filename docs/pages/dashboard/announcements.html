@@ -344,9 +344,14 @@
         showMessage(data.error || 'Failed to post announcement.', 'error');
         return;
       }
+      const data = await res.json();
       document.getElementById('announcementTitle').value = '';
       document.getElementById('announcementBody').value = '';
-      showMessage('Announcement posted.', 'success');
+      if (data.emailStatus && !data.emailStatus.sent) {
+        showMessage(`Announcement posted, but email not sent: ${data.emailStatus.error || 'No recipients'}`, 'error');
+      } else {
+        showMessage('Announcement posted and emailed.', 'success');
+      }
       loadAnnouncements();
     });
 

@@ -1284,6 +1284,31 @@
       }
     }
 
+    let editingPlayerId = null;
+
+    function startEditPlayer(playerId) {
+      const player = players.find(p => p.id === playerId);
+      if (!player) return;
+      editingPlayerId = playerId;
+      document.getElementById('firstName').value = player.first_name || '';
+      document.getElementById('lastName').value = player.last_name || '';
+      document.getElementById('gradYear').value = player.grad_year || '';
+      document.getElementById('playerEmail').value = player.email || '';
+      document.querySelector('#playerForm h3').textContent = 'Edit Player';
+      document.getElementById('savePlayerBtn').textContent = 'Save Changes';
+      document.getElementById('playerForm').classList.add('active');
+    }
+
+    function resetPlayerForm() {
+      editingPlayerId = null;
+      document.querySelector('#playerForm h3').textContent = 'Add New Player';
+      document.getElementById('savePlayerBtn').textContent = 'Add Player';
+      document.getElementById('firstName').value = '';
+      document.getElementById('lastName').value = '';
+      document.getElementById('gradYear').value = '';
+      document.getElementById('playerEmail').value = '';
+    }
+
     // Render players
     function renderPlayers() {
       const list = document.getElementById('playersList');
@@ -1300,6 +1325,7 @@
             '<span>Class of ' + (player.grad_year || 'N/A') + (player.email ? ' • ' + player.email : '') + '</span>' +
           '</div>' +
           '<div class="player-actions">' +
+            '<button onclick="startEditPlayer(\'' + player.id + '\')" title="Edit">Edit</button>' +
             '<button onclick="removePlayer(\'' + player.id + '\')" title="Remove">Remove</button>' +
           '</div>' +
         '</div>'
@@ -1324,34 +1350,47 @@
       }
 
       try {
-        const res = await api.post('/api/players', {
-          coachId: currentUser.id,
-          firstName,
-          lastName,
-          gradYear,
-          gender: currentPlayerGender,
-          email,
-          ownerCoachId: activeOwnerCoachId
-        });
+        let res;
+        if (editingPlayerId) {
+          res = await api.put(`/api/players/${editingPlayerId}`, {
+            coachId: currentUser.id,
+            firstName,
+            lastName,
+            gradYear,
+            gender: currentPlayerGender,
+            email
+          });
+        } else {
+          res = await api.post('/api/players', {
+            coachId: currentUser.id,
+            firstName,
+            lastName,
+            gradYear,
+            gender: currentPlayerGender,
+            email,
+            ownerCoachId: activeOwnerCoachId
+          });
+        }
 
         if (!res.ok) {
           const data = await res.json();
-          showMessage(data.error || 'Failed to add player', 'error');
+          showMessage(data.error || 'Failed to save player', 'error');
           return;
         }
 
-        // Clear form and hide
-        document.getElementById('firstName').value = '';
-        document.getElementById('lastName').value = '';
-        document.getElementById('gradYear').value = '';
-        document.getElementById('playerEmail').value = '';
-        document.getElementById('playerForm').classList.remove('active');
+        const data = await res.json();
 
-        showMessage(`${firstName} ${lastName} added successfully!`, 'success');
+        document.getElementById('playerForm').classList.remove('active');
+        if (!editingPlayerId && data.emailStatus && !data.emailStatus.sent && email) {
+          showMessage(`${firstName} ${lastName} added, but email not sent: ${data.emailStatus.error || 'unknown error'}`, 'error');
+        } else {
+          showMessage(editingPlayerId ? 'Player updated.' : `${firstName} ${lastName} added successfully!`, 'success');
+        }
+        resetPlayerForm();
         loadPlayers();
       } catch (err) {
         console.error('Add player failed:', err);
-        showMessage('Failed to add player.', 'error');
+        showMessage('Failed to save player.', 'error');
       }
     }
 
@@ -1452,11 +1491,13 @@
 
     // Toggle form
     document.getElementById('addPlayerBtn').addEventListener('click', () => {
+      resetPlayerForm();
       document.getElementById('playerForm').classList.toggle('active');
     });
 
     document.getElementById('cancelBtn').addEventListener('click', () => {
       document.getElementById('playerForm').classList.remove('active');
+      resetPlayerForm();
     });
 
     document.getElementById('savePlayerBtn').addEventListener('click', addPlayer);

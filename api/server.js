@@ -31,14 +31,20 @@ const mailTransport = process.env.SMTP_HOST && process.env.SMTP_USER && process.
   : null;
 
 async function sendEmail(to, subject, html) {
-  if (!mailTransport) return false;
-  await mailTransport.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
-    to,
-    subject,
-    html
-  });
-  return true;
+  if (!mailTransport) {
+    return { success: false, error: 'Email service not configured (SMTP_* env vars missing)' };
+  }
+  try {
+    await mailTransport.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to,
+      subject,
+      html
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
 // CORS - allow GitHub Pages and local development
@@ -805,18 +811,24 @@ app.post('/api/announcements', async (req, res) => {
       .eq('coach_id', targetCoachId)
       .not('email', 'is', null);
 
+    let emailStatus = { sent: false, recipients: 0, error: null };
     if (players && players.length) {
       const emails = players.map(p => p.email).filter(Boolean);
       if (emails.length) {
-        await sendEmail(
+        const result = await sendEmail(
           emails,
           `New Announcement: ${title}`,
           `<p>${body}</p>`
         );
+        emailStatus = {
+          sent: !!result.success,
+          recipients: emails.length,
+          error: result.success ? null : result.error
+        };
       }
     }
 
-    res.json(data);
+    res.json({ ...data, emailStatus });
   } catch (error) {
     console.error('Announcement create error:', error);
     res.status(400).json({ error: error.message });
@@ -1176,6 +1188,7 @@ app.post('/api/players', async (req, res) => {
       .single();
 
     if (error) throw error;
+    let emailStatus = { sent: false, recipients: 0, error: null };
     if (email) {
       const { data: owner } = await supabase
         .from('users')
@@ -1185,15 +1198,20 @@ app.post('/api/players', async (req, res) => {
 
       const teamCode = owner?.team_code || '';
       const teamName = owner?.team_name || 'your team';
-      await sendEmail(
+      const result = await sendEmail(
         email,
         `Welcome to ${teamName}`,
         `<p>You’ve been invited to join <strong>${teamName}</strong> on StrikeMaster.</p>
          <p>Your team code is: <strong>${teamCode}</strong></p>
          <p>Use this code to sign in as a player.</p>`
       );
+      emailStatus = {
+        sent: !!result.success,
+        recipients: 1,
+        error: result.success ? null : result.error
+      };
     }
-    res.json(data);
+    res.json({ ...data, emailStatus });
 
   } catch (error) {
     console.error('Create player error:', error);

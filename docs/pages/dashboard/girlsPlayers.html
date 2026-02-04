@@ -87,7 +87,7 @@
 
     .add-form {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
       gap: 15px;
       align-items: end;
     }
@@ -181,6 +181,18 @@
       gap: 10px;
     }
 
+    .edit-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .edit-btn:hover { opacity: 0.9; }
+
     .delete-btn {
       background: #dc3545;
       color: white;
@@ -199,6 +211,47 @@
       text-align: center;
       padding: 40px;
       color: #888;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 2px solid var(--accent-color);
+      padding: 20px;
+    }
+
+    .modal-content h3 { margin-top: 0; }
+
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      cursor: pointer;
     }
 
     /* Player Stats Modal */
@@ -480,6 +533,10 @@
             <option value="girls">F</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="playerEmail" placeholder="student@email.com">
+        </div>
         <button class="add-btn" id="addPlayerBtn">Add Player</button>
       </div>
     </div>
@@ -561,6 +618,48 @@
             <tr><td colspan="8" class="no-stats">No match data available</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <div class="modal" id="editPlayerModal">
+      <div class="modal-content">
+        <h3>Edit Player</h3>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" id="editFirstName">
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" id="editLastName">
+          </div>
+          <div class="form-group">
+            <label>Grad Year *</label>
+            <select id="editGradYear">
+              <option value="">Select</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Gender *</label>
+            <select id="editGender">
+              <option value="boys">M</option>
+              <option value="girls">F</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Email (optional)</label>
+            <input type="email" id="editEmail" placeholder="student@email.com">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="editCancelBtn" type="button">Cancel</button>
+          <button class="add-btn" id="editSaveBtn" type="button">Save</button>
+        </div>
       </div>
     </div>
   </div>
@@ -741,9 +840,10 @@
           <div class="player-card" data-player-id="${player.id}" onclick="selectPlayer('${player.id}')">
             <div class="player-info">
               <h4>${player.first_name} ${player.last_name}</h4>
-              <span>Class of ${player.grad_year || 'N/A'}</span>
+              <span>Class of ${player.grad_year || 'N/A'}${player.email ? ` • ${player.email}` : ''}</span>
             </div>
             <div class="player-actions">
+              <button class="edit-btn" onclick="event.stopPropagation(); openEditPlayer('${player.id}')">Edit</button>
               <button class="delete-btn" onclick="event.stopPropagation(); deletePlayer('${player.id}')">Remove</button>
             </div>
           </div>
@@ -914,11 +1014,66 @@
       }).join('');
     
 
+    let editPlayerId = null;
+
+    function openEditPlayer(playerId) {
+      const player = players.find(p => p.id === playerId);
+      if (!player) return;
+      editPlayerId = playerId;
+      document.getElementById('editFirstName').value = player.first_name || '';
+      document.getElementById('editLastName').value = player.last_name || '';
+      document.getElementById('editGradYear').value = player.grad_year || '';
+      document.getElementById('editGender').value = player.gender || 'boys';
+      document.getElementById('editEmail').value = player.email || '';
+      document.getElementById('editPlayerModal').classList.add('active');
+    }
+
+    function closeEditPlayer() {
+      editPlayerId = null;
+      document.getElementById('editPlayerModal').classList.remove('active');
+    }
+
+    document.getElementById('editCancelBtn').addEventListener('click', closeEditPlayer);
+    document.getElementById('editPlayerModal').addEventListener('click', (event) => {
+      if (event.target.id === 'editPlayerModal') closeEditPlayer();
+    });
+
+    document.getElementById('editSaveBtn').addEventListener('click', async () => {
+      if (!editPlayerId) return;
+      const firstName = document.getElementById('editFirstName').value.trim();
+      const lastName = document.getElementById('editLastName').value.trim();
+      const gradYear = document.getElementById('editGradYear').value;
+      const gender = document.getElementById('editGender').value;
+      const email = document.getElementById('editEmail').value.trim();
+      if (!firstName || !lastName || !gradYear) {
+        showMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/players/${editPlayerId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coachId, firstName, lastName, gradYear: parseInt(gradYear), gender, email })
+        });
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to update player');
+        }
+        closeEditPlayer();
+        showMessage('Player updated.', 'success');
+        loadPlayers();
+      } catch (error) {
+        showMessage(error.message || 'Failed to update player.', 'error');
+      }
+    });
+
     // Add player
     document.getElementById('addPlayerBtn').addEventListener('click', async () => {
       const firstName = document.getElementById('firstName').value.trim();
       const lastName = document.getElementById('lastName').value.trim();
       const gradYear = document.getElementById('gradYear').value;
+      const email = document.getElementById('playerEmail').value.trim();
       const genderSelect = document.getElementById('playerGender');
       const selectedGender = genderSelect ? genderSelect.value : (currentGender === 'girls' ? 'girls' : 'boys');
 
@@ -937,7 +1092,8 @@
             firstName,
             lastName,
             gradYear: parseInt(gradYear),
-            gender: selectedGender
+            gender: selectedGender,
+            email
           })
         });
 
@@ -946,13 +1102,20 @@
           throw new Error(data.error || 'Failed to add player');
         }
 
+        const data = await response.json();
+
         // Clear form
         document.getElementById('firstName').value = '';
         document.getElementById('lastName').value = '';
         document.getElementById('gradYear').value = '';
+        document.getElementById('playerEmail').value = '';
         if (genderSelect) genderSelect.value = currentGender === 'girls' ? 'girls' : 'boys';
 
-        showMessage(`${firstName} ${lastName} added successfully!`, 'success');
+        if (data.emailStatus && !data.emailStatus.sent && email) {
+          showMessage(`${firstName} ${lastName} added, but email not sent: ${data.emailStatus.error || 'unknown error'}`, 'error');
+        } else {
+          showMessage(`${firstName} ${lastName} added successfully!`, 'success');
+        }
         loadPlayers();
 
       } catch (error) {
@@ -1003,6 +1166,9 @@
         // Hide remove player buttons in stats panel
         const removeBtn = document.getElementById('removePlayerBtn');
         if (removeBtn) removeBtn.style.display = 'none';
+
+        document.querySelectorAll('.delete-btn').forEach(btn => btn.style.display = 'none');
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.style.display = 'none');
       }
     }
 
