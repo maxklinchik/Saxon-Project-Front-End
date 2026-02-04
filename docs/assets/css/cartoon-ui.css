@@ -1,49 +1,35 @@
 [data-ui="cartoon"] body {
   font-family: 'Nunito', 'Segoe UI', sans-serif;
   background:
-    radial-gradient(circle at 10% 10%, rgba(255, 244, 194, 0.5), transparent 45%),
-    radial-gradient(circle at 90% 15%, rgba(110, 203, 255, 0.35), transparent 45%),
-    radial-gradient(circle at 15% 85%, rgba(255, 107, 107, 0.25), transparent 40%),
-    repeating-linear-gradient(35deg, rgba(43, 43, 43, 0.035) 0 1px, transparent 1px 14px),
-    radial-gradient(rgba(43, 43, 43, 0.06) 1px, transparent 1px),
-    linear-gradient(var(--bg-color), var(--bg-color));
-  background-size: auto, auto, auto, 36px 36px, 24px 24px, auto;
-  background-position: 0 0, 0 0, 0 0, 0 0, 8px 8px, 0 0;
+    repeating-linear-gradient(35deg, rgba(0, 0, 0, 0.04) 0 1px, transparent 1px 18px),
+    linear-gradient(#f2f2f2, #f2f2f2);
+  background-size: 32px 32px, auto;
+  background-position: 0 0, 0 0;
 }
 
 [data-ui="cartoon"][data-theme="dark"] body {
   background:
-    radial-gradient(circle at 10% 10%, rgba(255, 244, 194, 0.2), transparent 45%),
-    radial-gradient(circle at 90% 15%, rgba(110, 203, 255, 0.2), transparent 45%),
-    radial-gradient(circle at 15% 85%, rgba(255, 107, 107, 0.18), transparent 40%),
-    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 14px),
-    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 18px),
     linear-gradient(var(--bg-color), var(--bg-color));
-  background-size: auto, auto, auto, 36px 36px, 24px 24px, auto;
-  background-position: 0 0, 0 0, 0 0, 0 0, 8px 8px, 0 0;
+  background-size: 32px 32px, auto;
+  background-position: 0 0, 0 0;
 }
 
 [data-ui="cartoon"] body.dashboard {
   background:
-    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--main-color) 18%, transparent) 0 40%, transparent 62%),
-    radial-gradient(circle at 80% 12%, color-mix(in srgb, var(--accent-color) 14%, transparent) 0 36%, transparent 60%),
-    radial-gradient(circle at 18% 85%, color-mix(in srgb, var(--accent-color) 10%, transparent) 0 30%, transparent 58%),
-    repeating-linear-gradient(22deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 26px),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg-color) 82%, var(--main-color) 18%) 0%, var(--bg-color) 60%);
-  background-size: auto, auto, auto, 30px 30px, auto;
-  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+    repeating-linear-gradient(22deg, rgba(0, 0, 0, 0.04) 0 1px, transparent 1px 26px),
+    linear-gradient(#f2f2f2, #f2f2f2);
+  background-size: 30px 30px, auto;
+  background-position: 0 0, 0 0;
   background-attachment: fixed;
 }
 
 [data-ui="cartoon"][data-theme="dark"] body.dashboard {
   background:
-    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--main-color) 14%, transparent) 0 38%, transparent 62%),
-    radial-gradient(circle at 80% 12%, color-mix(in srgb, var(--accent-color) 10%, transparent) 0 34%, transparent 60%),
-    radial-gradient(circle at 18% 85%, color-mix(in srgb, var(--accent-color) 8%, transparent) 0 30%, transparent 58%),
-    repeating-linear-gradient(22deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 26px),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg-color) 86%, var(--main-color) 14%) 0%, var(--bg-color) 60%);
-  background-size: auto, auto, auto, 30px 30px, auto;
-  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+    repeating-linear-gradient(22deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 26px),
+    linear-gradient(var(--bg-color), var(--bg-color));
+  background-size: 30px 30px, auto;
+  background-position: 0 0, 0 0;
   background-attachment: fixed;
 }
 

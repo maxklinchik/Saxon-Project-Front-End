@@ -1466,7 +1466,7 @@ app.post('/api/matches', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, gender, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, oppG1, oppG2, oppG3, sharedCoaches } = req.body;
+    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches } = req.body;
 
     if (!coachId || !gender || !opponent || !matchDate) {
       return res.status(400).json({ error: 'Required: coachId, gender, opponent, matchDate' });
@@ -1479,6 +1479,7 @@ app.post('/api/matches', async (req, res) => {
       .insert([{
         coach_id: coachId,
         gender,
+        match_type: matchType || 'team',
         opponent,
         match_date: matchDate,
         location: location || null,
@@ -1489,9 +1490,11 @@ app.post('/api/matches', async (req, res) => {
         team_g1: teamG1 ? parseInt(teamG1) : null,
         team_g2: teamG2 ? parseInt(teamG2) : null,
         team_g3: teamG3 ? parseInt(teamG3) : null,
+        team_g4: teamG4 ? parseInt(teamG4) : null,
         opp_g1: oppG1 ? parseInt(oppG1) : null,
         opp_g2: oppG2 ? parseInt(oppG2) : null,
         opp_g3: oppG3 ? parseInt(oppG3) : null,
+        opp_g4: oppG4 ? parseInt(oppG4) : null,
         is_complete: false
       }])
       .select()
@@ -1528,7 +1531,7 @@ app.put('/api/matches/:id', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, comments, teamG1, teamG2, teamG3, oppG1, oppG2, oppG3, sharedCoaches } = req.body;
+    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, matchType, sharedCoaches } = req.body;
 
     if (coachId) {
       const { data: matchOwner, error: ownerError } = await supabase
@@ -1564,12 +1567,15 @@ app.put('/api/matches/:id', async (req, res) => {
     if (result !== undefined) updateData.result = result;
     if (isComplete !== undefined) updateData.is_complete = isComplete;
     if (comments !== undefined) updateData.comments = comments;
+    if (matchType !== undefined) updateData.match_type = matchType;
     if (teamG1 !== undefined) updateData.team_g1 = teamG1 ? parseInt(teamG1) : null;
     if (teamG2 !== undefined) updateData.team_g2 = teamG2 ? parseInt(teamG2) : null;
     if (teamG3 !== undefined) updateData.team_g3 = teamG3 ? parseInt(teamG3) : null;
+    if (teamG4 !== undefined) updateData.team_g4 = teamG4 ? parseInt(teamG4) : null;
     if (oppG1 !== undefined) updateData.opp_g1 = oppG1 ? parseInt(oppG1) : null;
     if (oppG2 !== undefined) updateData.opp_g2 = oppG2 ? parseInt(oppG2) : null;
     if (oppG3 !== undefined) updateData.opp_g3 = oppG3 ? parseInt(oppG3) : null;
+    if (oppG4 !== undefined) updateData.opp_g4 = oppG4 ? parseInt(oppG4) : null;
 
     const resolvedShared = await resolveSharedCoaches(sharedCoaches, coachId);
 
@@ -1729,7 +1735,7 @@ app.post('/api/records', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { matchId, playerId, game1, game2, game3, isVarsity } = req.body;
+    const { matchId, playerId, game1, game2, game3, game4, isVarsity } = req.body;
 
     if (!matchId || !playerId) {
       return res.status(400).json({ error: 'Required: matchId, playerId' });
@@ -1743,6 +1749,7 @@ app.post('/api/records', async (req, res) => {
         game1: game1 !== undefined && game1 !== null ? parseInt(game1) : null,
         game2: game2 !== undefined && game2 !== null ? parseInt(game2) : null,
         game3: game3 !== undefined && game3 !== null ? parseInt(game3) : null,
+        game4: game4 !== undefined && game4 !== null ? parseInt(game4) : null,
         is_varsity: isVarsity !== undefined ? isVarsity : true
       }], { onConflict: 'match_id,player_id' })
       .select()
@@ -1764,12 +1771,13 @@ app.put('/api/records/:id', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { game1, game2, game3 } = req.body;
+    const { game1, game2, game3, game4 } = req.body;
 
     const updateData = {};
     if (game1 !== undefined) updateData.game1 = parseInt(game1);
     if (game2 !== undefined) updateData.game2 = parseInt(game2);
     if (game3 !== undefined) updateData.game3 = parseInt(game3);
+    if (game4 !== undefined) updateData.game4 = parseInt(game4);
 
     const { data, error } = await supabase
       .from('records')
@@ -1867,12 +1875,13 @@ app.get('/api/players/:playerId/stats', async (req, res) => {
     let highSeries = 0;
 
     records.forEach(r => {
-      const series = (r.game1 || 0) + (r.game2 || 0) + (r.game3 || 0);
+      const series = (r.game1 || 0) + (r.game2 || 0) + (r.game3 || 0) + (r.game4 || 0);
       totalPins += series;
       
       if (r.game1) { totalGames++; highGame = Math.max(highGame, r.game1); }
       if (r.game2) { totalGames++; highGame = Math.max(highGame, r.game2); }
       if (r.game3) { totalGames++; highGame = Math.max(highGame, r.game3); }
+      if (r.game4) { totalGames++; highGame = Math.max(highGame, r.game4); }
       
       highSeries = Math.max(highSeries, series);
     });
@@ -1946,6 +1955,7 @@ app.get('/api/stats/team', async (req, res) => {
         if (r.game1) { totalPins += r.game1; totalGames++; highGame = Math.max(highGame, r.game1); }
         if (r.game2) { totalPins += r.game2; totalGames++; highGame = Math.max(highGame, r.game2); }
         if (r.game3) { totalPins += r.game3; totalGames++; highGame = Math.max(highGame, r.game3); }
+        if (r.game4) { totalPins += r.game4; totalGames++; highGame = Math.max(highGame, r.game4); }
       });
 
       return {

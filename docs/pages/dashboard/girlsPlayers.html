@@ -573,6 +573,7 @@
           <option value="game1">Game 1 Only</option>
           <option value="game2">Game 2 Only</option>
           <option value="game3">Game 3 Only</option>
+          <option value="game4">Game 4 Only</option>
         </select>
       </div>
 
@@ -594,6 +595,10 @@
           <div class="summary-value" id="avgGame3">0.0</div>
         </div>
         <div class="summary-box">
+          <div class="summary-label">Avg Game 4</div>
+          <div class="summary-value" id="avgGame4">0.0</div>
+        </div>
+        <div class="summary-box">
           <div class="summary-label">Total Avg</div>
           <div class="summary-value" id="totalAvg">0.0</div>
         </div>
@@ -609,13 +614,14 @@
               <th>Game 1</th>
               <th>Game 2</th>
               <th>Game 3</th>
+              <th>Game 4</th>
               <th>Total</th>
               <th>Avg</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody id="matchHistoryBody">
-            <tr><td colspan="8" class="no-stats">No match data available</td></tr>
+            <tr><td colspan="9" class="no-stats">No match data available</td></tr>
           </tbody>
         </table>
       </div>
@@ -918,8 +924,8 @@
 
       // Calculate averages based on game filter
       const matchCount = filteredRecords.length;
-      let totalG1 = 0, totalG2 = 0, totalG3 = 0, totalAll = 0;
-      let countG1 = 0, countG2 = 0, countG3 = 0, countAll = 0;
+      let totalG1 = 0, totalG2 = 0, totalG3 = 0, totalG4 = 0, totalAll = 0;
+      let countG1 = 0, countG2 = 0, countG3 = 0, countG4 = 0, countAll = 0;
 
       filteredRecords.forEach(r => {
         if (currentGameFilter === 'all' || currentGameFilter === 'game1') {
@@ -931,6 +937,9 @@
         if (currentGameFilter === 'all' || currentGameFilter === 'game3') {
           if (r.game3) { totalG3 += r.game3; countG3++; }
         }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game4') {
+          if (r.game4) { totalG4 += r.game4; countG4++; }
+        }
         
         // Calculate overall average based on game filter
         let gameTotal = 0, gamesPlayed = 0;
@@ -938,36 +947,34 @@
           if (r.game1) { gameTotal += r.game1; gamesPlayed++; }
           if (r.game2) { gameTotal += r.game2; gamesPlayed++; }
           if (r.game3) { gameTotal += r.game3; gamesPlayed++; }
+          if (r.game4) { gameTotal += r.game4; gamesPlayed++; }
         } else if (currentGameFilter === 'game1' && r.game1) {
           gameTotal = r.game1; gamesPlayed = 1;
         } else if (currentGameFilter === 'game2' && r.game2) {
           gameTotal = r.game2; gamesPlayed = 1;
         } else if (currentGameFilter === 'game3' && r.game3) {
           gameTotal = r.game3; gamesPlayed = 1;
+        } else if (currentGameFilter === 'game4' && r.game4) {
+          gameTotal = r.game4; gamesPlayed = 1;
         }
         if (gamesPlayed > 0) {
           totalAll += gameTotal / gamesPlayed;
           countAll++;
         }
       });
-        const gamesPlayed = (r.game1 ? 1 : 0) + (r.game2 ? 1 : 0) + (r.game3 ? 1 : 0);
-        if (gamesPlayed > 0) {
-          totalAll += gameTotal / gamesPlayed;
-          countAll++;
-        }
-      };
 
       document.getElementById('totalMatches').textContent = matchCount;
       document.getElementById('avgGame1').textContent = countG1 > 0 ? (totalG1 / countG1).toFixed(1) : '0.0';
       document.getElementById('avgGame2').textContent = countG2 > 0 ? (totalG2 / countG2).toFixed(1) : '0.0';
       document.getElementById('avgGame3').textContent = countG3 > 0 ? (totalG3 / countG3).toFixed(1) : '0.0';
+      document.getElementById('avgGame4').textContent = countG4 > 0 ? (totalG4 / countG4).toFixed(1) : '0.0';
       document.getElementById('totalAvg').textContent = countAll > 0 ? (totalAll / countAll).toFixed(1) : '0.0';
 
       // Build match history table
       const tbody = document.getElementById('matchHistoryBody');
       
       if (filteredRecords.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="no-stats">No match data available for this filter</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="no-stats">No match data available for this filter</td></tr>';
         return;
       }
 
@@ -990,8 +997,9 @@
         const g1 = record.game1 || 0;
         const g2 = record.game2 || 0;
         const g3 = record.game3 || 0;
-        const total = g1 + g2 + g3;
-        const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0);
+        const g4 = record.game4 || 0;
+        const total = g1 + g2 + g3 + g4;
+        const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0) + (record.game4 ? 1 : 0);
         const avg = gamesPlayed > 0 ? (total / gamesPlayed).toFixed(1) : '0.0';
 
         const opponentLogo = getOpponentLogo(match.opponent);
@@ -1006,6 +1014,7 @@
             <td>${record.game1 || '-'}</td>
             <td>${record.game2 || '-'}</td>
             <td>${record.game3 || '-'}</td>
+            <td>${record.game4 || '-'}</td>
             <td><strong>${total}</strong></td>
             <td>${avg}</td>
             <td>${record.is_varsity ? '<span class="varsity-badge">V</span>' : 'JV'}</td>

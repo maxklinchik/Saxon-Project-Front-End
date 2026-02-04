@@ -91,6 +91,7 @@ CREATE TABLE matches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   coach_id UUID REFERENCES users(id) ON DELETE CASCADE,
   gender VARCHAR(10) NOT NULL CHECK (gender IN ('boys', 'girls')),
+  match_type VARCHAR(20) DEFAULT 'team' CHECK (match_type IN ('team', 'tournament')),
   opponent VARCHAR(255) NOT NULL,
   match_date DATE NOT NULL,
   our_score INTEGER DEFAULT 0,
@@ -98,6 +99,14 @@ CREATE TABLE matches (
   result VARCHAR(10) CHECK (result IN ('win', 'loss', 'tie', NULL)),
   location VARCHAR(255),
   is_complete BOOLEAN DEFAULT false,
+  team_g1 INTEGER,
+  team_g2 INTEGER,
+  team_g3 INTEGER,
+  opp_g1 INTEGER,
+  opp_g2 INTEGER,
+  opp_g3 INTEGER,
+  team_g4 INTEGER,
+  opp_g4 INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -144,7 +153,8 @@ CREATE TABLE records (
   game1 INTEGER CHECK (game1 >= 0 AND game1 <= 300),
   game2 INTEGER CHECK (game2 >= 0 AND game2 <= 300),
   game3 INTEGER CHECK (game3 >= 0 AND game3 <= 300),
-  total INTEGER GENERATED ALWAYS AS (COALESCE(game1, 0) + COALESCE(game2, 0) + COALESCE(game3, 0)) STORED,
+  game4 INTEGER CHECK (game4 >= 0 AND game4 <= 300),
+  total INTEGER GENERATED ALWAYS AS (COALESCE(game1, 0) + COALESCE(game2, 0) + COALESCE(game3, 0) + COALESCE(game4, 0)) STORED,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(match_id, player_id)  -- One record per player per match
 );
@@ -189,7 +199,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
 -- users: id, email, username, first_name, last_name, team_name, team_code, created_at
 -- players: id, first_name, last_name, gender, email, grad_year, coach_id, is_active, created_at
 -- coach_access: id, owner_coach_id, coach_id, can_edit, created_at
--- matches: id, coach_id, gender, opponent, match_date, our_score, opponent_score, result, location, is_complete, created_at
+-- matches: id, coach_id, gender, match_type, opponent, match_date, our_score, opponent_score, result, location, is_complete, team_g1, team_g2, team_g3, team_g4, opp_g1, opp_g2, opp_g3, opp_g4, created_at
 -- match_permissions: id, match_id, coach_id, can_edit, created_at
--- records: id, match_id, player_id, game1, game2, game3, total (auto-calculated), created_at
+-- records: id, match_id, player_id, game1, game2, game3, game4, total (auto-calculated), created_at
 -- announcements: id, coach_id, title, body, created_at

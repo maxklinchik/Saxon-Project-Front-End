@@ -346,7 +346,7 @@
 
     .form-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px;
       margin-bottom: 20px;
     }
@@ -1312,6 +1312,13 @@
             <input type="date" id="matchDate" required>
           </div>
           <div class="form-group">
+            <label for="matchType">Match Type</label>
+            <select id="matchType">
+              <option value="team">Team (3 games)</option>
+              <option value="tournament">Tournament (4 games)</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label for="opponent">Opponent</label>
             <select id="opponent" required>
               <option value="">Select opponent...</option>
@@ -1346,6 +1353,7 @@
                 <th>Game 1</th>
                 <th>Game 2</th>
                 <th>Game 3</th>
+                <th class="tournament-only" style="display: none;">Game 4</th>
                 <th>Total Pins</th>
               </tr>
             </thead>
@@ -1355,6 +1363,7 @@
                 <td><input type="number" class="score-input auto-calc" id="teamG1" min="0" placeholder="-" readonly></td>
                 <td><input type="number" class="score-input auto-calc" id="teamG2" min="0" placeholder="-" readonly></td>
                 <td><input type="number" class="score-input auto-calc" id="teamG3" min="0" placeholder="-" readonly></td>
+                <td class="tournament-only" style="display: none;"><input type="number" class="score-input auto-calc" id="teamG4" min="0" placeholder="-" readonly></td>
                 <td><span id="teamTotal" class="total-display">0</span></td>
               </tr>
               <tr>
@@ -1362,6 +1371,7 @@
                 <td><input type="number" class="score-input" id="oppG1" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
                 <td><input type="number" class="score-input" id="oppG2" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
                 <td><input type="number" class="score-input" id="oppG3" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
+                <td class="tournament-only" style="display: none;"><input type="number" class="score-input" id="oppG4" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
                 <td><span id="oppTotal" class="total-display">0</span></td>
               </tr>
             </tbody>
@@ -1380,6 +1390,10 @@
               </div>
               <div class="point-item" id="g3Point">
                 <span class="point-label">G3</span>
+                <span class="point-value">+0</span>
+              </div>
+              <div class="point-item tournament-only" id="g4Point" style="display: none;">
+                <span class="point-label">G4</span>
                 <span class="point-value">+0</span>
               </div>
               <div class="point-item" id="totalPoint">
@@ -1411,6 +1425,7 @@
                 <th>Game 1</th>
                 <th>Game 2</th>
                 <th>Game 3</th>
+                <th class="tournament-only" style="display: none;">Game 4</th>
                 <th>Varsity</th>
                 <th>DNP</th>
               </tr>
@@ -1487,22 +1502,25 @@
 
     // Calculate match result based on opponent scores
     function calculateMatchResult() {
+      const matchType = document.getElementById('matchType')?.value || 'team';
       const teamG1 = parseInt(document.getElementById('teamG1').value) || 0;
       const teamG2 = parseInt(document.getElementById('teamG2').value) || 0;
       const teamG3 = parseInt(document.getElementById('teamG3').value) || 0;
+      const teamG4 = parseInt(document.getElementById('teamG4')?.value) || 0;
       const oppG1 = parseInt(document.getElementById('oppG1').value) || 0;
       const oppG2 = parseInt(document.getElementById('oppG2').value) || 0;
       const oppG3 = parseInt(document.getElementById('oppG3').value) || 0;
+      const oppG4 = parseInt(document.getElementById('oppG4')?.value) || 0;
 
-      const teamTotal = teamG1 + teamG2 + teamG3;
-      const oppTotal = oppG1 + oppG2 + oppG3;
+      const teamTotal = teamG1 + teamG2 + teamG3 + (matchType === 'tournament' ? teamG4 : 0);
+      const oppTotal = oppG1 + oppG2 + oppG3 + (matchType === 'tournament' ? oppG4 : 0);
 
       // Update total displays
       document.getElementById('teamTotal').textContent = teamTotal;
       document.getElementById('oppTotal').textContent = oppTotal;
 
       // Check if any scores entered
-      const hasScores = teamG1 || teamG2 || teamG3 || oppG1 || oppG2 || oppG3;
+      const hasScores = teamG1 || teamG2 || teamG3 || teamG4 || oppG1 || oppG2 || oppG3 || oppG4;
       const resultCard = document.getElementById('pointsResultCard');
       
       if (!hasScores) {
@@ -1564,6 +1582,23 @@
         g3Point.querySelector('.point-value').textContent = teamG3 || oppG3 ? '0' : '-';
       }
 
+      // Game 4 (2 points) for tournaments
+      const g4Point = document.getElementById('g4Point');
+      if (matchType === 'tournament' && g4Point) {
+        if (teamG4 > oppG4) {
+          ourPoints += 2;
+          g4Point.className = 'point-item won tournament-only';
+          g4Point.querySelector('.point-value').textContent = '+2';
+        } else if (oppG4 > teamG4) {
+          oppPoints += 2;
+          g4Point.className = 'point-item lost tournament-only';
+          g4Point.querySelector('.point-value').textContent = '+0';
+        } else {
+          g4Point.className = 'point-item tournament-only';
+          g4Point.querySelector('.point-value').textContent = teamG4 || oppG4 ? '0' : '-';
+        }
+      }
+
       // Total (1 point)
       const totalPoint = document.getElementById('totalPoint');
       if (teamTotal > oppTotal) {
@@ -1604,6 +1639,14 @@
       document.getElementById('result').value = result;
       document.getElementById('ourScore').value = ourPoints;
       document.getElementById('opponentScore').value = oppPoints;
+    }
+
+    function applyMatchTypeUI() {
+      const matchType = document.getElementById('matchType')?.value || 'team';
+      document.querySelectorAll('.tournament-only').forEach(el => {
+        el.style.display = matchType === 'tournament' ? '' : 'none';
+      });
+      calculateTeamTotals();
     }
 
     // Team logo mapping for opponents - uses centralized teams.js config
@@ -1755,6 +1798,7 @@
       document.getElementById('matchModal').classList.add('active');
       document.getElementById('matchDate').valueAsDate = new Date();
       loadPlayers(gender);
+      applyMatchTypeUI();
     }
 
     // Modal controls
@@ -1780,6 +1824,8 @@
       document.getElementById('matchModal').classList.remove('active');
       resetModal();
     });
+
+    document.getElementById('matchType').addEventListener('change', applyMatchTypeUI);
 
     // Modal click-to-close handler removed as requested
 
@@ -1823,7 +1869,7 @@
       } catch (error) {
         console.error('Error loading players:', error);
         document.getElementById('playersTableBody').innerHTML = 
-          '<tr><td colspan="6" style="text-align:center; color:#dc3545;">Error loading players</td></tr>';
+          '<tr><td colspan="7" style="text-align:center; color:#dc3545;">Error loading players</td></tr>';
       }
     }
 
@@ -1832,7 +1878,7 @@
       const tbody = document.getElementById('playersTableBody');
       
       if (!players || players.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
         return;
       }
 
@@ -1842,6 +1888,7 @@
           <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
           <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
           <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+          <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
           <td><input type="checkbox" class="varsity-checkbox" checked onchange="calculateTeamTotals()"></td>
           <td><input type="checkbox" class="dnp-checkbox" onchange="toggleDNP(this)"></td>
         </tr>
@@ -1853,7 +1900,7 @@
       const tbody = document.getElementById('playersTableBody');
       
       if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
         return;
       }
 
@@ -1861,13 +1908,14 @@
       
       // Boys section
       if (allPlayers.boys.length > 0) {
-        html += '<tr><td colspan="6" class="gender-separator">Boys Team</td></tr>';
+        html += '<tr><td colspan="7" class="gender-separator">Boys Team</td></tr>';
         html += allPlayers.boys.map(player => `
           <tr class="player-row" data-player-id="${player.id}" data-gender="boys">
             <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
             <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
             <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
             <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="varsity-checkbox" checked onchange="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="dnp-checkbox" onchange="toggleDNP(this)"></td>
           </tr>
@@ -1876,13 +1924,14 @@
       
       // Girls section
       if (allPlayers.girls.length > 0) {
-        html += '<tr><td colspan="6" class="gender-separator">Girls Team</td></tr>';
+        html += '<tr><td colspan="7" class="gender-separator">Girls Team</td></tr>';
         html += allPlayers.girls.map(player => `
           <tr class="player-row" data-player-id="${player.id}" data-gender="girls">
             <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
             <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
             <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
             <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="varsity-checkbox" checked onchange="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="dnp-checkbox" onchange="toggleDNP(this)"></td>
           </tr>
@@ -1896,7 +1945,7 @@
       const tbody = document.getElementById('playersTableBody');
       
       if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No players found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found.</td></tr>';
         return;
       }
 
@@ -1907,7 +1956,7 @@
 
       let html = '';
       if (allPlayers.boys.length > 0) {
-        html += '<tr><td colspan="6" class="gender-separator">Boys Team</td></tr>';
+        html += '<tr><td colspan="7" class="gender-separator">Boys Team</td></tr>';
         html += allPlayers.boys.map(player => {
           const record = recordMap[player.id];
           const hasRecord = !!record;
@@ -1918,6 +1967,7 @@
               <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
               <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
               <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" value="${record?.game4 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
               <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
               <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
             </tr>
@@ -1926,7 +1976,7 @@
       }
 
       if (allPlayers.girls.length > 0) {
-        html += '<tr><td colspan="6" class="gender-separator">Girls Team</td></tr>';
+        html += '<tr><td colspan="7" class="gender-separator">Girls Team</td></tr>';
         html += allPlayers.girls.map(player => {
           const record = recordMap[player.id];
           const hasRecord = !!record;
@@ -1937,6 +1987,7 @@
               <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
               <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
               <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" value="${record?.game4 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
               <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
               <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
             </tr>
@@ -1950,7 +2001,8 @@
 
     // Calculate team totals from varsity player scores
     function calculateTeamTotals() {
-      let teamG1 = 0, teamG2 = 0, teamG3 = 0;
+      let teamG1 = 0, teamG2 = 0, teamG3 = 0, teamG4 = 0;
+      const matchType = document.getElementById('matchType')?.value || 'team';
       
       document.querySelectorAll('.player-row').forEach(row => {
         const isVarsity = row.querySelector('.varsity-checkbox')?.checked;
@@ -1960,9 +2012,11 @@
           const g1 = parseInt(row.querySelector('.game1')?.value) || 0;
           const g2 = parseInt(row.querySelector('.game2')?.value) || 0;
           const g3 = parseInt(row.querySelector('.game3')?.value) || 0;
+          const g4 = parseInt(row.querySelector('.game4')?.value) || 0;
           teamG1 += g1;
           teamG2 += g2;
           teamG3 += g3;
+          if (matchType === 'tournament') teamG4 += g4;
         }
       });
       
@@ -1970,6 +2024,8 @@
       document.getElementById('teamG1').value = teamG1 || '';
       document.getElementById('teamG2').value = teamG2 || '';
       document.getElementById('teamG3').value = teamG3 || '';
+      const teamG4Input = document.getElementById('teamG4');
+      if (teamG4Input) teamG4Input.value = matchType === 'tournament' ? (teamG4 || '') : '';
       
       // Recalculate match result
       calculateMatchResult();
@@ -2099,13 +2155,16 @@
         ourScore: parseInt(document.getElementById('ourScore').value) || 0,
         opponentScore: parseInt(document.getElementById('opponentScore').value) || 0,
         comments: document.getElementById('comments').value,
+        matchType: document.getElementById('matchType').value,
         // Team game scores
         teamG1: parseInt(document.getElementById('teamG1').value) || 0,
         teamG2: parseInt(document.getElementById('teamG2').value) || 0,
         teamG3: parseInt(document.getElementById('teamG3').value) || 0,
+        teamG4: parseInt(document.getElementById('teamG4')?.value) || 0,
         oppG1: parseInt(document.getElementById('oppG1').value) || 0,
         oppG2: parseInt(document.getElementById('oppG2').value) || 0,
         oppG3: parseInt(document.getElementById('oppG3').value) || 0,
+        oppG4: parseInt(document.getElementById('oppG4')?.value) || 0,
         sharedCoaches: getSharedCoachesPayload()
       };
 
@@ -2180,6 +2239,7 @@
       const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
       const rows = document.querySelectorAll('.player-row');
       let totalWood = 0;
+      const matchType = document.getElementById('matchType')?.value || 'team';
       
       for (const row of rows) {
         // Skip rows that don't match the gender filter (if specified)
@@ -2192,17 +2252,19 @@
         const game1 = row.querySelector('.game1').value;
         const game2 = row.querySelector('.game2').value;
         const game3 = row.querySelector('.game3').value;
+        const game4 = row.querySelector('.game4')?.value;
         const isVarsity = row.querySelector('.varsity-checkbox').checked;
 
         // Only save if at least one score is entered
-        if (game1 || game2 || game3) {
+        if (game1 || game2 || game3 || game4) {
           const g1 = game1 ? parseInt(game1) : 0;
           const g2 = game2 ? parseInt(game2) : 0;
           const g3 = game3 ? parseInt(game3) : 0;
+          const g4 = game4 ? parseInt(game4) : 0;
           
           // Add to total wood if varsity
           if (isVarsity) {
-            totalWood += g1 + g2 + g3;
+            totalWood += g1 + g2 + g3 + (matchType === 'tournament' ? g4 : 0);
           }
           
           await fetch(`${API_BASE}/api/records`, {
@@ -2214,6 +2276,7 @@
               game1: game1 ? parseInt(game1) : null,
               game2: game2 ? parseInt(game2) : null,
               game3: game3 ? parseInt(game3) : null,
+              game4: matchType === 'tournament' ? (game4 ? parseInt(game4) : null) : null,
               isVarsity: isVarsity
             })
           });
@@ -2305,20 +2368,26 @@
           const avgWood = varsityRecords.length > 0 ? (totalWood / varsityRecords.length).toFixed(1) : '0.0';
 
           // Calculate points from stored game scores (2 per game win, 1 for total)
+          const isTournament = match.match_type === 'tournament';
           const teamG1 = match.team_g1 || 0;
           const teamG2 = match.team_g2 || 0;
           const teamG3 = match.team_g3 || 0;
+          const teamG4 = match.team_g4 || 0;
           const oppG1 = match.opp_g1 || 0;
           const oppG2 = match.opp_g2 || 0;
           const oppG3 = match.opp_g3 || 0;
-          const teamTotal = teamG1 + teamG2 + teamG3;
-          const oppTotal = oppG1 + oppG2 + oppG3;
+          const oppG4 = match.opp_g4 || 0;
+          const teamTotal = teamG1 + teamG2 + teamG3 + (isTournament ? teamG4 : 0);
+          const oppTotal = oppG1 + oppG2 + oppG3 + (isTournament ? oppG4 : 0);
           
           let ourPoints = 0;
           let oppPoints = 0;
           if (teamG1 > oppG1) ourPoints += 2; else if (oppG1 > teamG1) oppPoints += 2;
           if (teamG2 > oppG2) ourPoints += 2; else if (oppG2 > teamG2) oppPoints += 2;
           if (teamG3 > oppG3) ourPoints += 2; else if (oppG3 > teamG3) oppPoints += 2;
+          if (isTournament) {
+            if (teamG4 > oppG4) ourPoints += 2; else if (oppG4 > teamG4) oppPoints += 2;
+          }
           if (teamTotal > oppTotal) ourPoints += 1; else if (oppTotal > teamTotal) oppPoints += 1;
 
           // Format date
@@ -2331,7 +2400,7 @@
           });
 
           // Determine result from calculated points (not stored result)
-          const hasGameScores = teamG1 || teamG2 || teamG3 || oppG1 || oppG2 || oppG3;
+          const hasGameScores = teamG1 || teamG2 || teamG3 || teamG4 || oppG1 || oppG2 || oppG3 || oppG4;
           let result, resultClass, resultText;
           if (hasGameScores) {
             if (ourPoints > oppPoints) {
@@ -2390,6 +2459,7 @@
                         <th>Game 1</th>
                         <th>Game 2</th>
                         <th>Game 3</th>
+                        ${isTournament ? '<th>Game 4</th>' : ''}
                         <th>Total</th>
                         <th>Average</th>
                       </tr>
@@ -2399,8 +2469,9 @@
                         const g1 = record.game1 || 0;
                         const g2 = record.game2 || 0;
                         const g3 = record.game3 || 0;
-                        const total = g1 + g2 + g3;
-                        const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0);
+                        const g4 = record.game4 || 0;
+                        const total = g1 + g2 + g3 + (isTournament ? g4 : 0);
+                        const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0) + (isTournament && record.game4 ? 1 : 0);
                         const avg = gamesPlayed > 0 ? (total / gamesPlayed).toFixed(1) : '0.0';
                         return `
                           <tr>
@@ -2411,6 +2482,7 @@
                             <td>${record.game1 || '-'}</td>
                             <td>${record.game2 || '-'}</td>
                             <td>${record.game3 || '-'}</td>
+                            ${isTournament ? `<td>${record.game4 || '-'}</td>` : ''}
                             <td><strong>${total}</strong></td>
                             <td>${avg}</td>
                           </tr>
@@ -2504,6 +2576,7 @@
         // Fill in form fields
         document.getElementById('matchDate').value = formatDateInputValue(match.match_date);
         document.getElementById('opponent').value = match.opponent;
+        document.getElementById('matchType').value = match.match_type || 'team';
         populateLocationDropdown(match.location || '');
         document.getElementById('comments').value = match.comments || '';
 
@@ -2519,9 +2592,14 @@
         document.getElementById('teamG1').value = match.team_g1 || '';
         document.getElementById('teamG2').value = match.team_g2 || '';
         document.getElementById('teamG3').value = match.team_g3 || '';
+        const teamG4Input = document.getElementById('teamG4');
+        if (teamG4Input) teamG4Input.value = match.team_g4 || '';
         document.getElementById('oppG1').value = match.opp_g1 || '';
         document.getElementById('oppG2').value = match.opp_g2 || '';
         document.getElementById('oppG3').value = match.opp_g3 || '';
+        const oppG4Input = document.getElementById('oppG4');
+        if (oppG4Input) oppG4Input.value = match.opp_g4 || '';
+        applyMatchTypeUI();
         
         // Recalculate the result display
         calculateMatchResult();
@@ -2561,7 +2639,7 @@
       const tbody = document.getElementById('playersTableBody');
       
       if (!players || players.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">No players found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found.</td></tr>';
         return;
       }
 
@@ -2582,6 +2660,7 @@
             <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
             <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
             <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" value="${record?.game4 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
             <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
           </tr>
@@ -2629,12 +2708,19 @@
       document.getElementById('teamG1').value = '';
       document.getElementById('teamG2').value = '';
       document.getElementById('teamG3').value = '';
+      const teamG4Input = document.getElementById('teamG4');
+      if (teamG4Input) teamG4Input.value = '';
       document.getElementById('oppG1').value = '';
       document.getElementById('oppG2').value = '';
       document.getElementById('oppG3').value = '';
+      const oppG4Input = document.getElementById('oppG4');
+      if (oppG4Input) oppG4Input.value = '';
       document.getElementById('teamTotal').textContent = '0';
       document.getElementById('oppTotal').textContent = '0';
       document.getElementById('pointsResultCard').style.display = 'none';
+      const matchTypeSelect = document.getElementById('matchType');
+      if (matchTypeSelect) matchTypeSelect.value = 'team';
+      applyMatchTypeUI();
 
       sharedCoachEntries = [];
       const shareInput = document.getElementById('shareCoachIdentifier');
@@ -2645,7 +2731,7 @@
 
       const tbody = document.getElementById('playersTableBody');
       if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Loading players...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">Loading players...</td></tr>';
       }
     }
 
